@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Data files (regenerated on startup)
+amrap.json
+charts.json
+amrap_art/
+
+# Dev files
+*.log
+.DS_Store
