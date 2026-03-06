@@ -1,4 +1,4 @@
-const CACHE = 'radio-radar-v1';
+const CACHE = 'radio-radar-v3';
 const STATIC = [
   '/',
   '/manifest.json',
@@ -28,15 +28,13 @@ self.addEventListener('fetch', e => {
   }
 
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      return cached || fetch(e.request).then(res => {
-        // Cache the main page
-        if (e.request.url.endsWith('/') || e.request.url.includes('community-radio-radar')) {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
-        return res;
-      });
-    }).catch(() => caches.match('/'))
+    // Always try network first for the main HTML, fall back to cache
+    fetch(e.request).then(res => {
+      if (e.request.url.endsWith('/') || e.request.url.includes('community-radio-radar')) {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+      }
+      return res;
+    }).catch(() => caches.match(e.request).then(cached => cached || caches.match('/')))
   );
 });
