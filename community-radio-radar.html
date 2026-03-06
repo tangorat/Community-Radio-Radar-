@@ -80,6 +80,57 @@
     z-index: 100;
   }
 
+  .mini-player {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0,255,65,0.08);
+    border: 1px solid var(--border);
+    padding: 6px 6px 6px 14px;
+    border-radius: 2px;
+    animation: fadeIn 0.3s ease;
+  }
+  .mini-player-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--green);
+    letter-spacing: 2px;
+  }
+  .mini-player-stop {
+    background: rgba(0,255,65,0.12);
+    border: 1px solid var(--border);
+    color: var(--green);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 8px 14px;
+    line-height: 1;
+    opacity: 0.9;
+  }
+  .mini-player-stop:hover { opacity: 1; background: rgba(0,255,65,0.22); }
+
+  .mini-waveform {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 20px;
+  }
+  .mini-wave-bar {
+    width: 2px;
+    height: 3px;
+    background: var(--green-dim);
+    border-radius: 1px;
+    transition: height 0.15s ease;
+  }
+  .mini-wave-bar.active {
+    background: var(--green);
+    animation: wave-dance 0.8s ease-in-out infinite alternate;
+  }
+  .mini-wave-bar:nth-child(1) { animation-delay: 0.0s; }
+  .mini-wave-bar:nth-child(2) { animation-delay: 0.15s; }
+  .mini-wave-bar:nth-child(3) { animation-delay: 0.3s; }
+  .mini-wave-bar:nth-child(4) { animation-delay: 0.45s; }
+  .mini-wave-bar:nth-child(5) { animation-delay: 0.6s; }
+
   .logo {
     display: flex;
     align-items: baseline;
@@ -764,10 +815,14 @@
   /* ─── MOBILE ──────────────────────────────────────────────────────────────── */
   @media (max-width: 700px) {
 
-    /* Header */
+    /* Header — push below iPhone status bar using safe area */
     header {
       padding: 0 12px;
-      height: 48px;
+      padding-top: env(safe-area-inset-top, 0px);
+      height: calc(48px + env(safe-area-inset-top, 0px));
+      align-items: flex-end;
+      padding-bottom: 6px;
+      box-sizing: border-box;
     }
     .logo-main { font-size: 0.9rem; }
     .logo-sub   { display: none; }
@@ -778,10 +833,10 @@
     .amrap-panel { display: none !important; }
     .amrap-toggle { display: none !important; }
 
-    /* App layout — full width, no left offset */
+    /* App layout — accounts for taller safe-area header */
     .app {
       margin-left: 0 !important;
-      height: calc(100dvh - 48px - 48px);
+      height: calc(100dvh - 48px - env(safe-area-inset-top, 0px) - 48px);
       flex-direction: column;
       overflow: hidden;
     }
@@ -1173,6 +1228,18 @@
   <div class="logo">
     <div class="logo-main">COMMUNITY RADIO RADAR</div>
     <div class="logo-sub">Australia</div>
+  </div>
+  <!-- Mini player — shown when audio plays with panel closed -->
+  <div class="mini-player" id="miniPlayer" style="display:none">
+    <div class="mini-waveform" id="miniWaveform">
+      <div class="mini-wave-bar"></div>
+      <div class="mini-wave-bar"></div>
+      <div class="mini-wave-bar"></div>
+      <div class="mini-wave-bar"></div>
+      <div class="mini-wave-bar"></div>
+    </div>
+    <span class="mini-player-label" id="miniPlayerLabel">PLAYING</span>
+    <button class="mini-player-stop" onclick="stopAudio()">■</button>
   </div>
   <div class="header-right">
     <div class="signal-indicator">
@@ -1587,12 +1654,11 @@ function selectState(code) {
 
   if (!station && !uc) return;
 
-  // Deselect old
+  // Deselect old state visuals (but keep audio playing)
   if (currentState) {
     document.getElementById(currentState)?.classList.remove('selected');
     document.getElementById('label-' + currentState)?.classList.remove('selected-label');
     document.getElementById('ping-'  + currentState)?.classList.remove('active');
-    if (isPlaying) stopAudio();
   }
 
   currentState = code;
@@ -1611,6 +1677,7 @@ function selectState(code) {
 
   document.getElementById('sidePanel').classList.add('open');
   document.getElementById('mapContainer').classList.add('panel-open');
+  updateMiniPlayer();
 }
 
 function showStationPanel(station) {
@@ -1636,12 +1703,28 @@ function showStationPanel(station) {
   document.getElementById('stationLink').textContent      = 'VISIT ' + station.name.toUpperCase() + ' ↗';
   document.getElementById('activeFreq').textContent       = station.freq;
 
-  // Reset player UI
-  document.getElementById('playBtn').textContent      = '▶';
-  document.getElementById('playBtn').className        = 'play-btn';
-  document.getElementById('playerStatus').textContent = 'STANDBY';
-  document.getElementById('playerStatus').className   = 'player-status';
-  stopWaveAnimation();
+  // Update player UI based on what's currently playing
+  if (!isPlaying) {
+    document.getElementById('playBtn').textContent      = '▶';
+    document.getElementById('playBtn').className        = 'play-btn';
+    document.getElementById('playerStatus').textContent = 'STANDBY';
+    document.getElementById('playerStatus').className   = 'player-status';
+    stopWaveAnimation();
+  } else if (window._lastPlayedStation === station) {
+    // This is the station currently playing — show active UI
+    document.getElementById('playBtn').textContent      = '■';
+    document.getElementById('playBtn').className        = 'play-btn playing';
+    document.getElementById('playerStatus').textContent = '● LIVE';
+    document.getElementById('playerStatus').className   = 'player-status live';
+    startWaveAnimation();
+  } else {
+    // Different station is playing — show ▶, single press will stop old and start new
+    document.getElementById('playBtn').textContent      = '▶';
+    document.getElementById('playBtn').className        = 'play-btn';
+    document.getElementById('playerStatus').textContent = 'TAP TO SWITCH';
+    document.getElementById('playerStatus').className   = 'player-status';
+    stopWaveAnimation();
+  }
 
   loadCharts(station);
 }
@@ -1659,7 +1742,7 @@ function showUCPanel(uc) {
 }
 
 function closePanel() {
-  stopAudio();
+  // Keep audio playing — just close the panel
   if (window._localTimerInterval) clearInterval(window._localTimerInterval);
   document.getElementById('panelLocalTime').innerHTML = '';
   const panel = document.getElementById('sidePanel');
@@ -1673,9 +1756,32 @@ function closePanel() {
     document.getElementById(currentState)?.classList.remove('selected');
     document.getElementById('label-' + currentState)?.classList.remove('selected-label');
     document.getElementById('ping-'  + currentState)?.classList.remove('active');
-    currentState = null;
+    // Only clear currentState if nothing is playing — keep it for resume
+    if (!isPlaying) currentState = null;
   }
   document.getElementById('activeFreq').textContent = '---.-FM';
+
+  // Show mini player in header if audio is still going
+  updateMiniPlayer();
+}
+
+function updateMiniPlayer() {
+  const mini = document.getElementById('miniPlayer');
+  if (!mini) return;
+  // Show whenever a station has been played (persists through panel open/close)
+  if (window._lastPlayedStation) {
+    const st = window._lastPlayedStation;
+    mini.style.display = 'flex';
+    document.getElementById('miniPlayerLabel').textContent = st.name + ' ' + st.freq;
+    // Sync wave animation with play state
+    if (isPlaying) {
+      document.querySelectorAll('.mini-wave-bar').forEach(b => b.classList.add('active'));
+    } else {
+      document.querySelectorAll('.mini-wave-bar').forEach(b => b.classList.remove('active'));
+    }
+  } else {
+    mini.style.display = 'none';
+  }
 }
 
 // ─── CHARTS ───────────────────────────────────────────────────────────────────
@@ -1739,12 +1845,47 @@ function renderCharts(station) {
 
 // ─── AUDIO ────────────────────────────────────────────────────────────────────
 function togglePlay() {
-  if (isPlaying) stopAudio(); else startAudio();
+  if (isPlaying) {
+    // If this panel's station is playing, pause it
+    // If a different station is playing, stop it and start this one
+    if (window._lastPlayedStation === STATIONS[currentState]) {
+      pauseAudio();
+    } else {
+      stopAudio();
+      startAudio();
+    }
+  } else {
+    // If audio is paused on a different station, stop it first then start new
+    const audio = document.getElementById('audioPlayer');
+    if (audio.src && window._lastPlayedStation !== STATIONS[currentState]) {
+      stopAudio();
+    }
+    startAudio();
+  }
+}
+
+function pauseAudio() {
+  const audio = document.getElementById('audioPlayer');
+  audio._userStopped = true;
+  audio.onpause = null;
+  audio.pause();
+  // Don't clear src — keep it so we can resume
+  isPlaying = false;
+  document.getElementById('playBtn').textContent = '▶';
+  document.getElementById('playBtn').classList.remove('playing', 'buffering');
+  document.getElementById('playerStatus').textContent = 'PAUSED';
+  document.getElementById('playerStatus').className   = 'player-status';
+  stopWaveAnimation();
+  if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
 }
 
 // ─── AUDIO ────────────────────────────────────────────────────────────────────
 function startAudio() {
-  if (!currentState || !STATIONS[currentState]) return;
+  // Fall back to last played station if panel is closed and currentState is null
+  const stateKey = currentState || Object.keys(STATIONS).find(k => STATIONS[k] === window._lastPlayedStation);
+  if (!stateKey || !STATIONS[stateKey]) return;
+  if (!currentState) currentState = stateKey;
+
   const audio   = document.getElementById('audioPlayer');
   const playBtn = document.getElementById('playBtn');
 
@@ -1752,16 +1893,22 @@ function startAudio() {
   playBtn.textContent = '▶';
   document.getElementById('playerStatus').textContent = 'BUFFERING...';
 
-  audio.src = STATIONS[currentState].stream;
-  audio.load();
+  // If already has the right src (paused), just resume — otherwise load fresh
+  const targetSrc = STATIONS[currentState].stream;
+  if (audio.src !== targetSrc || audio.readyState === 0) {
+    audio.src = targetSrc;
+    audio.load();
+  }
   audio.play().then(() => {
     isPlaying = true;
+    window._lastPlayedStation = STATIONS[currentState];
     playBtn.classList.remove('buffering');
     playBtn.textContent = '■';
     playBtn.classList.add('playing');
     document.getElementById('playerStatus').textContent = '● LIVE';
     document.getElementById('playerStatus').className   = 'player-status live';
     startWaveAnimation();
+    updateMiniPlayer();
 
     // ── MEDIA SESSION ────────────────────────────────────────────
     if ('mediaSession' in navigator) {
@@ -1850,11 +1997,13 @@ function stopAudio() {
   audio.pause();
   audio.src = '';
   isPlaying = false;
+  window._lastPlayedStation = null;  // clear so mini player disappears
   document.getElementById('playBtn').textContent = '▶';
   document.getElementById('playBtn').classList.remove('playing', 'buffering');
   document.getElementById('playerStatus').textContent = 'STANDBY';
   document.getElementById('playerStatus').className   = 'player-status';
   stopWaveAnimation();
+  updateMiniPlayer();
 
   // ── MEDIA SESSION ────────────────────────────────────────────
   if ('mediaSession' in navigator) {
@@ -1865,13 +2014,13 @@ function stopAudio() {
 }
 
 function startWaveAnimation() {
-  document.querySelectorAll('.wave-bar').forEach(b => b.classList.add('active'));
+  document.querySelectorAll('.wave-bar, .mini-wave-bar').forEach(b => b.classList.add('active'));
 }
 
 function stopWaveAnimation() {
-  document.querySelectorAll('.wave-bar').forEach(b => {
+  document.querySelectorAll('.wave-bar, .mini-wave-bar').forEach(b => {
     b.classList.remove('active');
-    b.style.height = '4px';
+    b.style.height = '3px';
   });
 }
 
@@ -1980,17 +2129,6 @@ async function loadChartsFromAPI() {
     // Server not running — placeholder data stays in place
     console.warn('Charts API not available, using placeholder data');
   }
-}
-
-function startWaveAnimation() {
-  document.querySelectorAll('.wave-bar').forEach(b => b.classList.add('active'));
-}
-
-function stopWaveAnimation() {
-  document.querySelectorAll('.wave-bar').forEach(b => {
-    b.classList.remove('active');
-    b.style.height = '4px';
-  });
 }
 
 // ─── MOBILE TAB SWITCHING ─────────────────────────────────────────────────────
