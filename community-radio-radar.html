@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#00ff41">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -781,13 +781,15 @@
     /* App layout — full width, no left offset */
     .app {
       margin-left: 0 !important;
-      height: calc(100vh - 48px - 48px);
+      height: calc(100dvh - 48px - 48px);
       flex-direction: column;
+      overflow: hidden;
     }
 
     /* Map takes full width */
     .map-container {
       flex: 1;
+      min-height: 0;
       padding: 8px;
       display: flex;
       align-items: center;
@@ -798,8 +800,10 @@
     svg#australia-map {
       margin: 0 auto;
       display: block;
-      max-height: calc(100vh - 48px - 48px - 16px);
+      max-height: 100%;
+      max-width: 100%;
       width: auto;
+      height: auto;
     }
 
     /* Stack footer text vertically so they don't overlap */
@@ -853,14 +857,16 @@
 
     /* Drag handle on panel */
     .side-panel::before {
-      content: '';
-      display: block;
+      display: none;
+    }
+    .panel-drag-handle {
       width: 40px;
       height: 4px;
       background: var(--border);
       border-radius: 2px;
-      margin: 10px auto 0;
+      margin: 10px auto 4px;
       flex-shrink: 0;
+      cursor: grab;
     }
 
     /* Bigger close button for thumbs */
@@ -1266,6 +1272,7 @@
 
   <!-- SIDE PANEL -->
   <div class="side-panel" id="sidePanel">
+    <div class="panel-drag-handle"></div>
     <!-- Shared close button always present -->
     <button class="panel-close" id="panelCloseBtn">✕</button>
 
@@ -1322,7 +1329,7 @@
   </div>
 </div>
 
-<audio id="audioPlayer" preload="none"></audio>
+<audio id="audioPlayer" preload="none" playsinline x-webkit-airplay="allow"></audio>
 
 <script>
 // ─── DATA ─────────────────────────────────────────────────────────────────────
@@ -1514,6 +1521,49 @@ function init() {
   // Close button
   document.getElementById('panelCloseBtn').addEventListener('click', closePanel);
 
+  // ── SWIPE DOWN TO CLOSE (mobile) ────────────────────────────────────────────
+  const panel = document.getElementById('sidePanel');
+  let swipeStartY = 0;
+  let swipeCurrentY = 0;
+  let isSwiping = false;
+
+  panel.addEventListener('touchstart', e => {
+    // Only start swipe if touching near the top of the panel (drag handle area)
+    const panelTop = panel.getBoundingClientRect().top;
+    const touchY = e.touches[0].clientY;
+    if (touchY - panelTop < 60) {
+      swipeStartY = touchY;
+      isSwiping = true;
+      panel.style.transition = 'none';
+    }
+  }, { passive: true });
+
+  panel.addEventListener('touchmove', e => {
+    if (!isSwiping) return;
+    swipeCurrentY = e.touches[0].clientY;
+    const delta = swipeCurrentY - swipeStartY;
+    if (delta > 0) {
+      panel.style.transform = `translateY(${delta}px)`;
+    }
+  }, { passive: true });
+
+  panel.addEventListener('touchend', () => {
+    if (!isSwiping) return;
+    isSwiping = false;
+    panel.style.transition = '';
+    const delta = swipeCurrentY - swipeStartY;
+    if (delta > 80) {
+      // Swiped down far enough — close
+      closePanel();
+    } else {
+      // Snap back
+      panel.style.transform = '';
+    }
+    swipeStartY = 0;
+    swipeCurrentY = 0;
+  });
+  // ────────────────────────────────────────────────────────────────────────────
+
   // Play button
   document.getElementById('playBtn').addEventListener('click', togglePlay);
 
@@ -1612,7 +1662,10 @@ function closePanel() {
   stopAudio();
   if (window._localTimerInterval) clearInterval(window._localTimerInterval);
   document.getElementById('panelLocalTime').innerHTML = '';
-  document.getElementById('sidePanel').classList.remove('open');
+  const panel = document.getElementById('sidePanel');
+  panel.style.transform = '';
+  panel.style.transition = '';
+  panel.classList.remove('open');
   document.getElementById('mapContainer').classList.remove('panel-open');
   document.getElementById('mapHint').style.opacity = '';
 
@@ -1741,33 +1794,47 @@ function startAudio() {
     // ─────────────────────────────────────────────────────────────
 
     // ── iOS SCREEN LOCK RECOVERY ─────────────────────────────────
-    // iOS suspends streams on lock — detect system pause and reconnect
+    // iOS suspends the JS engine on lock — setTimeout won't fire.
+    // Instead listen for page becoming visible again after unlock.
     audio._userStopped = false;
+
     audio.onpause = () => {
       if (audio._userStopped) return;
-      // System paused it (lock screen / interruption) — attempt reconnect
       document.getElementById('playerStatus').textContent = 'RECONNECTING...';
       document.getElementById('playerStatus').className   = 'player-status';
-      setTimeout(() => {
-        if (!audio._userStopped && currentState) {
-          audio.src = STATIONS[currentState].stream;
-          audio.load();
-          audio.play().then(() => {
-            document.getElementById('playerStatus').textContent = '● LIVE';
-            document.getElementById('playerStatus').className   = 'player-status live';
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
-          }).catch(() => {
-            // iOS requires user gesture to resume — update UI to show paused state
-            isPlaying = false;
-            document.getElementById('playBtn').textContent = '▶';
-            document.getElementById('playBtn').classList.remove('playing', 'buffering');
-            document.getElementById('playerStatus').textContent = 'TAP TO RESUME';
-            document.getElementById('playerStatus').className   = 'player-status';
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-          });
-        }
-      }, 1500);
+      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
     };
+
+    const onWakeUp = () => {
+      if (audio._userStopped || !isPlaying) return;
+      if (audio.paused) {
+        document.getElementById('playerStatus').textContent = 'RECONNECTING...';
+        audio.src = STATIONS[currentState].stream;
+        audio.load();
+        audio.play().then(() => {
+          document.getElementById('playerStatus').textContent = '● LIVE';
+          document.getElementById('playerStatus').className   = 'player-status live';
+          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+        }).catch(() => {
+          isPlaying = false;
+          document.getElementById('playBtn').textContent = '▶';
+          document.getElementById('playBtn').classList.remove('playing', 'buffering');
+          document.getElementById('playerStatus').textContent = 'TAP TO RESUME';
+          document.getElementById('playerStatus').className   = 'player-status';
+          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+        });
+      }
+    };
+
+    // Remove previous listeners to avoid stacking on re-play
+    document.removeEventListener('visibilitychange', window._onVisibility);
+    window._onVisibility = () => { if (document.visibilityState === 'visible') onWakeUp(); };
+    document.addEventListener('visibilitychange', window._onVisibility);
+
+    // pageshow fires when returning from bfcache — common on iOS Safari
+    window.removeEventListener('pageshow', window._onPageShow);
+    window._onPageShow = (e) => { if (e.persisted) onWakeUp(); };
+    window.addEventListener('pageshow', window._onPageShow);
     // ─────────────────────────────────────────────────────────────
 
   }).catch(() => {
