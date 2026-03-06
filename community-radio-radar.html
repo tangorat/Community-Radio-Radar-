@@ -34,7 +34,12 @@
     color: var(--text);
     font-family: 'Share Tech Mono', monospace;
     overflow: hidden;
+    font-size: 14px;
   }
+
+  @media (min-width: 1920px) { html { font-size: 16px; } }
+  @media (min-width: 2560px) { html { font-size: 20px; } }
+  @media (min-width: 3840px) { html { font-size: 26px; } }
 
   /* SCANLINES */
   body::after {
@@ -134,6 +139,10 @@
     height: calc(100vh - 57px);
     position: relative;
     margin-left: 16rem;
+    transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .app.amrap-hidden {
+    margin-left: 0;
   }
 
   /* MAP AREA */
@@ -179,6 +188,10 @@
     height: auto;
     filter: drop-shadow(0 0 30px rgba(0,255,65,0.08));
   }
+
+  @media (min-width: 1920px) { svg#australia-map { max-width: 900px; } }
+  @media (min-width: 2560px) { svg#australia-map { max-width: 1020px; } }
+  @media (min-width: 3840px) { svg#australia-map { max-width: 1200px; } }
 
   .state-path {
     fill: var(--inactive);
@@ -765,6 +778,7 @@
 
     /* Hide AMRAP panel — accessible via tab bar instead */
     .amrap-panel { display: none !important; }
+    .amrap-toggle { display: none !important; }
 
     /* App layout — full width, no left offset */
     .app {
@@ -933,7 +947,33 @@
     z-index: 10;
     padding: 0;
     overflow: hidden;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  .amrap-panel.collapsed {
+    transform: translateX(-16rem);
+  }
+  .amrap-toggle {
+    position: fixed;
+    left: 16rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 11;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: none;
+    color: var(--accent);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    writing-mode: vertical-rl;
+    padding: 10px 5px;
+    cursor: pointer;
+    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.15s;
+    border-radius: 0 4px 4px 0;
+    line-height: 1;
+  }
+  .amrap-toggle:hover { background: rgba(0,255,65,0.08); }
+  .amrap-toggle.collapsed { left: 0; }
   .amrap-header {
     padding: 14px 14px 10px;
     border-bottom: 1px solid var(--border);
@@ -1158,7 +1198,9 @@
     </div>
   </div>
 
-<div class="app">
+<button class="amrap-toggle" id="amrapToggle" onclick="toggleAmrap()" title="Toggle charts panel">◀ AMRAP CHART</button>
+
+<div class="app" id="appContainer">
   <div class="map-container" id="mapContainer">
     <div class="map-title">// SELECT A STATE TO TUNE IN</div>
 
@@ -1171,9 +1213,19 @@
       <circle class="radar-ping" id="ping-WA" cx="140" cy="303" r="5"/>
 
       <!-- NORTHERN TERRITORY -->
-      <path id="NT" class="state-path coming-soon" d="M 240.9,100.5 L 243.3,102.7 L 244.8,105.8 L 245.3,110.1 L 247.2,107.3 L 250.0,105.8 L 253.1,107.0 L 255.9,108.6 L 258.8,107.6 L 261.9,107.6 L 262.4,105.2 L 260.6,102.4 L 259.6,98.7 L 260.9,95.3 L 262.4,92.2 L 264.2,89.4 L 265.8,86.3 L 267.8,83.8 L 270.4,82.0 L 270.4,78.2 L 271.5,74.5 L 273.0,71.4 L 275.1,69.0 L 277.2,66.5 L 279.5,64.3 L 282.6,63.1 L 285.7,61.8 L 289.3,61.2 L 293.4,61.2 L 297.6,61.2 L 301.2,60.6 L 304.3,59.4 L 304.1,55.3 L 302.5,52.2 L 298.9,52.2 L 296.6,50.7 L 294.5,48.2 L 295.8,45.4 L 297.8,44.8 L 300.7,43.9 L 303.5,43.6 L 305.9,45.1 L 307.4,48.2 L 310.0,46.4 L 312.1,48.8 L 314.1,51.3 L 316.5,53.5 L 319.8,53.2 L 322.4,53.8 L 325.0,55.6 L 327.8,57.2 L 330.2,58.1 L 333.3,58.1 L 336.9,58.7 L 339.7,60.3 L 342.6,60.6 L 345.2,58.7 L 348.3,57.5 L 350.3,60.0 L 352.7,62.1 L 354.7,64.6 L 354.7,62.8 L 355.5,60.0 L 357.6,57.5 L 360.4,57.8 L 362.5,60.3 L 364.6,62.8 L 365.6,66.5 L 364.8,70.5 L 362.8,73.0 L 362.5,76.4 L 361.7,79.2 L 359.1,81.0 L 355.5,81.6 L 352.7,83.2 L 352.2,86.3 L 353.7,89.4 L 353.4,94.0 L 351.9,97.1 L 350.3,100.2 L 349.6,103.0 L 347.0,104.9 L 345.7,107.6 L 348.0,109.8 L 350.6,111.7 L 352.9,113.8 L 355.0,116.3 L 357.6,118.2 L 359.9,120.3 L 362.0,122.8 L 364.8,124.4 L 367.9,125.6 L 371.0,126.8 L 373.9,128.4 L 382.9,294.3 L 251.0,294.3 Z"/>
-      <text class="state-label active-label" id="label-NT" x="318" y="205" text-anchor="middle">NT</text>
-      <circle class="radar-ping" id="ping-NT" cx="318" cy="190" r="5"/>
+      <!-- NT split into top (TEABBA) and bottom (CAAMA) -->
+      <g id="NT_GROUP">
+        <!-- NT Top half - TEABBA: real NT top border, closes along split line -->
+        <path id="NT_TOP" class="state-path active" d="M 240.9,100.5 L 243.3,102.7 L 244.8,105.8 L 245.3,110.1 L 247.2,107.3 L 250.0,105.8 L 253.1,107.0 L 255.9,108.6 L 258.8,107.6 L 261.9,107.6 L 262.4,105.2 L 260.6,102.4 L 259.6,98.7 L 260.9,95.3 L 262.4,92.2 L 264.2,89.4 L 265.8,86.3 L 267.8,83.8 L 270.4,82.0 L 270.4,78.2 L 271.5,74.5 L 273.0,71.4 L 275.1,69.0 L 277.2,66.5 L 279.5,64.3 L 282.6,63.1 L 285.7,61.8 L 289.3,61.2 L 293.4,61.2 L 297.6,61.2 L 301.2,60.6 L 304.3,59.4 L 304.1,55.3 L 302.5,52.2 L 298.9,52.2 L 296.6,50.7 L 294.5,48.2 L 295.8,45.4 L 297.8,44.8 L 300.7,43.9 L 303.5,43.6 L 305.9,45.1 L 307.4,48.2 L 310.0,46.4 L 312.1,48.8 L 314.1,51.3 L 316.5,53.5 L 319.8,53.2 L 322.4,53.8 L 325.0,55.6 L 327.8,57.2 L 330.2,58.1 L 333.3,58.1 L 336.9,58.7 L 339.7,60.3 L 342.6,60.6 L 345.2,58.7 L 348.3,57.5 L 350.3,60.0 L 352.7,62.1 L 354.7,64.6 L 354.7,62.8 L 355.5,60.0 L 357.6,57.5 L 360.4,57.8 L 362.5,60.3 L 364.6,62.8 L 365.6,66.5 L 364.8,70.5 L 362.8,73.0 L 362.5,76.4 L 361.7,79.2 L 359.1,81.0 L 355.5,81.6 L 352.7,83.2 L 352.2,86.3 L 353.7,89.4 L 353.4,94.0 L 351.9,97.1 L 350.3,100.2 L 349.6,103.0 L 347.0,104.9 L 345.7,107.6 L 348.0,109.8 L 350.6,111.7 L 352.9,113.8 L 355.0,116.3 L 357.6,118.2 L 359.9,120.3 L 362.0,122.8 L 364.8,124.4 L 367.9,125.6 L 371.0,126.8 L 373.9,128.4 L 376.1,169.0 L 244.5,169.0 Z"/>
+        <!-- NT Bottom half - CAAMA: follows real diagonal edges down to bottom -->
+        <path id="NT_BOT" class="state-path active" d="M 244.5,169.0 L 376.1,169.0 L 382.9,294.3 L 251.0,294.3 Z"/>
+        <!-- Dotted dividing line only — no extra border -->
+        <line x1="244.5" y1="169" x2="376.1" y2="169" stroke="rgba(0,255,65,0.8)" stroke-width="1.5" stroke-dasharray="6,5" pointer-events="none"/>
+      </g>
+      <text class="state-label active-label" id="label-NT_TOP" x="305" y="118" text-anchor="middle">NT/ Top</text>
+      <text class="state-label active-label" id="label-NT_BOT" x="318" y="240" text-anchor="middle">NT/ Central</text>
+      <circle class="radar-ping" id="ping-NT_TOP" cx="305" cy="110" r="5"/>
+      <circle class="radar-ping" id="ping-NT_BOT" cx="318" cy="232" r="5"/>
 
       <!-- SOUTH AUSTRALIA -->
       <path id="SA" class="state-path active" d="M 391.7,495.2 L 388.4,496.1 L 384.5,496.4 L 381.9,494.5 L 382.2,491.8 L 384.2,489.3 L 385.8,486.2 L 386.3,481.9 L 384.7,478.8 L 380.9,478.5 L 379.1,481.2 L 377.8,484.6 L 375.7,485.9 L 372.6,487.1 L 369.2,488.0 L 366.1,489.3 L 364.1,488.7 L 363.5,485.6 L 364.8,482.2 L 366.9,479.7 L 369.7,478.1 L 372.1,477.2 L 371.8,473.2 L 372.1,468.5 L 372.8,464.5 L 373.6,460.5 L 374.9,457.1 L 376.7,454.3 L 377.5,450.3 L 377.5,445.3 L 375.9,444.1 L 374.4,447.2 L 373.1,450.6 L 371.8,454.0 L 369.7,456.5 L 367.2,458.3 L 364.3,459.9 L 361.7,461.7 L 359.4,463.9 L 357.8,467.0 L 357.1,469.8 L 355.0,472.3 L 352.9,474.7 L 353.2,478.8 L 352.2,481.2 L 349.1,481.9 L 346.2,480.3 L 343.9,478.1 L 342.1,475.4 L 341.3,472.6 L 342.3,470.1 L 341.8,465.8 L 340.5,462.4 L 338.7,459.6 L 336.9,456.8 L 335.6,453.4 L 334.8,450.6 L 333.3,447.5 L 330.7,446.9 L 327.8,445.3 L 326.0,442.5 L 325.3,438.5 L 326.8,435.4 L 325.0,433.9 L 322.9,431.4 L 321.1,428.6 L 318.3,427.1 L 314.1,427.1 L 311.0,425.8 L 308.4,424.0 L 304.8,423.4 L 301.2,424.0 L 298.4,423.7 L 296.3,421.2 L 293.7,419.3 L 291.1,417.5 L 288.8,415.3 L 285.7,414.1 L 282.1,414.7 L 279.0,415.9 L 275.3,416.5 L 271.2,416.5 L 267.1,416.5 L 263.4,417.2 L 259.3,417.2 L 251.0,294.3 L 382.9,294.3 Z"/>
@@ -1277,14 +1329,13 @@
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 
 const UNDER_CONSTRUCTION = {
-  ACT: { name: 'Canberra / ACT',     abbr: 'ACT', city: 'Canberra', reason: 'Station selection in progress' }
 };
 
 const STATIONS = {
   QLD: {
     name: '4ZZZ', fullName: 'Four Triple Zed', freq: '102.1FM', city: 'Brisbane', state: 'Queensland', timezone: 'Australia/Brisbane',
     stream: 'https://iheart.4zzz.org.au/4zzz',
-    website: 'https://www.4zzz.org.au', chartUrl: 'https://www.4zzz.org.au/hot-100',
+    website: 'https://www.4zzz.org.au', chartUrl: 'https://4zzz.org.au/program/the-chart-show',
     bio: "Brisbane's realest radio since 1975. Independent, volunteer-powered, no-playlist broadcasting covering rock, hip-hop, indie, dub, punk, electronica and everything in between.",
     chartData: [
       { pos:1,  track:'Shadows & Light',   artist:'Tired Lion' },
@@ -1330,7 +1381,7 @@ const STATIONS = {
   VIC: {
     name: 'Triple R', fullName: '3RRR 102.7FM', freq: '102.7FM', city: 'Melbourne', state: 'Victoria', timezone: 'Australia/Melbourne',
     stream: 'https://ondemand.rrr.org.au/getstream?id=web1',
-    website: 'https://www.rrr.org.au', chartUrl: 'https://www.rrr.org.au/explore/features/charts',
+    website: 'https://www.rrr.org.au', chartUrl: 'https://www.rrr.org.au/explore/soundscape',
     bio: "Melbourne's independent community broadcaster since 1976. Triple R is subscriber-supported and plays the music commercial radio ignores — adventurous, eclectic, and fiercely local.",
     chartData: [
       { pos:1,  track:'The Neon Remains',   artist:'Courtney Barnett' },
@@ -1353,7 +1404,7 @@ const STATIONS = {
   WA: {
     name: 'RTRFM', fullName: 'RTR FM 92.1', freq: '92.1FM', city: 'Perth', state: 'Western Australia', timezone: 'Australia/Perth',
     stream: 'https://live.rtrfm.com.au/stream1',
-    website: 'https://rtrfm.com.au', chartUrl: 'https://rtrfm.com.au/charts/',
+    website: 'https://rtrfm.com.au', chartUrl: 'https://rtrfm.com.au/featured-music/',
     bio: "Perth's community radio heartbeat since 1977. RTRFM is 100% volunteer-run and listener-funded, dedicated to showcasing independent music and Western Australian artists.",
     chartData: [
       { pos:1,  track:'The Wheel',               artist:'Stella Donnelly' },
@@ -1376,7 +1427,7 @@ const STATIONS = {
   SA: {
     name: 'Three D Radio', fullName: 'Three D Radio 93.7FM', freq: '93.7FM', city: 'Adelaide', state: 'South Australia', timezone: 'Australia/Adelaide',
     stream: 'https://sounds.threedradio.com/stream',
-    website: 'https://threedradio.com', chartUrl: 'https://threedradio.com/charts/',
+    website: 'https://threedradio.com', chartUrl: 'https://threedradio.com/chart-category/top-20-1/',
     bio: '100% volunteer-run from Adelaide since 1975. Three D Radio champions independent and local music, recognising the Kaurna people and their connection to the land it broadcasts from.',
     chartData: [
       { pos:1,  track:'Teenager',        artist:'Teenage Joans' },
@@ -1396,7 +1447,14 @@ const STATIONS = {
       { pos:15, track:'All These Things',artist:'Mia Dyson' },
     ]
   },
-  NT: {
+  NT_TOP: {
+    name: 'TEABBA Radio', fullName: 'TEABBA 88.0FM', freq: '88.0FM', city: 'Darwin', state: 'Northern Territory', timezone: 'Australia/Darwin',
+    stream: 'https://firstnationsmedia.stream/8014/stream',
+    website: 'https://www.teabba.com.au/radio', chartUrl: '',
+    bio: "The Top End Aboriginal Bush Broadcasting Association broadcasts 24/7 into 29 remote Indigenous communities across the Top End. Programmed from Darwin with local shows in language — community announcements, weather, school shout-outs and music from the bush.",
+    chartData: []
+  },
+  NT_BOT: {
     name: 'CAAMA Radio', fullName: 'CAAMA 8KIN FM', freq: '8KIN FM', city: 'Alice Springs', state: 'Northern Territory', timezone: 'Australia/Darwin',
     stream: 'https://streamer.radio.co/sa67d9a81d/listen',
     website: 'https://caama.com.au', chartUrl: '',
@@ -1408,6 +1466,13 @@ const STATIONS = {
     stream: 'https://streaming.edgeradio.org.au/radio/8000/stream',
     website: 'https://www.edgeradio.org.au', chartUrl: '',
     bio: "Hobart's only youth community station since 2003. Volunteer-run from the University of Tasmania, Edge Radio plays 50% Australian music — nearly half of that Tasmanian — and provides a platform for emerging local artists and youth voices.",
+    chartData: []
+  },
+  ACT: {
+    name: 'Radio National', fullName: 'ABC Radio National', freq: 'RN 846AM', city: 'Canberra', state: 'Australian Capital Territory', timezone: 'Australia/Sydney',
+    stream: 'https://live-radio01.mediahubaustralia.com/2RNW/mp3/',
+    website: 'https://www.abc.net.au/radionational', chartUrl: '',
+    bio: "Radio National! For when community radio isn't quite cutting it. What could be more communal than Ian McNamara?",
     chartData: []
   }
 };
@@ -1437,10 +1502,15 @@ function init() {
   }
 
   // Map click listeners
-  ['WA','SA','QLD','NSW','VIC','NT','TAS','ACT'].forEach(code => {
+  ['WA','SA','QLD','NSW','VIC','TAS','ACT'].forEach(code => {
     const el = document.getElementById(code);
     if (el) el.addEventListener('click', () => selectState(code));
   });
+  // NT is split — top = TEABBA, bottom = CAAMA
+  const ntTop = document.getElementById('NT_TOP');
+  const ntBot = document.getElementById('NT_BOT');
+  if (ntTop) ntTop.addEventListener('click', () => selectState('NT_TOP'));
+  if (ntBot) ntBot.addEventListener('click', () => selectState('NT_BOT'));
 
   // Close button
   document.getElementById('panelCloseBtn').addEventListener('click', closePanel);
@@ -1610,7 +1680,7 @@ function renderCharts(station) {
 
   const note = document.createElement('div');
   note.className = 'chart-source-note';
-  note.innerHTML = 'SOURCE: <a href="' + station.chartUrl + '" target="_blank">' +
+  note.innerHTML = 'SOURCE: <a href="' + (station.chartSourceUrl || station.chartUrl) + '" target="_blank">' +
     station.name.toUpperCase() + ' CHARTS ↗</a>';
   container.appendChild(note);
 }
@@ -1620,12 +1690,12 @@ function togglePlay() {
   if (isPlaying) stopAudio(); else startAudio();
 }
 
+// ─── AUDIO ────────────────────────────────────────────────────────────────────
 function startAudio() {
   if (!currentState || !STATIONS[currentState]) return;
   const audio   = document.getElementById('audioPlayer');
   const playBtn = document.getElementById('playBtn');
 
-  // Show buffering immediately
   playBtn.classList.add('buffering');
   playBtn.textContent = '▶';
   document.getElementById('playerStatus').textContent = 'BUFFERING...';
@@ -1640,6 +1710,26 @@ function startAudio() {
     document.getElementById('playerStatus').textContent = '● LIVE';
     document.getElementById('playerStatus').className   = 'player-status live';
     startWaveAnimation();
+
+    // ── MEDIA SESSION ────────────────────────────────────────────
+    if ('mediaSession' in navigator) {
+      const st = STATIONS[currentState];
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title:  st.fullName || st.name,
+        artist: st.freq + ' · ' + st.city,
+        album:  'Community Radio Radar',
+        artwork: [
+          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+        ]
+      });
+      navigator.mediaSession.playbackState = 'playing';
+      navigator.mediaSession.setActionHandler('play',  () => { if (!isPlaying) startAudio(); });
+      navigator.mediaSession.setActionHandler('pause', () => { if (isPlaying)  stopAudio();  });
+      navigator.mediaSession.setActionHandler('stop',  () => { if (isPlaying)  stopAudio();  });
+    }
+    // ─────────────────────────────────────────────────────────────
+
   }).catch(() => {
     playBtn.classList.remove('buffering');
     document.getElementById('playerStatus').textContent = 'NO SIGNAL';
@@ -1656,6 +1746,13 @@ function stopAudio() {
   document.getElementById('playerStatus').textContent = 'STANDBY';
   document.getElementById('playerStatus').className   = 'player-status';
   stopWaveAnimation();
+
+  // ── MEDIA SESSION ────────────────────────────────────────────
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = 'none';
+    navigator.mediaSession.metadata = null;
+  }
+  // ─────────────────────────────────────────────────────────────
 }
 
 function startWaveAnimation() {
@@ -1851,6 +1948,138 @@ loadChartsFromAPI();
         .catch(e => console.log('SW failed:', e));
     });
   }
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     VISUAL FLAIR — toggle each by flipping its flag to false
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+// ── AMRAP PANEL TOGGLE ────────────────────────────────────────────
+function toggleAmrap() {
+  const panel  = document.getElementById('amrapPanel');
+  const toggle = document.getElementById('amrapToggle');
+  const app    = document.getElementById('appContainer');
+  const collapsed = panel.classList.toggle('collapsed');
+  toggle.classList.toggle('collapsed', collapsed);
+  app.classList.toggle('amrap-hidden', collapsed);
+  toggle.textContent = collapsed ? '▶ AMRAP CHART' : '◀ AMRAP CHART';
+}
+
+// ── FEATURE FLAGS ─────────────────────────────────────────────────
+const FLAIR_SCAN_LINE   = false;  // 1. Slow horizontal sweep across map (disabled)
+const FLAIR_GLITCH      = true;   // 2. Occasional label static/scramble
+const FLAIR_COORD_TIP   = true;   // 4. Lat/long tooltip on state hover
+const FLAIR_WAVE_CHARTS = true;   // 7. Waveform flash on chart track hover
+
+// ── 2. LABEL GLITCH ───────────────────────────────────────────────
+if (FLAIR_GLITCH) {
+  const GLITCH_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/\\|#@!%';
+  const glitchLabel = (el) => {
+    const original = el.textContent;
+    const len = original.length;
+    let ticks = 0;
+    const scramble = setInterval(() => {
+      el.textContent = original.split('').map((c, i) =>
+        c === ' ' ? ' ' : (Math.random() < (ticks / 8) ? c : GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)])
+      ).join('');
+      ticks++;
+      if (ticks > 8) { el.textContent = original; clearInterval(scramble); }
+    }, 60);
+  };
+
+  const scheduleGlitch = () => {
+    const labels = [...document.querySelectorAll('.state-label.active-label')];
+    if (labels.length) glitchLabel(labels[Math.floor(Math.random() * labels.length)]);
+    setTimeout(scheduleGlitch, 8000 + Math.random() * 12000);
+  };
+  setTimeout(scheduleGlitch, 5000);
+}
+
+// ── 4. COORDINATE TOOLTIP ─────────────────────────────────────────
+if (FLAIR_COORD_TIP) {
+  // Approx centre coords for each state/region
+  const STATE_COORDS = {
+    WA:     { lat: -25.3, lng: 122.1 },
+    NT_TOP: { lat: -13.5, lng: 131.0 },
+    NT_BOT: { lat: -22.0, lng: 134.5 },
+    QLD:    { lat: -22.5, lng: 144.4 },
+    SA:     { lat: -30.0, lng: 135.8 },
+    NSW:    { lat: -32.1, lng: 147.0 },
+    VIC:    { lat: -37.0, lng: 144.9 },
+    TAS:    { lat: -42.0, lng: 146.5 },
+    ACT:    { lat: -35.5, lng: 149.0 },
+  };
+
+  const tip = document.createElement('div');
+  tip.style.cssText = `
+    position: fixed; pointer-events: none; display: none;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.6rem;
+    color: rgba(0,255,65,0.7); background: rgba(2,10,3,0.85);
+    padding: 3px 6px; border: 1px solid rgba(0,255,65,0.2);
+    letter-spacing: 0.08em; z-index: 9999; white-space: nowrap;
+  `;
+  document.body.appendChild(tip);
+
+  let tipTimeout = null;
+  Object.keys(STATE_COORDS).forEach(code => {
+    const el = document.getElementById(code);
+    if (!el) return;
+    el.addEventListener('mouseenter', (e) => {
+      if (tipTimeout) clearTimeout(tipTimeout);
+      const c = STATE_COORDS[code];
+      tip.textContent = `// ${c.lat}° ${c.lng}°`;
+      tip.style.display = 'block';
+      tipTimeout = setTimeout(() => { tip.style.display = 'none'; }, 1200);
+    });
+    el.addEventListener('mousemove', (e) => {
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top  = (e.clientY - 20) + 'px';
+    });
+    el.addEventListener('mouseleave', () => {
+      if (tipTimeout) clearTimeout(tipTimeout);
+      tip.style.display = 'none';
+    });
+  });
+}
+
+// ── 7. CHART WAVEFORM HOVER ───────────────────────────────────────
+if (FLAIR_WAVE_CHARTS) {
+  const WAVE_CSS = `
+    .chart-wave { display:none; align-items:center; gap:2px; height:14px; margin-left:auto; padding-right:4px; }
+    .chart-entry:hover .chart-wave { display:flex; }
+    .chart-wave span {
+      display:inline-block; width:2px; background:rgba(0,255,65,0.7);
+      border-radius:1px; animation: cw-pulse 0.5s ease-in-out infinite alternate;
+    }
+    @keyframes cw-pulse {
+      from { transform: scaleY(0.2); opacity:0.4; }
+      to   { transform: scaleY(1);   opacity:1;   }
+    }
+  `;
+  const style = document.createElement('style');
+  style.textContent = WAVE_CSS;
+  document.head.appendChild(style);
+
+  // Patch renderCharts to inject waveform into each entry
+  const _origRenderCharts = window.renderCharts;
+  window.renderCharts = function(station) {
+    _origRenderCharts(station);
+    document.querySelectorAll('.chart-entry').forEach(entry => {
+      const wave = document.createElement('div');
+      wave.className = 'chart-wave';
+      const bars = 5;
+      for (let i = 0; i < bars; i++) {
+        const bar = document.createElement('span');
+        const h = 4 + Math.floor(Math.random() * 10);
+        bar.style.height = h + 'px';
+        bar.style.animationDelay = (i * 0.1) + 's';
+        bar.style.animationDuration = (0.3 + Math.random() * 0.3) + 's';
+        wave.appendChild(bar);
+      }
+      entry.appendChild(wave);
+    });
+  };
+}
 </script>
 
 </body>
