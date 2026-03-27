@@ -1456,20 +1456,27 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
     background: var(--panel);
     border-top: 1px solid var(--border);
-    z-index: 100;
+    z-index: 150;
     flex-direction: row;
   }
   /* Fills the iPhone home-indicator safe area below the tab bar */
   .safe-area-filler {
     display: none;
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    height: env(safe-area-inset-bottom, 0px);
-    background: var(--panel);
-    z-index: 101;
   }
   @media (max-width: 700px) {
-    .safe-area-filler { display: block; }
+    /* Nuclear option: paint the panel colour behind the entire bottom safe zone */
+    .safe-area-filler {
+      display: block;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      /* Use a generous height that covers the home indicator on any iPhone */
+      height: calc(env(safe-area-inset-bottom, 34px) + 2px);
+      min-height: 34px;
+      background: var(--panel);
+      z-index: 200;
+    }
   }
   .mobile-tab {
     flex: 1;
