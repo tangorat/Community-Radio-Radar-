@@ -847,6 +847,11 @@
   /* ─── MOBILE ──────────────────────────────────────────────────────────────── */
   @media (max-width: 700px) {
 
+    /* Prevent black gap at bottom on iPhone */
+    body {
+      background: var(--bg) !important;
+    }
+
     /* Header — push below iPhone status bar using safe area */
     header {
       padding: 0 12px;
@@ -858,8 +863,8 @@
     }
     .logo-main { font-size: 0.9rem; }
     .logo-sub   { display: none; }
-    .signal-indicator { gap: 2px; }
-    .signal-bar { width: 3px; }
+    .signal-indicator { display: none !important; }
+    .signal-bar { display: none !important; }
 
     /* Hide AMRAP panel — accessible via tab bar instead */
     .amrap-panel { display: none !important; }
@@ -869,6 +874,7 @@
     .app {
       margin-left: 0 !important;
       height: calc(100dvh - 48px - env(safe-area-inset-top, 0px) - 48px - env(safe-area-inset-bottom, 0px));
+      background: var(--bg);
       flex-direction: column;
       overflow: hidden;
     }
@@ -918,7 +924,7 @@
       top: auto !important;
       width: 100vw !important;
       height: 75vh !important;
-      max-height: calc(100vh - 57px - 48px - env(safe-area-inset-bottom, 0px)) !important;
+      max-height: calc(100dvh - 48px - env(safe-area-inset-top, 0px) - 48px - env(safe-area-inset-bottom, 0px)) !important;
       border-left: none !important;
       border-top: 1px solid var(--border);
       transform: translateY(110%);
@@ -1210,6 +1216,10 @@
     /* Centred via flex positioning — no absolute needed */
     order: -1;
   }
+  @media (max-width: 700px) {
+    .world-toggle-btn { display: none !important; }
+    .header-centre { display: none !important; }
+  }
   .world-toggle-btn:hover {
     border-color: var(--green);
     color: var(--green);
@@ -1237,9 +1247,9 @@
       justify-content: center;
       text-align: center;
     }
-    .world-card-name { font-size: 0.78rem; }
-    .world-card-location { font-size: 0.5rem; letter-spacing: 1px; }
-    .world-card-flag { font-size: 1.1rem; }
+    .world-card-name { font-size: 1.05rem; }
+    .world-card-location { font-size: 0.58rem; letter-spacing: 1px; }
+    .world-card-flag { font-size: 1.5rem; }
   }
   .amrap-panel {
     position: fixed;
@@ -1445,6 +1455,7 @@
   .mobile-tab.active { color: var(--accent); }
   .mobile-tab:active { background: rgba(0,255,65,0.06); }
   .mobile-tab-icon { font-size: 1.1rem; line-height: 1; }
+  .mobile-tab-ascii { font-family: 'Share Tech Mono', monospace; font-size: 1.3rem; color: inherit; }
 
   /* ─── AMRAP MOBILE SHEET (hidden on desktop) ───────────────────────────── */
   .amrap-mobile-sheet {
@@ -2631,7 +2642,7 @@ function switchMobileTab(tab) {
       amrapSheet.dataset.populated = '1';
     }
     amrapSheet.classList.add('open');
-    tabAmrap.classList.add('active');
+    if (tabAmrap) tabAmrap.classList.add('active');
     sidePanel.classList.remove('open');
     mapContainer.classList.remove('panel-open');
     currentView = 'australia';
@@ -2654,16 +2665,12 @@ loadChartsFromAPI();
 </script><!-- Mobile Tab Bar -->
 <nav class="mobile-tabs" id="mobileTabs">
   <button class="mobile-tab active" id="tab-map" onclick="switchMobileTab('map')">
-    <span class="mobile-tab-icon">🗺</span>
+    <span class="mobile-tab-icon mobile-tab-ascii">▣</span>
     MAP
   </button>
   <button class="mobile-tab" id="tab-world" onclick="switchMobileTab('world')">
-    <span class="mobile-tab-icon">🌍</span>
+    <span class="mobile-tab-icon mobile-tab-ascii">◈</span>
     WORLD
-  </button>
-  <button class="mobile-tab" id="tab-amrap" onclick="switchMobileTab('amrap')">
-    <span class="mobile-tab-icon">📻</span>
-    AIRPLAY
   </button>
 </nav>
 
