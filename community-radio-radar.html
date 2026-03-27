@@ -30,6 +30,7 @@
 
   html, body {
     height: 100%;
+    min-height: 100dvh;
     background: var(--bg);
     color: var(--text);
     font-family: 'Share Tech Mono', monospace;
@@ -848,10 +849,15 @@
   @media (max-width: 700px) {
 
     /* Prevent black gap at bottom on iPhone */
-    html, body {
+    html {
       background: var(--bg) !important;
-      min-height: 100dvh;
+      height: -webkit-fill-available;
+      height: 100dvh;
+    }
+    body {
+      background: var(--bg) !important;
       min-height: -webkit-fill-available;
+      min-height: 100dvh;
     }
 
     /* Header — push below iPhone status bar using safe area */
@@ -879,11 +885,10 @@
     /* App layout — accounts for taller safe-area header */
     .app {
       margin-left: 0 !important;
-      height: calc(100dvh - 48px - env(safe-area-inset-top, 0px) - 48px - env(safe-area-inset-bottom, 0px));
+      height: calc(100dvh - calc(48px + env(safe-area-inset-top, 0px)) - calc(48px + env(safe-area-inset-bottom, 0px)));
       background: var(--bg);
       overflow: hidden;
       flex-direction: column;
-      overflow: hidden;
     }
 
     /* Map takes full width */
@@ -928,6 +933,8 @@
       left: 0 !important;
       right: 0 !important;
       bottom: calc(48px + env(safe-area-inset-bottom, 0px)) !important;
+      /* Ensure panel bg covers any gap */
+      background: var(--panel) !important;
       top: auto !important;
       width: 100vw !important;
       height: 75vh !important;
@@ -1104,8 +1111,13 @@
     box-shadow: 0 0 24px rgba(0,255,65,0.25);
   }
   .world-card-flag {
-    font-size: 1.8rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--muted);
     line-height: 1;
+    border: 1px solid var(--border);
+    padding: 2px 6px;
   }
   .world-card-name {
     font-family: 'Oswald', sans-serif;
@@ -1256,7 +1268,7 @@
     }
     .world-card-name { font-size: 1.05rem; }
     .world-card-location { font-size: 0.58rem; letter-spacing: 1px; }
-    .world-card-flag { font-size: 1.5rem; }
+    .world-card-flag { font-size: 0.65rem; }
   }
   .amrap-panel {
     position: fixed;
@@ -1436,21 +1448,15 @@
     display: none;
     position: fixed;
     bottom: 0; left: 0; right: 0;
+    /* Height includes safe area — tab buttons sit in the 48px, safe area is padding below */
     height: calc(48px + env(safe-area-inset-bottom, 0px));
     padding-bottom: env(safe-area-inset-bottom, 0px);
     background: var(--panel);
     border-top: 1px solid var(--border);
     z-index: 100;
     flex-direction: row;
-  }
-  /* Cover safe area below tab bar to prevent black gap */
-  .mobile-tabs::after {
-    content: '';
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    height: env(safe-area-inset-bottom, 0px);
-    background: var(--panel);
-    z-index: 99;
+    /* Extend bg colour into safe area via box-shadow trick */
+    box-shadow: 0 calc(env(safe-area-inset-bottom, 0px)) 0 calc(env(safe-area-inset-bottom, 0px)) var(--panel);
   }
   .mobile-tab {
     flex: 1;
@@ -1846,7 +1852,7 @@ const WORLD_STATIONS_PAGES = [
       fullName: 'Radio AlHara راديو الحارة',
       city: 'Bethlehem',
       country: 'Palestine',
-      flag: '🇵🇸',
+      flag: '[PS]',
       freq: 'Online',
       timezone: 'Asia/Hebron',
       stream: 'http://stream.radiojar.com/78cxy6wkxtzuv',
@@ -1860,7 +1866,7 @@ const WORLD_STATIONS_PAGES = [
       fullName: 'Refuge Worldwide Berlin',
       city: 'Berlin',
       country: 'Germany',
-      flag: '🇩🇪',
+      flag: '[DE]',
       freq: 'Online',
       timezone: 'Europe/Berlin',
       stream: 'https://streaming.radio.co/s3699c5e49/listen',
@@ -1874,7 +1880,7 @@ const WORLD_STATIONS_PAGES = [
       fullName: '20ft Radio Kyiv',
       city: 'Kyiv',
       country: 'Ukraine',
-      flag: '🇺🇦',
+      flag: '[UA]',
       freq: 'Online',
       timezone: 'Europe/Kyiv',
       stream: 'https://20ft-radio.radiocult.fm/stream',
@@ -1888,7 +1894,7 @@ const WORLD_STATIONS_PAGES = [
       fullName: 'Dublin Digital Radio ddr.',
       city: 'Dublin',
       country: 'Ireland',
-      flag: '🇮🇪',
+      flag: '[IE]',
       freq: 'Online',
       timezone: 'Europe/Dublin',
       stream: 'https://dublin-digital-radio.radiocult.fm/stream',
@@ -1902,7 +1908,7 @@ const WORLD_STATIONS_PAGES = [
       fullName: 'Hà Nội Community Radio',
       city: 'Hanoi',
       country: 'Vietnam',
-      flag: '🇻🇳',
+      flag: '[VN]',
       freq: 'Online',
       timezone: 'Asia/Ho_Chi_Minh',
       stream: 'https://ha-noi-community-radio.radiocult.fm/stream',
@@ -1916,7 +1922,7 @@ const WORLD_STATIONS_PAGES = [
       fullName: 'Radio Aporee: Maps',
       city: 'Berlin',
       country: 'Germany',
-      flag: '🇩🇪',
+      flag: '[DE]',
       freq: 'Online',
       timezone: 'Europe/Berlin',
       stream: 'https://radio.aporee.org:8443/aporee',
@@ -1930,7 +1936,7 @@ const WORLD_STATIONS_PAGES = [
       fullName: 'Resonance 104.4 FM',
       city: 'London',
       country: 'United Kingdom',
-      flag: '🇬🇧',
+      flag: '[GB]',
       freq: '104.4 FM',
       timezone: 'Europe/London',
       stream: 'https://icecast.resonancefm.com/resonance',
@@ -1944,7 +1950,7 @@ const WORLD_STATIONS_PAGES = [
       fullName: 'Radio Free Brooklyn RFB',
       city: 'Brooklyn',
       country: 'USA',
-      flag: '🇺🇸',
+      flag: '[US]',
       freq: 'Online',
       timezone: 'America/New_York',
       stream: 'http://192.111.140.6:9300/stream',
@@ -1958,7 +1964,7 @@ const WORLD_STATIONS_PAGES = [
       fullName: 'Radio Centraal Antwerpen',
       city: 'Antwerp',
       country: 'Belgium',
-      flag: '🇧🇪',
+      flag: '[BE]',
       freq: '106.7 FM',
       timezone: 'Europe/Brussels',
       stream: 'https://streams.movemedia.eu/centraal',
