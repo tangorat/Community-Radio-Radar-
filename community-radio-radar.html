@@ -28,9 +28,17 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  html, body {
-    height: 100%;
+  html {
+    /* Fill the full physical screen including safe areas on iPhone PWA */
+    height: -webkit-fill-available;
+    height: 100dvh;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  body {
+    min-height: -webkit-fill-available;
     min-height: 100dvh;
+    height: 100%;
     background: var(--bg);
     color: var(--text);
     font-family: 'Share Tech Mono', monospace;
@@ -849,17 +857,8 @@
   /* ─── MOBILE ──────────────────────────────────────────────────────────────── */
   @media (max-width: 700px) {
 
-    /* Prevent black gap at bottom on iPhone */
-    html {
-      background: var(--bg) !important;
-      height: -webkit-fill-available;
-      height: 100dvh;
-    }
-    body {
-      background: var(--bg) !important;
-      min-height: -webkit-fill-available;
-      min-height: 100dvh;
-    }
+    /* Mobile bg reinforcement */
+    html, body { background: var(--bg) !important; }
 
     /* Header — push below iPhone status bar using safe area */
     header {
@@ -883,10 +882,15 @@
     .amrap-panel { display: none !important; }
     .amrap-toggle { display: none !important; }
 
-    /* App layout — accounts for taller safe-area header */
+    /* App layout — fill remaining space between header and tab bar */
+    body {
+      display: flex;
+      flex-direction: column;
+    }
     .app {
       margin-left: 0 !important;
-      height: calc(100dvh - calc(48px + env(safe-area-inset-top, 0px)) - calc(48px + env(safe-area-inset-bottom, 0px)));
+      flex: 1 1 0;
+      height: 0; /* flex-grow handles height, this prevents overflow */
       background: var(--bg);
       overflow: hidden;
       flex-direction: column;
@@ -1460,23 +1464,20 @@
     flex-direction: row;
   }
   /* Fills the iPhone home-indicator safe area below the tab bar */
+  /* Always-on safe area filler — covers iPhone home indicator void */
   .safe-area-filler {
-    display: none;
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px; /* generous fixed height — always covers the home bar */
+    background: var(--panel);
+    z-index: 90; /* below tab bar (150) so tabs sit on top */
   }
-  @media (max-width: 700px) {
-    /* Nuclear option: paint the panel colour behind the entire bottom safe zone */
-    .safe-area-filler {
-      display: block;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      /* Use a generous height that covers the home indicator on any iPhone */
-      height: calc(env(safe-area-inset-bottom, 34px) + 2px);
-      min-height: 34px;
-      background: var(--panel);
-      z-index: 200;
-    }
+  @media (min-width: 701px) {
+    /* On desktop, filler sits behind content and is invisible */
+    .safe-area-filler { display: none; }
   }
   .mobile-tab {
     flex: 1;
