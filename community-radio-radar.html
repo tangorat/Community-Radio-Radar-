@@ -848,8 +848,10 @@
   @media (max-width: 700px) {
 
     /* Prevent black gap at bottom on iPhone */
-    body {
+    html, body {
       background: var(--bg) !important;
+      min-height: 100dvh;
+      min-height: -webkit-fill-available;
     }
 
     /* Header — push below iPhone status bar using safe area */
@@ -860,9 +862,13 @@
       align-items: flex-end;
       padding-bottom: 6px;
       box-sizing: border-box;
+      display: flex !important;
+      justify-content: space-between !important;
     }
     .logo-main { font-size: 0.9rem; }
     .logo-sub   { display: none; }
+    .header-centre { display: none !important; }
+    .header-right { margin-left: auto; }
     .signal-indicator { display: none !important; }
     .signal-bar { display: none !important; }
 
@@ -875,6 +881,7 @@
       margin-left: 0 !important;
       height: calc(100dvh - 48px - env(safe-area-inset-top, 0px) - 48px - env(safe-area-inset-bottom, 0px));
       background: var(--bg);
+      overflow: hidden;
       flex-direction: column;
       overflow: hidden;
     }
@@ -1435,6 +1442,15 @@
     border-top: 1px solid var(--border);
     z-index: 100;
     flex-direction: row;
+  }
+  /* Cover safe area below tab bar to prevent black gap */
+  .mobile-tabs::after {
+    content: '';
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: env(safe-area-inset-bottom, 0px);
+    background: var(--panel);
+    z-index: 99;
   }
   .mobile-tab {
     flex: 1;
@@ -2613,10 +2629,10 @@ function switchMobileTab(tab) {
   const tabAmrap       = document.getElementById('tab-amrap');
 
   // Close all sheets first
-  amrapSheet.classList.remove('open');
-  tabMap.classList.remove('active');
+  if (amrapSheet) amrapSheet.classList.remove('open');
+  if (tabMap) tabMap.classList.remove('active');
   if (tabWorld) tabWorld.classList.remove('active');
-  tabAmrap.classList.remove('active');
+  if (tabAmrap) tabAmrap.classList.remove('active');
 
   const logoSub = document.getElementById('logoSub');
   if (tab === 'map') {
