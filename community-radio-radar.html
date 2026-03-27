@@ -76,14 +76,28 @@
 
   /* HEADER */
   header {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
     padding: 14px 28px;
     border-bottom: 1px solid var(--border);
     background: var(--panel);
     position: relative;
     z-index: 100;
+  }
+  /* Centre column holds the WORLD button */
+  .header-centre {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  /* Right column aligns to the right */
+  .header-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 24px;
   }
 
   .mini-player {
@@ -148,6 +162,11 @@
     align-items: baseline;
     gap: 12px;
   }
+  .logo-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
 
   .logo-main {
     font-family: 'VT323', monospace;
@@ -165,11 +184,7 @@
     text-transform: uppercase;
   }
 
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-  }
+
 
   .signal-indicator {
     display: flex;
@@ -221,6 +236,10 @@
 
   .map-container.panel-open {
     margin-right: 400px;
+  }
+  .world-view.panel-open {
+    margin-right: 400px;
+    transition: margin-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* GRID BACKGROUND */
@@ -351,7 +370,7 @@
     height: calc(100vh - 57px);
     background: var(--panel);
     border-left: 1px solid var(--border);
-    z-index: 200;
+    z-index: 50;
     transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
@@ -937,16 +956,18 @@
       cursor: grab;
     }
 
-    /* Bigger close button for thumbs */
+    /* Panel header tighter — right padding makes room for the ✕ button */
+    .panel-header {
+      padding: 8px 56px 12px 16px;
+    }
+
+    /* Close button — bigger for thumbs, repositioned so it doesn't overlap station name */
     .panel-close {
       width: 36px;
       height: 36px;
       font-size: 1.2rem;
-    }
-
-    /* Panel header tighter */
-    .panel-header {
-      padding: 8px 16px 12px;
+      top: 12px;
+      right: 12px;
     }
   }
 
@@ -1010,7 +1031,215 @@
     opacity: 0.5;
   }
 
-  /* ─── AMRAP LEFT PANEL ──────────────────────────────────────── */
+  /* ─── WORLD VIEW ────────────────────────────────────────────────────────── */
+  .world-view {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    padding: 20px 28px;
+    overflow-y: auto;
+    position: relative;
+    transition: margin-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .world-view.active { display: flex; }
+  .world-view::-webkit-scrollbar { width: 4px; }
+  .world-view::-webkit-scrollbar-track { background: var(--bg); }
+  .world-view::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .world-title {
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .world-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 220px);
+    gap: 18px;
+    align-content: center;
+    justify-content: center;
+    flex: 1;
+  }
+
+  .world-card {
+    background: var(--panel);
+    border: 1px solid #0a2e0c;
+    padding: 28px 18px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    min-height: 170px;
+  }
+  .world-card:hover {
+    border-color: var(--green);
+    background: var(--green-dark);
+    box-shadow: 0 0 20px rgba(0,255,65,0.15);
+  }
+  .world-card.selected {
+    border-color: var(--green);
+    background: var(--green-dark);
+    box-shadow: 0 0 24px rgba(0,255,65,0.25);
+  }
+  .world-card-flag {
+    font-size: 1.8rem;
+    line-height: 1;
+  }
+  .world-card-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--green);
+    line-height: 1.1;
+    text-shadow: 0 0 12px rgba(0,255,65,0.3);
+  }
+  .world-card-location {
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .world-card-freq {
+    font-size: 0.58rem;
+    color: var(--green-dim);
+    letter-spacing: 1px;
+  }
+
+  /* World ASCII art section (replaces chart data) */
+  .world-ascii-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 20px 0;
+    gap: 14px;
+  }
+  .world-ascii-art {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.5rem;
+    color: var(--green-dim);
+    line-height: 1.4;
+    text-align: center;
+    white-space: pre;
+    animation: world-ascii-pulse 4s ease-in-out infinite;
+  }
+  @keyframes world-ascii-pulse {
+    0%, 100% { opacity: 0.5; text-shadow: none; }
+    50% { opacity: 0.9; text-shadow: 0 0 8px rgba(0,255,65,0.5); }
+  }
+  .world-ascii-label {
+    font-size: 0.5rem;
+    color: var(--muted);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .world-card-ping {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    opacity: 0;
+  }
+  .world-card.selected .world-card-ping {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--green);
+    animation: world-ping 1.8s ease-out infinite;
+  }
+  @keyframes world-ping {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(3); opacity: 0; }
+  }
+
+  /* Pagination */
+  .world-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 0 4px;
+    flex-shrink: 0;
+  }
+  .world-page-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .world-page-btn:hover:not(:disabled) {
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .world-page-btn:disabled { opacity: 0.3; cursor: default; }
+  .world-page-indicator {
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+  }
+
+  /* World toggle button in header */
+  .world-toggle-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 3px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    /* Centred via flex positioning — no absolute needed */
+    order: -1;
+  }
+  .world-toggle-btn:hover {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-glow);
+  }
+  .world-toggle-btn.active {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-glow);
+  }
+
+  /* Mobile world tab */
+  @media (max-width: 700px) {
+    .world-view {
+      padding: 12px;
+    }
+    .world-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .world-card {
+      padding: 18px 12px;
+      min-height: 120px;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .world-card-name { font-size: 0.78rem; }
+    .world-card-location { font-size: 0.5rem; letter-spacing: 1px; }
+    .world-card-flag { font-size: 1.1rem; }
+  }
   .amrap-panel {
     position: fixed;
     left: 0; top: 57px; bottom: 0;
@@ -1240,20 +1469,25 @@
 
 <header>
   <div class="logo">
-    <div class="logo-main">COMMUNITY RADIO RADAR</div>
-    <div class="logo-sub">Australia</div>
-  </div>
-  <!-- Mini player — shown when audio plays with panel closed -->
-  <div class="mini-player" id="miniPlayer" style="display:none">
-    <div class="mini-waveform" id="miniWaveform">
-      <div class="mini-wave-bar"></div>
-      <div class="mini-wave-bar"></div>
-      <div class="mini-wave-bar"></div>
-      <div class="mini-wave-bar"></div>
-      <div class="mini-wave-bar"></div>
+    <div class="logo-row">
+      <div class="logo-main">COMMUNITY RADIO RADAR</div>
+      <div class="logo-sub" id="logoSub">Australia</div>
     </div>
-    <span class="mini-player-label" id="miniPlayerLabel">PLAYING</span>
-    <button class="mini-player-stop" onclick="stopAudio()">■</button>
+  </div>
+  <div class="header-centre">
+    <button class="world-toggle-btn" id="worldToggleBtn" onclick="toggleWorldView()">WORLD</button>
+    <!-- Mini player — right of WORLD btn, only shown when panel closed + playing -->
+    <div class="mini-player" id="miniPlayer" style="display:none">
+      <div class="mini-waveform" id="miniWaveform">
+        <div class="mini-wave-bar"></div>
+        <div class="mini-wave-bar"></div>
+        <div class="mini-wave-bar"></div>
+        <div class="mini-wave-bar"></div>
+        <div class="mini-wave-bar"></div>
+      </div>
+      <span class="mini-player-label" id="miniPlayerLabel">PLAYING</span>
+      <button class="mini-player-stop" onclick="stopAudio()">■</button>
+    </div>
   </div>
   <div class="header-right">
     <div class="signal-indicator">
@@ -1349,6 +1583,17 @@
 
     <div class="map-hint" id="mapHint">▶ CLICK A HIGHLIGHTED STATE TO TUNE IN</div>
     <div class="corner-tag">FREQ // <span id="activeFreq">---.-FM</span></div>
+  </div>
+
+  <!-- WORLD VIEW -->
+  <div class="world-view" id="worldView">
+    <div class="world-title">// SELECT A STATION TO TUNE IN · WORLD EDITION</div>
+    <div class="world-grid" id="worldGrid"></div>
+    <div class="world-pagination" id="worldPagination" style="display:none">
+      <button class="world-page-btn" id="worldPrevBtn" onclick="changeWorldPage(-1)">◀ PREV</button>
+      <span class="world-page-indicator" id="worldPageIndicator">PAGE 1 / 1</span>
+      <button class="world-page-btn" id="worldNextBtn" onclick="changeWorldPage(1)">NEXT ▶</button>
+    </div>
   </div>
 
   <!-- SIDE PANEL -->
@@ -1564,9 +1809,143 @@ const STATIONS = {
   }
 };
 
+// ─── WORLD STATIONS (9 cards, paginated) ─────────────────────────────────────
+const WORLD_STATIONS_PAGES = [
+  [
+    {
+      id: 'alhara',
+      name: 'Radio Alhara',
+      fullName: 'Radio AlHara راديو الحارة',
+      city: 'Bethlehem',
+      country: 'Palestine',
+      flag: '🇵🇸',
+      freq: 'Online',
+      timezone: 'Asia/Hebron',
+      stream: 'http://stream.radiojar.com/78cxy6wkxtzuv',
+      website: 'https://radioalhara.net',
+      bio: 'Born in March 2020 as a quarantine radio out of Bethlehem, Ramallah and Amman, Radio Alhara became a vital meeting point for Arab artists and listeners worldwide. Broadcasting eclectic music, cultural dialogue and sounds from across the Middle East and North Africa — a neighbourhood on the airwaves.',
+      chartData: []
+    },
+    {
+      id: 'refuge',
+      name: 'Refuge Worldwide',
+      fullName: 'Refuge Worldwide Berlin',
+      city: 'Berlin',
+      country: 'Germany',
+      flag: '🇩🇪',
+      freq: 'Online',
+      timezone: 'Europe/Berlin',
+      stream: 'https://streaming.radio.co/s3699c5e49/listen',
+      website: 'https://refugeworldwide.com',
+      bio: 'Community radio and event space from Neukölln, Berlin. Founded in solidarity with grassroots organisations, Refuge Worldwide broadcasts 24/7 with a focus on platforming diverse voices, running free educational workshops and hosting shows from across the electronic, jazz, hip-hop and experimental spectrum.',
+      chartData: []
+    },
+    {
+      id: '20ft',
+      name: '20ft Radio',
+      fullName: '20ft Radio Kyiv',
+      city: 'Kyiv',
+      country: 'Ukraine',
+      flag: '🇺🇦',
+      freq: 'Online',
+      timezone: 'Europe/Kyiv',
+      stream: 'https://20ft-radio.radiocult.fm/stream',
+      website: 'https://20ftradio.net',
+      bio: 'Broadcasting from a 20-foot shipping container in a factory garden on Kyrylivska Street, Kyiv. Since 2016, 20ft has championed Ukrainian and international underground music — electronic, jazz, experimental and beyond — continuing to broadcast through adversity as a defiant cultural beacon.',
+      chartData: []
+    },
+    {
+      id: 'ddr',
+      name: 'Dublin Digital Radio',
+      fullName: 'Dublin Digital Radio ddr.',
+      city: 'Dublin',
+      country: 'Ireland',
+      flag: '🇮🇪',
+      freq: 'Online',
+      timezone: 'Europe/Dublin',
+      stream: 'https://dublin-digital-radio.radiocult.fm/stream',
+      website: 'https://listen.dublindigitalradio.com',
+      bio: 'Award-winning community station broadcasting from Dublin since 2016. Wholly funded by its members, ddr. is run democratically by a growing community of volunteers and broadcasters, championing underground music, bold storytelling and the voices shaping a more adventurous cultural future in Ireland.',
+      chartData: []
+    },
+    {
+      id: 'hanoi',
+      name: 'Hanoi Community Radio',
+      fullName: 'Hà Nội Community Radio',
+      city: 'Hanoi',
+      country: 'Vietnam',
+      flag: '🇻🇳',
+      freq: 'Online',
+      timezone: 'Asia/Ho_Chi_Minh',
+      stream: 'https://ha-noi-community-radio.radiocult.fm/stream',
+      website: 'https://www.hanoicommunityradio.com',
+      bio: 'Hà Nội Community Radio is a platform for residents and artists of Vietnam and Southeast Asia. With resident shows spanning disco, house, folk-electronic fusion and experimental sounds, HCR connects Hanoi\'s creative underground to the world through monthly DJ live streams from local bars and iconic landscapes.',
+      chartData: []
+    },
+    {
+      id: 'aporee',
+      name: 'Radio Aporee',
+      fullName: 'Radio Aporee: Maps',
+      city: 'Berlin',
+      country: 'Germany',
+      flag: '🇩🇪',
+      freq: 'Online',
+      timezone: 'Europe/Berlin',
+      stream: 'https://radio.aporee.org:8443/aporee',
+      website: 'https://radio.aporee.org',
+      bio: 'A global soundmap and radio project — field recordings, acoustic ecology and sonic art contributed by thousands of listeners from every corner of the planet. Radio Aporee streams a continuous journey through the world\'s soundscapes: rain on rooftops in Tokyo, market noise in Lagos, silence in Arctic tundra.',
+      chartData: []
+    },
+    {
+      id: 'resonance',
+      name: 'Resonance FM',
+      fullName: 'Resonance 104.4 FM',
+      city: 'London',
+      country: 'United Kingdom',
+      flag: '🇬🇧',
+      freq: '104.4 FM',
+      timezone: 'Europe/London',
+      stream: 'https://icecast.resonancefm.com/resonance',
+      website: 'https://www.resonancefm.com',
+      bio: 'London\'s groundbreaking 24/7 arts radio station since 2002. Broadcasting on 104.4 FM and globally online, Resonance is staffed by two permanent employees and over 300 volunteers — 105 weekly programmes spanning radiophonic art, experimental music, community voices and alternative culture. Once you\'ve heard Resonance, radio will never sound the same.',
+      chartData: []
+    },
+    {
+      id: 'rfb',
+      name: 'Radio Free Brooklyn',
+      fullName: 'Radio Free Brooklyn RFB',
+      city: 'Brooklyn',
+      country: 'USA',
+      flag: '🇺🇸',
+      freq: 'Online',
+      timezone: 'America/New_York',
+      stream: 'http://192.111.140.6:9300/stream',
+      website: 'https://www.radiofreebrooklyn.org',
+      bio: 'This is what Brooklyn sounds like. A non-profit, freeform internet station broadcasting 24/7 from Bushwick since 2015. Radio Free Brooklyn gives a global voice to local artists, residents and community organizers — 78 original programmes, zero commercial interference, pure NYC energy.',
+      chartData: []
+    },
+    {
+      id: 'centraal',
+      name: 'Radio Centraal',
+      fullName: 'Radio Centraal Antwerpen',
+      city: 'Antwerp',
+      country: 'Belgium',
+      flag: '🇧🇪',
+      freq: '106.7 FM',
+      timezone: 'Europe/Brussels',
+      stream: 'https://streams.movemedia.eu/centraal',
+      website: 'https://www.radiocentraal.be',
+      bio: 'Antwerp\'s beloved pirate-turned-legal community radio, broadcasting since 1980. Radio Centraal is run entirely by volunteers and plays an eclectic mix of world music, jazz, experimental sounds and local culture — the true voice of the city\'s multicultural Borgerhout neighbourhood.',
+      chartData: []
+    }
+  ]
+];
+
 // ─── APP STATE ────────────────────────────────────────────────────────────────
 let currentState = null;
 let isPlaying    = false;
+let currentView  = 'australia'; // 'australia' or 'world'
+let currentWorldPage = 0;
 
 // ─── INIT (runs after all functions are defined) ───────────────────────────────
 function init() {
@@ -1676,6 +2055,7 @@ function selectState(code) {
   }
 
   currentState = code;
+  window._currentWorldStation = null; // clear world station when Aus selected
 
   // Highlight new state on map
   document.getElementById(code)?.classList.add('selected');
@@ -1698,17 +2078,20 @@ function showStationPanel(station) {
   document.getElementById('normalPanelView').style.display = 'block';
   document.getElementById('ucPanelView').style.display     = 'none';
 
-  document.getElementById('panelStateTag').textContent    = '// ' + station.state.toUpperCase();
+  document.getElementById('panelStateTag').textContent    = '// ' + (station.state || station.country || '').toUpperCase();
   document.getElementById('panelStationName').textContent = station.name;
-  document.getElementById('panelFreq').textContent        = station.freq + ' · ' + station.city;
+  document.getElementById('panelFreq').textContent        = station.freq + ' · ' + (station.city || '');
 
-  // Local time clock
+  // Local time clock with TZ abbreviation
   if (window._localTimerInterval) clearInterval(window._localTimerInterval);
   const timeEl = document.getElementById('panelLocalTime');
   const tz = station.timezone || 'Australia/Sydney';
   function updateLocalTime() {
-    const t = new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: tz });
-    timeEl.innerHTML = t.toUpperCase();
+    const now = new Date();
+    const t = now.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: tz });
+    // Get short TZ name (e.g. AEST, GMT+1, CET)
+    const tzName = now.toLocaleDateString('en-AU', { timeZone: tz, timeZoneName: 'short' }).split(', ').pop() || '';
+    timeEl.innerHTML = t.toUpperCase() + '<span style="margin-left:6px;opacity:0.6;font-size:0.9em;">' + tzName + '</span>';
   }
   updateLocalTime();
   window._localTimerInterval = setInterval(updateLocalTime, 1000);
@@ -1758,7 +2141,9 @@ function showUCPanel(uc) {
 function closePanel() {
   // Keep audio playing — just close the panel
   if (window._localTimerInterval) clearInterval(window._localTimerInterval);
+  if (window._worldAsciiTimer) { clearInterval(window._worldAsciiTimer); window._worldAsciiTimer = null; }
   document.getElementById('panelLocalTime').innerHTML = '';
+  document.getElementById('worldView').classList.remove('panel-open');
   const panel = document.getElementById('sidePanel');
   panel.style.transform = '';
   panel.style.transition = '';
@@ -1799,22 +2184,82 @@ function updateMiniPlayer() {
 }
 
 // ─── CHARTS ───────────────────────────────────────────────────────────────────
+// ASCII art options for world stations
+const WORLD_ASCII_FRAMES = [
+  // Globe spinning
+  [
+    `      .-""""-.`,
+    `    .'        '.`,
+    `   /   O    O  \\`,
+    `  :   \\  __  /  :`,
+    `  |    '----'    |`,
+    `  :              :`,
+    `   \\            /`,
+    `    '.        .'`,
+    `      '-....-'`
+  ],
+  [
+    `      .-""""-.`,
+    `    .'   //   '.`,
+    `   /  O  //  O  \\`,
+    `  :    \\_//    :`,
+    `  |   / \\\\   |`,
+    `  :              :`,
+    `   \\   ||||    /`,
+    `    '.        .'`,
+    `      '-....-'`
+  ]
+];
+
+const WORLD_RADIO_ASCII = [
+  `  -=))) TRANSMITTING (((=-  `,
+  `  ~~~~ SIGNAL DETECTED ~~~~  `,
+  `  >>>>> TUNING IN... <<<<<  `,
+  `  ~~~ FREQUENCIES LOCKED ~~~  `
+];
+
 function loadCharts(station) {
   const container = document.getElementById('chartContainer');
 
+  // World stations — show animated ASCII art instead of charts
   if (!station.chartData || station.chartData.length === 0) {
-    const now = new Date();
-    document.getElementById('chartRefresh').textContent = 'CHARTS OFFLINE';
-    container.innerHTML = `
-      <div class="uc-chart-msg">
-        <div class="uc-chart-ascii">[ CHART DATA ]\n[ UNAVAILABLE ]</div>
-        <div class="uc-chart-bars">
-          <div class="uc-bar-row"><span class="uc-bar-label">TREBLE</span><div class="uc-progress-bar"><div class="uc-progress-fill"></div></div></div>
-          <div class="uc-bar-row"><span class="uc-bar-label">BASS</span><div class="uc-progress-bar"><div class="uc-progress-fill" style="animation-delay:0.3s"></div></div></div>
-          <div class="uc-bar-row"><span class="uc-bar-label">VOLUME</span><div class="uc-progress-bar"><div class="uc-progress-fill" style="animation-delay:0.6s"></div></div></div>
-        </div>
-        <div class="uc-chart-note">CHARTS COMING SOON</div>
-      </div>`;
+    document.getElementById('chartRefresh').textContent = 'WORLD BROADCAST';
+
+    // Pick an ASCII art based on station id for variety
+    const asciiArts = {
+      'alhara':    ['#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','###%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','######%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','########%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','###########%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','#############%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','##################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','#####################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','#######################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','##########################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','############################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','##############################*----------------------------------------------------------------------------------------------------------','################################*--------------------------------------------------------------------------------------------------------','###################################=-----------------------------------------------------------------------------------------------------','#####################################*---------------------------------------------------------------------------------------------------','########################################-------------------------------------------------------------------------------------------------','###########################################----------------------------------------------------------------------------------------------','#############################################--------------------------------------------------------------------------------------------','###########################################----------------------------------------------------------------------------------------------','########################################+------------------------------------------------------------------------------------------------','######################################---------------------------------------------------------------------------------------------------','###################################+-----------------------------------------------------------------------------------------------------','#################################--------------------------------------------------------------------------------------------------------','##############################*----------------------------------------------------------------------------------------------------------','############################*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','#########################*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','#######################*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','#####################++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','##################*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','################+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','#############*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','###########++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','########*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','######*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','###*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','#*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'],
+      'refuge':    ['----------------------------------------------------------------------------------------------------','----------------------------------------------------------------------------------------------------','----------------------------------------------------------------------------------------------------','----------------------------------------=+#%@@@@@@@@@@@@#+=-----------------------------------------','----------------------------------=%@@@@@@*@@*-@+-=@-*@@*@@@@@@@+-----------------------------------','------------------------------*@@@@#@%=--%%---##---+@---*@--=#@%%@@@#-------------------------------','---------------------------@@@#-=@#----=@----=@-----#-----@#----+@+-+@@@=---------------------------','------------------------@@@=--+@=-----%+-----*=-----=@-----+@------@*--=@@@-------------------------','---------------------+@@#---+@-------@-------@-------@=-----=@-------@*---*@@*----------------------','-------------------*@@=--*@@@%*=----@=------*@--------*-------@----=*#@@@*---@@%--------------------','-----------------*@@-----#@-----=*%@@@@@%#*+@=========@+*#%@@@@@%#=-----#@-----@@%------------------','---------------=@@=-----@+--------+*@@@@@=--@---------@---@@@@@*@--------=@------@@=----------------','--------------@@+-----=@---------=@@@@@@@@--@---------@*-@@@@@@@#+---------@=-----+@@---------------','-------------@@------=@----------@-@@@@@@@*+@---------=%+@@@@@@@=@----------@+------@@=-------------','-----------+@%-------@----------*%=@@@@@@@@@+----------@+@@@@@@@=+@----------@+------*@*------------','----------#@@*=-----@=----------@--@@@@@@@+@-----------@=@@@@@@@--@-----------@-----=+%@%-----------','---------*@*---=%@@@%*=--------=#--#@@@@@@-@-----------@-@@@@@@@--#%--------=*%@@@%+---=@@----------','--------+@*-------##----*#%@@@@@%*==%@@@@--@-----------%--@@@@@==+#@@@@@%%*=---=%-------+@#---------','-------=@#--------@-----------=@-----=++***@**######***@#**++=-----#=-----------@+-------*@+--------','-------@@--------@+-----------*=-----------*-----------##----------+@------------@--------@@=-------','------%@---------@------------@-----------=*-----------*@-----------@------------%+--------@@-------','------@%--------#+------------@-----------+*--==-------=@-----------@=-----------=@--------*@=------','-----#@-*@@@@@@@#@@@@@*------=@-----------=@@@=@@@@=----@-----------#*------------@---------@@------','-----@@---@@@@@@---@@@@@@----*%----------+@@@@=-*@@-----@------------#------------*+--------%@------','----=@*---@@@@@@---%@@@@@#---%+----------@@@@@=--=%-----@------------%--------+@--+%--------+@+-----','----*@=---@@@@@@---%@@@@@+---+#@@@@@%--*%@@@@@%%%+--=@@@----#@@@----*%@@@@@@@@@@---@@@@@@%---@%-----','----%@----@@@@@@--=@@@@@=---#@@--@@@@@---@@@@@=--+@@@@@@-*@@@@@@--+@@+--@@@@@=+@-%@+--@@@@@--@@-----','----@@----@@@@@@@@@@@*-----+@@@---@@@@---@@@@@=---=@@@@@--@@@@@@--@@@@---@@@@@--@@@@--=@@@@--@@-----','----@@----@@@@@@*@@@@@@----@@@@@-=@@@----@@@@@=---=@@@@@--@@@@@@--@@@@@---@@@%--@@@@#-=@@@---@@-----','----%@----@@@@@@-#@@@@@@---@@@@@@@%------@@@@@=---=@@@@@--@@@@@@---@@@@@=-*@@---@@@@@@@*-----@@-----','----#@=---@@@@@@--#@@@@@@=-=@@@@@@@*-----@@@@@=---=@@@@@--@@@@@@---@=%@@@@%-----+@@@@@@@+----@@-----','----+@+---@@@@@@---+@@@@@@=--@@@@@@@@@*--@@@@@=----@@@@@@@@@@@@@--@@@@@@@@@@+----=@@@@@@@@@+=@*-----','----=@%-=======*@=---=======-##-+**+----==%+====----=**=@-=======-@@@@@@@@@@@@*---+*=***+---#@=-----','-----@@--------=@=-----------+@-----------%+------------@---------%@@@@@@@@@@@@---@---------@@------','------@#--------@@-----------=@-----------**-----------=@--------@@@-------=@@---#@--------=@*------','------@@---------@%-----------@-----------=*-----------+@---------@@@@@@%@@=----=@*--------@@-------','-------@@--------@@*----------#=--------==+#+++++++++++%@==--------=@-----------@@--------+@+-------','-------*@+-------=@@*--+##%@@@@@@%*+==-----#-----------%+----==+*%@@@@@@%##*=-=@%#-------=@#--------','--------%@=--+%@@@@@@%---------@-----------@-----------%-----------@---------*@#@@@@%*---@@---------','---------@@+-------@-%@--------**----------@-----------@----------+@--------#%-@=------=@@----------','----------@@-------=@-+@*-------@----------@-----------@----------@=-------@=-#+-------@@-----------','-----------%@=------+#--@@=-----@#---------@=----------@----------@------%@--%@------=@@------------','------------+@#------#@---@@+----@---------#%----------@---------@=----#@---*%------*@%-------------','--------------@@------*@----@@%--*@---------@---------%#--------=*--=@%----*#------@@+--------------','---------------%@%-----=@-----#@@%@=--------@---------@--------=@+@@+-----@*-----*@@----------------','-----------------@@*-----@+------#@@@%%@@@@@@@@@%%%@@@@@@@@@%#%@@+-------@=----=@@=-----------------','------------------=@@*----*@@@@%*+=-@*@@@@@@@%-------=%%@@@@@+@==+*%@@@@%----+@@+-------------------','---------------------@@@#+=-@#------=@----=+#@@@@@@@@@#==----@+------+@=-=#@@@=---------------------','-----------------------*@@+---@+------@=-----@=------@------@=-----=@=---@@@------------------------','--------------------------@@@#=-@@=----@*----+@-----*=----=@-----#@--*@@@=--------------------------','-----------------------------#@@@#*@#=--+@=---@+----@----@*---*@#*@@@%------------------------------','---------------------------------*@@@@@@#++@*--@---@--*@*=#@@@@@@#=---------------------------------','--------------------------------------=*%@@@@@@@@@@@@@@@@@%*=---------------------------------------','----------------------------------------------------------------------------------------------------','----------------------------------------------------------------------------------------------------'],
+      '20ft':      ['####################################################################################################','####################################################################################################','####################################################################################################','####################################################################################################','###############################=#####################################+##############################','###############################=#####################################+##############################','###############################=#################+.##################+##############################','###############################=#################..:#################+##############################','###############################=####+.+#########*...##########-.*####+##############################','###############################=####+...+########...########=...*####+##############################','###############################=####+..:.:#######...#######:....*####+##############################','###############################=####+.:#:.:######..:######:.:#:.*####+##############################','###############################=####+.:##..-#####:.-#####=.:##:.*####+##############################','###############################=####+.:##=.:#####-.-#####..+##:.*####+##############################','###############################=####+.:##*..#####-.-#####..###:.*####+##############################','###############################=####+.:###..*####-.-####=.:###:.*####+##############################','###############################=####+.:###:.:####..:####-.-###:.*####+##############################','###############################=####+.:###+.:###+...####:.=###:.*####+##############################','...............................-####+.:##+..:###:...:###..:+##:.*####=..............................','...............................-####+.:#-.:####=..*..*####:.:#..*####=..............................','...............................-####+.....+####..+#+..####+.....*####=..............................','...............................-####+.:#=..-##..+###-..*#-..+#:.*####=..............................','...............................-####+.:###-......=#-......=###:.*####=..............................','...............................-####+.:#####:.:#:...:#:.=#####:.*####=..............................','...............................-####+.:#####..###-.-##-.:#####:.*####=..............................','...............................-####+...........................*####=..............................','...............................:############+..##-.-##..+###########**..............................','...............................:=############..-#-.-#:.:############-:..............................','................................:-*###########:.:-.:..:###########*=:...............................','..................................:-=+#########=.....*#########=+-:.................................','.......................................==+#######+.+#######+-=......................................','...........................................:*-#########-+:..........................................','...............................................-=+*+=:..............................................','....................................................................................................','....................................................................................................','....................................................................................................'],
+      'ddr':       ['------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','--------------%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@--------------','--------------%@#--------------------------------------------------------*@@--------------','--------------%@#--------------------------------------------------------*@@--------------','--------------%@#--------------------------------------------------------*@@--------------','--------------%@#---------------@@-@@+---------@@-@@#--------------------*@@--------------','--------------%@#---------------@@-@@+---------@@-@@%--------------------*@@--------------','--------------%@#------------------@@+------------@@%--------------------*@@--------------','--------------%@#-----------=%@@*--@@+------#@@#=-@@%--------------------*@@--------------','--------------%@#---------@@@@=+@@@@@+---@@@@+=@@@@@%--@@---#%@@@--------*@@--------------','--------------%@#--------@@-------@@@+--@@-------*@@%--@@@@@@@-----------*@@--------------','--------------%@#-------@@---------@@+-@@+--------@@%--@@+---------------*@@--------------','--------------%@#-------@@---------@@+-@@+--------@@%--@@----------------*@@--------------','--------------%@#--------@@-------@@@+--@@+------*@@%--@@----------------*@@--------------','--------------%@#--------=@@@@%@@@@@@+---@@@@%%@@@@@%--@@----------------*@@--------------','--------------%@#-----------+*%%*=-@@+-----+*%%*=-@@%--@@---@@-----------*@@--------------','--------------%@#--------------------------------------------------------*@@--------------','--------------%@#--------------------------------------------------------*@@--------------','--------------%@#--------------------------------------------------------*@@--------------','--------------%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@--------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------'],
+      'hanoi':     ['::::::::::::::::::::::::::::::::::::::::::::::::::::::--------::::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::-------:::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::',':::::-:::::::::::::::::::::::::::::-----::::::---*#=::::::::::::::::::::::::::::::::::::::::::::::::: ',':::::::---::::::::::::::::::::::::::::----------*###=-::::::::::::::::::::::::::::::::::::::::::::::: ','::::::::::--:::::::::::::::::::::::::::::---===+#####-----::::::::::::::::::::::::::::::::::::::::::: ',':::::::::::::::::::::::::::::::::::::::::::::::+######===--:::::::::::::::::::::::::::::::::::::::::: ',':::::::::::::::::::::::::::::::::::::::::::::::*###############=:::::::::::::::::::::::::::::::::::: :',':::::::::::::::::::::::::::::::::::::=#######################*=---::::::::::::::::::::::::::::::::::: ',':::::::::::::::::::::::::::::::::::::::-*##################*---------:::::::::::::::::::::::::::::::: ','::::::::::::::::::::::::::::::::::::::::::=*#############*::::::::::::::::::::::::::::::::::::::::::: ',':::::::::::::::::::::::::::::::::::::::::::::*##########+:::::::::::::::::::::::::::::::::::::::::::::  ','::::::::::::::::::::::::::::::::::::::::::::=############=::-----:::::::::::::::::::::::::::::::::::: ','::::::::::::::::::::::::::::::::::::::::::::*#####=:+#####::::------::::::::::::::::::::::::::::::::: ',':::::::::::::::::::::::::::::::::::::::::::-####-:::::+###-:::::::::--::::::::::::::::::::::::::::::: ',':::::::::::::::::::::::::::::::::::::::::::*#+-::::::::-*#=:::::::::::-:::::::::::::::::::::::::::::: ','::::::::::::::::::::::::::::::::::::::::::--:::::::::::::-+:::::::::::::::::::::::::::::::::::::::::: ','-----::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: ','---------------=======----::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: ','-::::::::::::::::------=======--::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: ','::::::::::::::::::::::::::::----=====---:::::::::::::::::::::::::::::::::::::::::---::::::::::::::::: ',':::::::::::::::::::::::::::::::::::::::::::::-----------:::::::::::::::::::----====--::::::::::::::::: ','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::-----------------------------:::::::::::::: ','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::-------:::::::---::::::::::::: ','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::'],
+      'aporee':    ['                                                                            .......................................................................   ','  .........................:=*%%%%%%%%%%%%%%%*=:.........................   ','  .....................=%%%%%%%%%%%%%%%%%%%%%%%%%%%=.....................   ','  .................:#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:.................   ','  ...............*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*...............   ','  .............%%%%%%%%%%%%%%%%%%%%%%@%%%%%%%%%%%%%%%%%%%%%%.............   ','  ...........%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%...........   ','  .........*%%%%%%%%%%%%%%%%%%%%%%%%%##%%%%%%%%%%%%%%%%%%%%%%%%*.........   ','  ........%%%%%%%%%%%%%%%%%%%%%%%%%%@#-%%%%%%%%%%%%%%%%%%%%%%%%%%........   ','  ......-%%%%%%%%%%%*%%%%%%%%%%%%%%%@#.%%%%%%%%%%%%%%%%*%%%%%%%%%%=......   ','  .....-%%%%%%%%%%%%%=-%%%%%%%%#%%%%@#.*%%%%*%%%%%%%*-*%%%%%%%%%%%%-.....   ','  ....-%%%%%%%%%%%%%%%#-:+%%%%%=+%%@@#.-%%%:#%%%%%+--%%%%%%%%%%%%%%%-....   ','  ....%%%%%%%%%%%%%%%%%%=-:-#%%%:=%@@#.:%%--%%%*=-:=%%%%%%%%%%%%%%%%%:...   ','  ...*%%%%%%%%%%%%%%%%%%%+=-::=%+.:@@#..+:.%%===::#%%%%%%%%%%%%%%%%%%*...   ','  ..:%%%%%%%%%%%%%%%%%%%%%#==-::::=@@#..::-===:::%%%%%%%%%%%%%%%%%%%%%:..   ','  ..%%%%%%%%%%%%%%%%%#*#%%%%===:::*@@#..:===-::+%%%%#*%%%%%%%%%%%%%%%%%..   ','  ..%%%%%%%%%%%%%%%%%%%%*-:..-===:@@@#...=-::::-:.:%%%%%%%%%%%%%%%%%%%%..   ','  .:%%%%%%%%%%%%%%%%%%%%%%#-:.....-@@#..*@@@@%*+%%%%%%%%%%%%%%%%%%%%%%%-.   ','  .-%%%%%%%%%%%%#+-.................=#*@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%=.   ','  .-%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@%*%.................-+#%%%%%%%%%%%%=.   ','  .:%%%%%%%%%%%%%%%%%%%%%%%**#@@@@%..+@@*.....::+%%%%%%%%%%%%%%%%%%%%%%-.   ','  ..%%%%%%%%%%%%%%%%%%%%=.:--::::=:..+@@@--===:..:-%%%%%%%%%%%%%%%%%%%%..   ','  ..%%%%%%%%%%%%%%%%%##%%%%#:::-==-..+@@@:::-==*%%%%##%%%%%%%%%%%%%%%%%..   ','  ..:%%%%%%%%%%%%%%%%%%%%%+::-===::..+@@*:::::-==%%%%%%%%%%%%%%%%%%%%%:..   ','  ...*%%%%%%%%%%%%%%%%%%%-:-==*%-:-:.+@@#.:%#-::==#%%%%%%%%%%%%%%%%%%*...   ','  ...:%%%%%%%%%%%%%%%%%#:-=+%%%%.+%=.+@@%%:=%%%+::=+%%%%%%%%%%%%%%%%%:...   ','  ....-%%%%%%%%%%%%%%%+-=*%%%%%-*%%*.+@@%%%:#%%%%%-:=%%%%%%%%%%%%%%%-....   ','  .....-%%%%%%%%%%%%%-+%%%%%%%##%%%%.+@@%%%%#%%%%%%%*:*%%%%%%%%%%%%-.....   ','  ......-%%%%%%%%%%##%%%%%%%%%%%%%%%:+@%%%%%%%%%%%%%%%%*%%%%%%%%%%=......   ','  ........%%%%%%%%%%%%%%%%%%%%%%%%%%*+@%%%%%%%%%%%%%%%%%%%%%%%%%%........   ','  .........*%%%%%%%%%%%%%%%%%%%%%%%%%*@%%%%%%%%%%%%%%%%%%%%%%%%#.........   ','  ...........%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%:..........   ','  .............%%%%%%%%%%%%%%%%%%%%%%@%%%%%%%%%%%%%%%%%%%%%%.............   ','  ...............*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*...............   ','  .................:#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#-.................   ','  .....................=%%%%%%%%%%%%%%%%%%%%%%%%%%%+.....................   ','  .........................:=*%%%%%%%%%%%%%%%*=:.........................   ','  .......................................................................   '],
+      'resonance': ['                                                                                                     ##%%%%%%%%%%%%%#                                                     ','                                                                     #%%%%%%##         #%%%%%%#                                             ','                                                                     #%%%%%%%%%                 #%%%%#                                      ','                                                                     #%%%%%%%%%%%%                     %%%#                                  ','                                                                  #%%%%%%%%%%%%%%                        %%%                              ','                                                               #%%%%%%%%%%%%%%%%                          %%#                           ','                                                            %%%%%%%%%%%%%%%%%%                            %%#                       ','                                                        #%%%%%%%%%%%%%%%%%#%%%%%%%%%%%##                 %%#                     ','                                                      %%%%%%%%%%%%%%%     %%%%%%%%%%%%%%%%               %%%                   ','                                                    #%%%%%%%%%%%%%%%     %%%%%%%%%%%%%%%%%%              %%%                  ','                                                   %%%%%%%%%%%%%%%%     #%%%%%%%%%%%%%%%%%%              %%#                ','                                                 %%%%%%%%%%%%%%%%%                 #%%%%%%#              %%               ','                                                %%%%%%%%%%%%%%%%%%                 %%%%%%%%              %%%              ','                                               %%%%%%%%%%%%%%%%%%                 %%%%%%%%               %%              ','                                               %%%%%%%%%%%%%%%%%%                #%%%%%%%                %%              ','                                                #%%%%%%%%%%%%%%%%%     %%%%%%%%%%%%%%%%%%                 %%#             ','                                                %%%%%%%%%%%%%%%%%%     %%%%%%%%%%%%%%%%#                  %%#             ','                                                %%%%%%%%%%%%%%%%%%     %%%%%%%%%%%%%%                     %%              ','                                                %%%%%%%%%%%%%%%%%%            +%%%%%%%                   #%%               ','                                                %%%%%%%%%%%%%%%%%             *%%%%%%%                  %%%               ','                                                %%%%%%%%%%%%%%%%%              #%%%%%%#                #%%                 ','                                                 %%%%%%%%%%%%%%%%               #%%%%%%#               %%*                  ','                                                  %%%%%%%%%%%%%%%                %%%%%%%#             %%#                    ','                                                    %%%%%%%%%%%%%%                 %%%%%%%*           %%*                      ','                                                      %%%%%%%%%%%%%%%%%%%                             #%                         ','                                                        #%%%%%%%%%%%%%%%%%                           %%#                            ','                                                           %%%%%%%%%%%%%%%%                         %#%                                ','                                                               %%%%%%%%%%%%%%                       %%%                                    ','                                                                   #%%%%%%%%%%%                    %%%%                                         ','                                                                       #%%%%%%%%                %%%%%#                                               ','                                                                           #%%%%#%%%%%%%%%%%#%%%%#                              %%%%%#                      ','                                                                               #%%##%%##                      %%%%### #%%    %%%%%%%                                                    ','                                                                   %#**%####%%    %%%%%%%%%%%%%#%%%%# %%%%%#%%%%%%%#%%%%%%%%%%%% %%%%% %%%%%#%%  %##%#%%    %%%%%%#%%##%%%%%%#*%%  *%%%%% #%*+###%%%%%  %%%%%  %#%##%%%               ','                                                              %%  %%%%%# %##%##%%%%# #%%%%% *%+%%  %%%%%  %%%%% #%*%# ###               ','                                                         %#  ##%#%%%%# %%%%# #%%%% ### *%+#%%%## ##  ##%#%%%# #%%%%'],
+      'rfb':       ['..............................................................................','..............................................................................','..............................................................................','...................................x$&&&&$+...................................','................................x&&XX&&$X$$$&+................................','..............................+&X$XXXxxxxX$$&X&:..............................','.............................X&$$XxxX&$XxxxxXX&&+.............................','............................xXX$xxxxX;$&$$xxxX&$X+............................','...........................;&&&xxxxxXx$&$xxxxxX&x&:...........................','...........................$$$$xxxxXx&&X$xxxxxx&X$X...........................','..........................:&xXxxxxX+$$+X$xxxxxxX$&$...........................','..........................;$XXxxxxX&+++XXxxxxxxx$x$:..........................','..........................+&&&Xxxxx$x++XXxxxxxxx&&&:..........................','..........................:&$&xxxxx$X+xx$xxxxxxX&&&...........................','...........................$&&XxxxxXx++$$xxxxxx&&&X...........................','...........................+&xxXxxxXx+XX+XxxxxX&$$;...........................','............................X$$&+++X++++x$$XxXX$X+............................','.............................$$$&x+++++++x$$X$XxX.............................','..............................X$X$&X++++++X&XX$+..............................','...............................:$X$X&&&$&xXX$X................................','..................................;$&X$X&&X:..................................','..............................................................................','..............................................................................','..............................................................................'],
+      'ACT':       ['                                                                                 .............................................................   ','  ..---::::::::::::::-:::::-:::::::::::::::::::::::::-:::----:.   ','  ..:............::::::::::::::::::::::::::::::::::::::::::.::.   ','  ..:.-----------------------------------------------------.::.   ','  ..:.------------=++--------------------------------------.::.   ','  ..:.:----+-----##----------------------------------------.::.   ','  ..:.:-----==--%@=----------------------------------------.::.   ','  ..:.:---+**#*%##----+*=---=#%@@%%#=----------------------.::.   ','  ..:.:-*#+==---*#---#%@%#%@@@@@@@%%%%%%=------------------.::.   ','  ..:.:=---*@@@+--=+--:::=@@%%@@@@@@@@@@%%*----------------.::.   ','  ..:.:---#@@@@=+%====:::-:=@@@@%%@@@@%%@@@@*--------------.:-.   ','  ..:.:--+@@@@@------*-%%==--#%=--=%%%@@@%@@%%-------------.:-.   ','  ..:.:--*@@@@*------=%**+=---*#-::::::*%@%%@%%------------.:-.   ','  ..:.:--+@@@@*-----+@@@#--==-----===--::#%@%%@%-----------.:-.   ','  ..:.:--=@@@@#----@@@@@=---==+=-+#*#@+-::-#%%%%*----------.:-.   ','  ..:.:---%@@@%---#@@%%@@@+----=+*++#+-:----#%%%%=---------.:-.   ','  ..:.:---+@@@@=--@@%@@@@@@+*@@#--=*--#@%%=--#%%@%*=-------.:-.   ','  ..:.----=@@@@+-=@@@@@@@@@%@@@@#---+=*+*#=--#@@@@@@@=-----.:-.   ','  ..:.:----#@%@*-=@@@%@@@@@@@@@@@*::::-=+--=+*@@@@@@@@=----.:-.   ','  ..:.:----=@@@#--@@@%@@@@@@@@@@=-----:---%##%*@%@@@@@%----.:-.   ','  ..:.:-----%@@*--%@@%%@@%@%%@%+=--+*+=:-=-+#%@*%@@@@@@*---.:-.   ','  ..:.:-----%%@+--*@@%%@@@@@%@%#-------:-:+=*%@=#+%@@@@%---.:-.   ','  ..:.:-----%%%---=%@@%%%@@@%%@@%=::::-+%%-=+@@-+++@@@@%---.:-.   ','  ..:.:----+%%-----*%@@%%@@%@%@@@%-=@@@@@#--=%*-::-@@@@%---.:-.   ','  ..:.:----%%=------#%@@%%@@@@%@@%-=@@@@@%---+*:::::+%@@=--.:-.   ','  ..:.:---+*--------=%@@@%@@@%@%@@--%@@@@%---##*:-=--+@%---.:-.   ','  ..:.:--------------*%%@@*%%@%%%@---%@%@%*--#*-*+---=%%---.:-.   ','  ..:.:---------------%%%%==#%@%%%=--+@@@@@=-#*-+%=@@@@%---.:-.   ','  ..:.:---------------=%#%=-@%%%%%*---*@%@@#-##--=*%@@@#---.:-.   ','  ..:.:----------------###=-@@%%%%%=---%@%@@=*#----%@@@*---..-.   ','  ..:.:----------------=##--%%%@%%%*----#%@@%-%+---#%@%=---..-.   ','  ..:.:-----------------*---%%@%+%%#----=@%@%=+#---*%@%----..-.   ','  ..:.:---------------------@%@*-*%#-----#@%@=-#=--=%%%=---..-.   ','  ..:.:---------------------@%%--=#*-----=@%@=--*---*#%#---..-.   ','  ..:.:---------------------%%+--=#+------%%%=---+---#+*+--..-.   ','  ..:.:--------------------=#*---=#-------%%%--------+==#=-..-.   ','  ..:.:--------------------##-----=-------%%=-----------++-..-.   ','  ..:.:----------------------------------=%*-------------=-..-.   ','  ..:.:----------------------------------=*----------------..-.   ','  ..:.:----------------------------------------------------..-.   ','  ..:..::::::::::::::::::::::................................-.   ','  ..-------:::::--::-----------:::::::::::::::::::::::::::::::.   ','  .............................................................   ','  ........................::::::::::.:::.......................   '],
+      'NT_TOP':    ['                                                                                         ','                                                                                         ','                                                                                         ','                                                                                         ','                                    ##                                                   ','                  %             #%#%%%%                                  %%              ','                %%%%%%%%%%%%% %#%%%%%% %%%                              ##               ','                %%%%%%%%%%%%         %%%%%% ##                                           ','               %%%%%%%%%%%#          #%%%%%%%%%%%%                 %                     ','                       %              %%%%%%%%%%%%%%%   %#      %%%%   %%                ','                       %%#%   %# %%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%% %%%%%%             ','                      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%# #%%%%%%            ','                  %#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%             ','                 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%               ','               %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#               ','               %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                ','                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%# %                   ','            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                     ','            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%#            ','            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   %%%%%             ','         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   %%%%%%            ','      %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        #%             ','          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                        ','            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                          ','     %%#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                         ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#                     ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                  ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %##           ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#%%#          ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%         ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%      ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#*+-:....:=*##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#*:.............:+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%=.................:#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%+...................:#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%:....................#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%#*=:..:-+#%%%%%:....................#%%%%#+-:..:-+#%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%#-..........:*%%%=...................:#%%#-..........:#%%%%%%%%%%%%%#   ','     %%%%%%%%%%#=..............-#%#:..................*%#=..............-#%%%%%%%%%%%#   ','     %%%%%%%%%%-................:*%*:................=##-................:#%%%%%%%%%%#   ','     %%%%%%%%#:..................:#%+...............=#%=...................*%%%%%%%%%#   ','     %%%%%%%#=....................-%%#:...........:*%%+....................-#%%%%%%%%#   ','     %%%%%%%#-.....................*%%%+:.......:=#%%#:....................:*%%%%%%%%#   ','     %%%%%%%#-.....................+%@@%%#*===+##%@@%*:....................:#%%%%%%%%#   ','     %%%%%%%%*:....................*%@@@@@@@@@@@@@@@%#:....................+%%%%%%%%%#   ','     %%%%%%%%%#-..................:#@@@@@@@@@@@@@@@@@%=..................:#%%%%%%%%%%#   ','     %%%%%%%%%%%#=:..............-%%@@@@@@@@@@@@@@@@@@%=:.............:-#%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%#*=-:.....:-+#%@@@@@@@@@@@@@@@@@@@@@%#*=:.....:-=+##%%%%%%%%%%%%%%#   ','     %%%%%%%%%#########%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%#########%%%%%%%%%%%   ','     %%%%%%#+:.........:-+#%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%#*=:.........:=*%%%%%%%%   ','     %%%%#=................:+%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@%#:................-#%%%%%%   ','     %%%%=...................:*%@@@@@@@@@@@@@@@@@@@@@@@@@%#-...................-#%%%%%   ','     %%%#.....................:#%@@@@@@@@@@@@@@@@@@@@@@@@%-.....................+%%%%%   ','     %%%*......................+%@@@@@@@@@@@@@@@@@@@@@@@@#......................=%%%%%   ','     %%%#......................#%@@@@@@@@@@@@@@@@@@@@@@@@%-.....................+%%%%%   ','     %%%%-....................+#@@@@@@@@@@@@@@@@@@@@@@@@@%*:....................#%%%%%   ','     %%%%*...................+#%@@@@@@@@@@@@@@@@@@@@@@@@@@%*...................=%%%%%%   ','     %%%%#=................-#%%%##*+**#%@@@@@@@@@%#**+**##%%#=:...............-#%%%%%%   ','     %%%%%#+.............-#%%*-:.......:+%@@@@@%#-........-+#%#+:............-#%%%%%%%   ','     %%%%%%%#=:......:-*%%#-.............=#%@@#+.............-*%%#=::.....:-#%%%%%%%%%   ','     %%%%%%%%%%#####%%%%#=................+%%%*:...............-#%%%%#####%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%#:..................#%%-.................:*%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%#:...................+%#....................*%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%-....................=%*....................:#%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%#:....................+%#....................:*%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%=....................#%%:...................:#%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%#-..................=%%%*..................:#%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%#+:...............-#%%%#+................=#%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%*-:..........:=#%%%%%%+:...........-+#%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%##*-:....-*#%%%%%%%%%#*=:....-+##%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','                                                                                         ','                                                                                         ','                                                                                         ','                                                                                         ','                                                                                         '],
+      'TAS':       ['#*###*#####*******+++***###+++=+++++*****+++##%%%@%#####**+*+=***-::-***=::::.-+**+=-:    ','%####%#######*+=++**++++***#**++==+++***+******###%#*=-++=====:-=    :.:.....:=+*#+::.  .:','#%%##%%%%#**#*++=++***++########*#**++**##***+++++==-==++=+::=:.       :--:   :=:.:.    :-','%%%%########*+++++****+=*%###%%##%###***##%*:::::*++=======-:..    .   ::::---++:.       .','@@%%#%%#%%##++=+++*##*+++#@@%#####**##*##*::%::*-::--===**+-:::..:-=:::::=++=---:..       ','%@@@%%%%@%##*+=++++*%@@@@@@%%%##**+**#++-:*::::::*:::-=++++===:=+***+::..-+#+-::::::..   .','##%%##%@@%***++***#%%%@@%%%%%#*###***#=:+::::::::::*::-=++++=::-+++#*-:::-=+--::::... :::=','%####%%%%%%##***%%@%%%@@%%%%%#**###*+:=+::::::::::::=+::=++=-::-**-=+--:::--::...  .  :::.','%#*#%%@%%##**##**##%%%@@%%%@%#**+*+:-#::::::::::::::::=-::--::.:++=+==-==::..    .::......','%%#%%%%%###*****#####%@%%%%%%%%#*::*::::::::::::::::::::#:::-::-=+*+---....      .::::::::','+##%@@%%###*****#*++*#%#%%#%%%#-:%::::::::::::::::::::::::#::::::=+=-::::. ...:.....:::.::','+*#%%%%%%##*+*###*+++#@%#**##+:+-:::::::::::::::::::::::::::*::-----:::--:   .. ...  ..:::','@%%%#%#####*#**%%#++++%%#**=:=+::::::::::::::::::::::::::::::-=::-=+==-++-::--.....  .::::','+%%%%%%#*##*#####*++++##+*:-*::::::::::::::::::::::::::::::::::*-::=++#%*=-=*-..:...... .:','%#%%%###******##%#*+**+*::#::::::::::::::::::::::::::::::::::::::+:::+=--===+:  ..  .   .:','##%##%#**#######%%*+++::*::::::::::::::::::::::::::::::::::::::::::#:::..::.:. ..      ..:','%@@@%%###**%#%#***+-::@::::::::::::::::::::::::::::::::::::::::::::::*::      .        ...','#%%%%%%%%##%#%#*++-:+=::::::::::::::=%@@@@#=::::::::::::::::::::::::::=+:   ...:          ','#%####**##%#%%%#=:++:::::::::::::+@@@@@@@@@@@@@@*:::::::::-:::::::::::::=::...:.       .:.:','##%######%%%##*:-*:::::::::::::-@@@@@@@@@@@@@@@@@@@@@##@@@@@@@@@%*-::=::::*::...  .   .:::','%##%#*#%%%%%*::#::::::::::::::@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*#@@@@@-:::::=::  .....:::.','@@%%%%%@@@@-:*::::::::::::::::@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@=%+::::::::::::.:::::..:','@@@@@@@@@=:%-:::::::::::::::::::+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#::::::::::::::::::.......:','@@@@@@@*:==:::::::::::::::::%@%::#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@=:::::::::::::::::::.   .:','@@@@@%:-*::::::::::::::::::+@@@@@@@@@@@@@@@@@@@@::*@@@@@@@@@@@@:@::::::::::::::::::-::  ..','@@@@@%:%:::::::::::::::::-@@@@@@*@@@@@@@@@@@@@@@#::::@@*@@@@@@@+:%-::::::::::::::::=:: . .','@@@@@@#:-*:::-+****#%%@@@@@@@@@@@@@@@@@@#***@@@@@@%:=@-:::::::-**-:::::::::::::::-+::.....:','@@@@@%%#=:+=::::::::::=+*=:::::@@@@@%@@*:::::@@@@@::@@@:::::::::::::::::::::::::=::.......','@@@%%%@%#*::#::::::::::::::::::-@@@:::::-++::%@@@=:::%@@@%#:::::::::::::::::::+::.::::::::','@@%%%%####*+::#:::::::::::::::::@@@=::::::::::@@@:::::::::::::::::::::::::::-:::......::..','@@@@@%####***-:=+:::::::::::::::::@@@@-:::::::@@@-::::::::::::::::::::::::::::.   ..::....','%%%%%%#*##%#*++::*-:::::::::::::::::=::::::::::+@@@@@-::::::::::::::::::*:::.:......:::..:','%%%%%%####%##**+=::#::::::::::::::::::::::::::::::::::::::::::::::::::*:.     .... ...  ..','@%%%%%##**##%##*+++:-+::::::::::::::::::::::::::::::::::::::::::::::*::.      .  ....  :. ','%*#%@@%%%##%%##+====::%=::::::::::::::::::::::::::::::::::::::::::#::        .. ....  .. .','*%@@@@%%%%#%##*-==+**+::*:::::::::::::::::::::::::::::::::::::::*-::      .     .:::.  ...','@@%%#%######%#*+++##++*=:-#:::::::::::::::::::::::::::::::::::+-::. .:..       . .:..... .','%@%%##%%%%%##**#*##%@@%%%*:+=:::::::::::::::::::::::::::::::+*:=:..   .  ..:.        -=:..','@%%@@%#%@%%%%%@@@%#**+++==+::#::::::::::::::::::::::::::::-*:::=:....:::::....... ....::::','%@@@@@@@@%%%%%%%%#*#**+*##**=::*:::::::::::::::::::::::::*::::-:... .:::..::-:::::. :... .','@@%#@@%###%%%#*###%%###%#*+=*+=:++:::::::::::::::::::::%:-=:::::::..:.:::::.....::.   .  .','@@%####*+*%##+#%@%%%%#%%##*++***::#::::::::::::::::::#:::-::...:-::::::::::::::--::.  .:::','%@@%###*+**##**%%%#**#*#*==+*##*=-::*::::::::::::::*-::-::--::..::.:::::::::::::..:. ::..','@@@@*#***#*#**#%%#***++##+-++#=----::*+::::::::::*=:-:::::::-:::::::::::::::---::::.  .:::','@@@%%%#%*+**##%%##*++***++++++++++=+=::*-::::::=*:::.::.::.-=-:::::::--::::::----:.   .:::','@%%#%##**+**###*+****+++*++**+==--+*#+=::%:::-*::---:::::.:=-=----------:::::::::.   ..::-','%%###+++*##**##*+++*****+++##++==+*+***=::=@%::-:--::=-::=--=----====--:--:::-:::..  .:::-','%%##*****++****++*****##**+*##*++++=-*=:--=:.  :-=-==-:::-:-=====---------:-*%%%@%#%#%%%%%'],
+      'NT_BOT':    ['                                      *##+    @@@@@+:..@@@@=...-@@@@@#  ','                                     :####.   -@@@@@:..-@@@@:...*@@@@@+ ','                                      .==.    .@@@@@:..:@@@@*:..:@@@@@@ ','                                             .@@@@@=...=@@@@@:..:*@@@@@.','                                 +###:      %@@@@@=...=@@@@@#:..:%@@@@@ ','                                 *###=    =@@@@@#:..:@@@@@@%:...@@@@@@: ','                          =**.    .:    .@@@@@@-..:#@@@@@@*:..+@@@@@@-  ','                         +####         #@@@@@@...+@@@@@@@:..:@@@@@@@:   ','                         .###-       +@@@@@@#:.:@@@@@@@#...*@@@@@@@     ','                  -###.         *@@@@@@@@@@@@@@@@@@@@@:..-@@@@@@@#      ','                  ####=      @@@@@@@@@@@@@@@@@@@@@@@@@@@#@@@@@@@.       ','                  +##*    +@@@@@@@@@@@#+++*%@@@@@@@@@@@@@@@@@@*         ','             -*+        +@@@@@@@=....:::::......:#@@@@@@@@@@@           ','            -####     :@@@@@@-..:-*@@@@@@@@@@+::...:@@@@@@@*            ','            :####    +@@@@@:.:=@@@@@@@@@@@@@@@@@#:...=@@@@@@            ','              --    *@@@@-..+@@@@@@@@@@@@@@@@@@@@@%:..:@@@@@*           ','         +###-     =@@@@-.:@@@@@@%:.:-==-::.-%@@@@@@-..-@@@@@           ','         *###+     @@@@*::@@@@@%:.=@@@@@@@@@-.:%@@@@@:.:#@@@@-          ','          -+=     .@@@@=.+@@@@%::%@@@@@@@@@@@@::@@@@@%..=@@@@#          ','          -=:     -@@@@-.@@@@@=.*@@@@@+-+@@@@@@.+@@@@@:.-@@@@@          ','         ####=    .@@@@=.@@@@@::%@@@@-...=@@@@@:-@@@@@:.-@@@@@          ','         -###-     @@@@+.@@@@@=.#@@@@@=:=@@@@@@:=@@@@@..-@@@@@          ','                   *@@@%:+@@@@%:-@@@@@@@@@@@@@=:*@@@@#.:*@@@@+          ','            +###-   @@@@=.@@@@@#::*@@@@@@@@@+:.=@@@@@:.:@@@@@           ','            *###-   -@@@@-:@@@@@@*:::-==-::..:@@@@@@-:.@@@@@#           ','              .      +@@@@::@@@@@@@@@%#**#@@@@@@@@@-::@@@@@@            ','           +#*:       *@@@@%.-@@@@@@@@@@@@@@@@@@@=::%@@@@@@             ','          ####*       @@@@@@@#::-#@@@@@@@@@@%+::.-%@@@@@@+              ','          .**-      +@@@@@@@@@@@#:.::.........:%@@@@@@@*                ','      .-.          @@@@@@#.:@@@@@@@@@@@%%@@@@@@@@@@@@                   ','    :####+       *@@@@@@-...#@@@@@@@@@@@@@@@@@@@@+                      ','    .*##*       @@@@@@%:..-@@@@@*:..#@@@@@@#-                           ','              .@@@@@@+..:@@@@@@=..:@@@@@                                ','   +##*      :@@@@@@:..-@@@@@@:..-@@@@@                                 ','  :####.     #@@@@@:..-@@@@@@...=@@@@@                                  ','    :.       #@@@@@...-@@@@@*..:%@@@@@                                  ','      ..     =@@@@@:..:#@@@@@:.:%@@@@@:                                 ','    +####     @@@@@@:..:@@@@@#..:@@@@@%                                 ','    -##*.     .@@@@@#...=@@@@@*..:@@@@@:                                '],
+      'centraal':  ['::::::::::::::::::::::::::::::::::::::::::;;;::::::::::::::::::::::::::::::::::::::::::::::',':::::::::::::::::::::::::::::::::::::::::;XXxx+;;;;:::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::xXXXXXXxx+;:::::::::::::::::::::::::::::::::::::',':::::::::::::::::::::::::::::::::::::::::;xXX$XXXXXXXx;:::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::;;+xXXXXXXXXX;::::::::::::::::::::::::::::::::::',':::::::::::::::::::::::::::::::::::::::::::::::;+XXXXXXx::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::;+XXXXXXX;;;;;::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::;+XXXXXXXXXXXx;:::::::::::::::::::::::::::::',':::::::::::::::::::::::::::::::::::::::::::::::;xXXXXXXXXXXX+:::::::::::::::::::::::::::::',':::::::::::::::::::::::::::::::::::::::::::;;::;xXXXXXXXXXXX+:::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::;+;;:;xXXXXXXXXXXXx;::::::::::::::::::::::::::::',':::::::;;:::::::::::::::::::::::::::::::::++::;xxXXXXXXXXXXX+;::::::::::::::::::::::::::::','::::::+++:::::::::::::::::::::::::::;;+::;xxxX$XxxxXXXXXXXXX+:::::::::::::::::::::::::::::',':::::;++x;:::::::::::::::::::::::::::;++;+xX;XXXxxXXXXXXXXXX+:::::::::::::::::::::::::::::','::::;;+xx:::::::::::::::::::::::::::::;xx+xXxXXx+xxXXXXXXXXX+:::::::::::::::::::::::::::::','::::;+xXx:::::::::::::::::::::::::::;:;+XXXXXXXXXXXXXXXXXXXX+:::::::::::::::::::::::::::::','::::;xxxx+;;++;;;:::::::::::::::::;xXXXXXXXXXXXXXXxxXXXXXXXX+:::::::::::::::::::::::::::::',':::::;+xxxxxxxxxx++;;:::::::::::;xXX$XXXXXXXXXXXXXXXXXXXXXXX+:::::::::::::::::::::::::::::',':::::::;;xxxxXXxxXxxxx+;;::::::+XXXXxxxXXXXXXXX$XXXxxXXXXXXXx;::::::::::::::::::::::::::::','::::::::;+xxXXxxXXXXXXXxx++;::;xX$X+XXXxxxxXXXXXXXXxxxxxxxxXx;::::::::::::::::::::::::::::',':::::::::+xxXXXXXXXXXXXXXXXxx++xXXxxXxxXxXxxXXXXXxxxxxxxxxxxx;::::::::::::::::::::::::::::',':::::::::+xXXXXXXXXXXXXXXXXXxxxxxxxxXXXxxxxxX$Xxxxxxxxxxxxxxx+;;;;;;::::::::::::::::::::::',':::::::::;xXXXXXXXXXXXXXXXXXXXXXXXxxxXXXXxxXXXxxxxxxXXXXxxxxxxxx+++x+;::::::::::::::::::::',':::::::::::::;+++++xXXXXXXXXXXXXXXXXXxxxxXXxx+xxxxXXXXXXxxXXxxx+xxXXx+:;X$+:::::::::::::::','::::::::::::::::::::;xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxxxXXXxXXXxXxXxx;;&Xx&X::::::::::::::','::::::::::::::::::::::;;xXXXXXXXXX$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX+::;&&+$X;::::::::::::',':::::::::::::::::::::::::;+XXXXXXXXXXX$XXXXXXXXXXXXXXXXXXXXXXXXXXXX+;:::;&&+$$;:::::::::::','::::::::::::::::::::::::::::+xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX++&&&$&&&&xX&+::::::::::','::::::::::::::::::::::::;:+&&x;;xXXXXXXXXxxxxXXXXX$XxxXXXXXXXXxX;::X$$&x;&&&xX&+:::::::::','::::::::::::::::::::::;$&&&&+x+:;x&XXXXXx&&xxxXxxXXXxXXX&&&$XXXXX;x;X&&&&$+&&&+&&X::::::::','::::::::::::::::::::::X&&&&&x+X+$&&&XXX+;;x&XXxXXXXXX&&&x&&&XX&&&$&&&&&x$&X+&&&&+:::::::::',':::::::::::::::::::::::$&&&&&$;&&&&&&&+&&&&&&&XXXXXXXX&+:x&&&&;&&&&$Xx&&&&&&x;::::::::::::','::::::::::::::::::::::::$&&&$++;&&&;&$&&&&&xX&&XXXXXXX$&&xX&&&+;&&&&&&+&&&X:::::::::::::::',':::::::::::::::::::::::::$&;&&&X+&&;;&x&&$;x&&xx&&$&&&&&&&xX&&&++&&&&&&$+&&$::::::::::::::','::::::::::::::::::::;+x$&&&:&&&&X;&&;+&&&&&&&x&&X&&&$&&$+&&&&&&&;x&&&X+&&$::::::::::::::::','::::::::::::::::::;&&&&XX;&&;x&&xx&&&+X&&&x+&:&&&&&$;&&&&+$&&$X$$XX+;$&+:::;;;++::::::::::','::::::::::::::::;X&&x&&&&&;X&&&&&&&xX&&&$&&&&&+$&X&&&;&&&&X&&$XXXXX+;::::::;+;;;::::::::::','::::::::::::::::x&++&&&&$&&;X&&&&&;::$&&+$&&&&&$$$$$&&xX&&&&&XXXXX$x;x;:::;+x;+;::::::::::',':::::::::::::::::;$x+&&&X+X&$+;XX;:::;&&$+X&&x&&XXXXX$&&&&XXXX$$$$$&x;+;+x++X+;:::::::::::',':::::::::::::::::::;$++&&&+:::::::::::+&&&&&&&$X;xXXXX$$$$$$$&&&$$$$$+;X;;::::::::::::::::',':::::::::::::::::::::+$&&X:::::::::::::+$X+;::::;xX$$$$X$$X$$&$X$$$$Xx;::++x;:::::::::::::',':::::::::::::::::::::::;;:::::::::::::::::::::+++X&&$$$&$$$X$&$X$$$$$&xxXxX+::::::::::::::',':::::::::::::::::::::::::::::::::::::::;++X+++;;XxX$&$$X$X$$$$$X$$$$&$$;:;::::::::::::::::','::::::::::::::::::::::::::::::::::::x+;;:xx+;:;;xXX$XXX$$&$$$$$$&$$XXXXX;:::::::::::::::::','::::::::::::::::::::::::::::::::::::;;x++;xX;+::+$$X$&$&$$$$$X$XXXXXXXXXX;::::::::::::::::',':::::::::::::::::::::::::::::::::::::+;;;;;:$+x;+&&X&XX$X$XXXXXXXXXXXXXXX+;:::::::::::::::',':::::::::::::::::::::::::::::::::::::::::;+;+:$+xXXXxXXXXXXXXXXXXXXXXXXXXxx;::::::::::::::',':::::::::::::::::::::::::::::::::::::::::::;;:;::;xxXXXXXXXXXXXXXXXXXXXXXXxx;:::::::::::::',':::::::::::::::::::::::::::::::::::::::::::::::::;+xXXXX$XXXXxxx$XXXXXXXXXXXx;::::::::::::','::::::::::::::::::::::;+x+;::::::::::::::::::::::;++xxxxxxxXX;::;xXXXXXXXXXXXx;:::::::::::',':::::::::::::::::::;;+XXXXX::::::::::::::::::::::;+++xxxxxXXXXXXXXXXXXXXXXXXXXx;::::::::::',':::::::::::::::;+XXXXXXXXXX+:::::::::::::::::::;++x++xxxxxXXXXXXXXXXXXXXXXXXXXXx+:::::::::',':::::::::::;xXXXXXXXXXXXXX$X;;;:;:::::::::::::+XX+xxxxxxxXXXXXXXXXXXXXXXXXXXXXXXX;::::::::',':::::::::;XXXXXXXXX$XXXXXXXXXXX$XXXXXXXX+;;::+XXXxxxxxxxXX$XXXXXXXXXXX$XXXXXXXXXx:::::::::',':::::::::;xXx+++xXXXXXXXXXXXXXXXXXXXXXX$XXXXX$X;;+xxxxxxXXx;::::;::;;++xXXXXXXx;::::::::::','::::::::::::::++;+::;;+XXXXXXXXXXXXXXXXXXXXXXXXXXXXxxxXXXX+:::::::::::::::::::::::::::::::',':::::::::::::;;;+;;x+++:;;;+xXXXXXXXXXXXXXXXXXXXXXXXXXXXXx;:::::::::::::::::::::::::::::::',':::::::::::::::::::;;;;+xx;xx;;;;;xXXXXXXXXXXXXXXXXXXXXXX;::::::::::::::::::::::::::::::::',':::::::::::::::::::::::::;;;;;;:::::::;+xXXXXXXXXXXXXXXX+:::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::;:;:::::::::::;;xxXXXXXXXXXx;:::::::::::::::::::::::::::::::::',':::::::::::::::::::::::::::::::::::::::::::::::;+xxxx+;:::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::'],
+    };
+
+    const art = asciiArts[station.id] || asciiArts[currentState] || asciiArts['resonance'];
+    let frame = 0;
+    const labels = ['// SIGNAL LOCKED', '// TRANSMITTING', '// WORLDWIDE', '// ON AIR'];
+
+    container.innerHTML = '<div class="world-ascii-section"><pre class="world-ascii-art" id="worldAsciiArt"></pre><div class="world-ascii-label" id="worldAsciiLabel"></div></div>';
+
+    const artEl   = document.getElementById('worldAsciiArt');
+    const labelEl = document.getElementById('worldAsciiLabel');
+
+    function updateAscii() {
+      if (!artEl) return;
+      artEl.textContent   = art.join('\n');
+      labelEl.textContent = labels[frame % labels.length];
+      frame++;
+    }
+    updateAscii();
+    if (window._worldAsciiTimer) clearInterval(window._worldAsciiTimer);
+    window._worldAsciiTimer = setInterval(updateAscii, 2200);
     return;
   }
 
@@ -1859,19 +2304,19 @@ function renderCharts(station) {
 
 // ─── AUDIO ────────────────────────────────────────────────────────────────────
 function togglePlay() {
+  // Determine which station the panel is showing RIGHT NOW
+  const panelStation = currentState ? STATIONS[currentState] : window._currentWorldStation;
   if (isPlaying) {
-    // If this panel's station is playing, pause it
-    // If a different station is playing, stop it and start this one
-    if (window._lastPlayedStation === STATIONS[currentState]) {
+    if (window._lastPlayedStation === panelStation) {
       pauseAudio();
     } else {
+      // Different station is playing — stop old, start new
       stopAudio();
       startAudio();
     }
   } else {
-    // If audio is paused on a different station, stop it first then start new
     const audio = document.getElementById('audioPlayer');
-    if (audio.src && window._lastPlayedStation !== STATIONS[currentState]) {
+    if (audio.src && window._lastPlayedStation && window._lastPlayedStation !== panelStation) {
       stopAudio();
     }
     startAudio();
@@ -1895,10 +2340,11 @@ function pauseAudio() {
 
 // ─── AUDIO ────────────────────────────────────────────────────────────────────
 function startAudio() {
-  // Fall back to last played station if panel is closed and currentState is null
-  const stateKey = currentState || Object.keys(STATIONS).find(k => STATIONS[k] === window._lastPlayedStation);
-  if (!stateKey || !STATIONS[stateKey]) return;
-  if (!currentState) currentState = stateKey;
+  // Determine the current station — prioritise panel-visible station
+  // currentState is set for Australian stations, null for world stations
+  const stationByState = currentState ? STATIONS[currentState] : null;
+  const station = stationByState || window._currentWorldStation || window._lastPlayedStation;
+  if (!station || !station.stream) { console.warn('[Audio] No station to play'); return; }
 
   const audio   = document.getElementById('audioPlayer');
   const playBtn = document.getElementById('playBtn');
@@ -1908,14 +2354,14 @@ function startAudio() {
   document.getElementById('playerStatus').textContent = 'BUFFERING...';
 
   // If already has the right src (paused), just resume — otherwise load fresh
-  const targetSrc = STATIONS[currentState].stream;
+  const targetSrc = station.stream;
   if (audio.src !== targetSrc || audio.readyState === 0) {
     audio.src = targetSrc;
     audio.load();
   }
   audio.play().then(() => {
     isPlaying = true;
-    window._lastPlayedStation = STATIONS[currentState];
+    window._lastPlayedStation = station;
     playBtn.classList.remove('buffering');
     playBtn.textContent = '■';
     playBtn.classList.add('playing');
@@ -1926,10 +2372,10 @@ function startAudio() {
 
     // ── MEDIA SESSION ────────────────────────────────────────────
     if ('mediaSession' in navigator) {
-      const st = STATIONS[currentState];
+      const st = station;
       navigator.mediaSession.metadata = new MediaMetadata({
         title:  st.fullName || st.name,
-        artist: st.freq + ' · ' + st.city,
+        artist: (st.freq || '') + ' · ' + (st.city || ''),
         album:  'Community Radio Radar',
         artwork: [
           { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
@@ -1937,12 +2383,11 @@ function startAudio() {
         ]
       });
       navigator.mediaSession.playbackState = 'playing';
-      // Play handler: rebuild stream from scratch (required after iOS screen lock)
       navigator.mediaSession.setActionHandler('play', () => {
         if (!isPlaying) {
           startAudio();
         } else if (audio.paused) {
-          audio.src = STATIONS[currentState].stream;
+          audio.src = station.stream;
           audio.load();
           audio.play().catch(() => {
             document.getElementById('playerStatus').textContent = 'NO SIGNAL';
@@ -1970,7 +2415,7 @@ function startAudio() {
       if (audio._userStopped || !isPlaying) return;
       if (audio.paused) {
         document.getElementById('playerStatus').textContent = 'RECONNECTING...';
-        audio.src = STATIONS[currentState].stream;
+        audio.src = station.stream;
         audio.load();
         audio.play().then(() => {
           document.getElementById('playerStatus').textContent = '● LIVE';
@@ -2148,28 +2593,47 @@ async function loadChartsFromAPI() {
 // ─── MOBILE TAB SWITCHING ─────────────────────────────────────────────────────
 function switchMobileTab(tab) {
   const mapContainer   = document.getElementById('mapContainer');
+  const worldView      = document.getElementById('worldView');
   const sidePanel      = document.getElementById('sidePanel');
   const amrapSheet     = document.getElementById('amrapMobileSheet');
   const tabMap         = document.getElementById('tab-map');
+  const tabWorld       = document.getElementById('tab-world');
   const tabAmrap       = document.getElementById('tab-amrap');
 
+  // Close all sheets first
+  amrapSheet.classList.remove('open');
+  tabMap.classList.remove('active');
+  if (tabWorld) tabWorld.classList.remove('active');
+  tabAmrap.classList.remove('active');
+
+  const logoSub = document.getElementById('logoSub');
   if (tab === 'map') {
-    amrapSheet.classList.remove('open');
+    worldView.classList.remove('active');
+    mapContainer.style.display = '';
     tabMap.classList.add('active');
-    tabAmrap.classList.remove('active');
+    currentView = 'australia';
+    if (logoSub) logoSub.textContent = 'Australia';
+  } else if (tab === 'world') {
+    worldView.classList.add('active');
+    mapContainer.style.display = 'none';
+    if (tabWorld) tabWorld.classList.add('active');
+    sidePanel.classList.remove('open');
+    currentView = 'world';
+    if (logoSub) logoSub.textContent = 'World';
+    renderWorldGrid();
   } else if (tab === 'amrap') {
-    // Clone AMRAP panel content into mobile sheet if not already done
+    worldView.classList.remove('active');
+    mapContainer.style.display = '';
     if (!amrapSheet.dataset.populated) {
       const amrapPanel = document.getElementById('amrapPanel');
       amrapSheet.innerHTML = amrapPanel.innerHTML;
       amrapSheet.dataset.populated = '1';
     }
     amrapSheet.classList.add('open');
-    tabMap.classList.remove('active');
     tabAmrap.classList.add('active');
-    // Close station panel if open
     sidePanel.classList.remove('open');
     mapContainer.classList.remove('panel-open');
+    currentView = 'australia';
   }
 }
 
@@ -2191,6 +2655,10 @@ loadChartsFromAPI();
   <button class="mobile-tab active" id="tab-map" onclick="switchMobileTab('map')">
     <span class="mobile-tab-icon">🗺</span>
     MAP
+  </button>
+  <button class="mobile-tab" id="tab-world" onclick="switchMobileTab('world')">
+    <span class="mobile-tab-icon">🌍</span>
+    WORLD
   </button>
   <button class="mobile-tab" id="tab-amrap" onclick="switchMobileTab('amrap')">
     <span class="mobile-tab-icon">📻</span>
@@ -2215,6 +2683,98 @@ loadChartsFromAPI();
      VISUAL FLAIR — toggle each by flipping its flag to false
      ═══════════════════════════════════════════════════════════════ -->
 <script>
+// ─── WORLD VIEW ───────────────────────────────────────────────────────────────
+function toggleWorldView() {
+  currentView = currentView === 'australia' ? 'world' : 'australia';
+  const btn = document.getElementById('worldToggleBtn');
+  const mapContainer = document.getElementById('mapContainer');
+  const worldView = document.getElementById('worldView');
+  const amrapPanel = document.getElementById('amrapPanel');
+  const amrapToggle = document.getElementById('amrapToggle');
+  const appContainer = document.getElementById('appContainer');
+
+  const logoSub = document.getElementById('logoSub');
+  if (currentView === 'world') {
+    btn.textContent = 'AUSTRALIA';
+    btn.classList.add('active');
+    mapContainer.style.display = 'none';
+    worldView.classList.add('active');
+    amrapPanel.style.display = 'none';
+    amrapToggle.style.display = 'none';
+    appContainer.classList.add('amrap-hidden');
+    if (logoSub) logoSub.textContent = 'World';
+    closePanel();
+    renderWorldGrid();
+  } else {
+    btn.textContent = 'WORLD';
+    btn.classList.remove('active');
+    mapContainer.style.display = '';
+    worldView.classList.remove('active');
+    amrapPanel.style.display = '';
+    amrapToggle.style.display = '';
+    appContainer.classList.remove('amrap-hidden');
+    if (logoSub) logoSub.textContent = 'Australia';
+  }
+}
+
+function renderWorldGrid() {
+  const grid = document.getElementById('worldGrid');
+  const pagination = document.getElementById('worldPagination');
+  const pageIndicator = document.getElementById('worldPageIndicator');
+  const prevBtn = document.getElementById('worldPrevBtn');
+  const nextBtn = document.getElementById('worldNextBtn');
+  const page = WORLD_STATIONS_PAGES[currentWorldPage];
+  grid.innerHTML = '';
+  page.forEach((station, i) => {
+    const card = document.createElement('div');
+    card.className = 'world-card';
+    card.id = 'world-card-' + station.id;
+    card.onclick = () => selectWorldStation(station);
+    card.innerHTML = `
+      <div class="world-card-ping"></div>
+      <div class="world-card-flag">${station.flag}</div>
+      <div class="world-card-name">${station.name}</div>
+      <div class="world-card-location">${station.city} · ${station.country}</div>
+      <div class="world-card-freq">${station.freq}</div>
+    `;
+    grid.appendChild(card);
+  });
+  if (WORLD_STATIONS_PAGES.length > 1) {
+    pagination.style.display = 'flex';
+    pageIndicator.textContent = `PAGE ${currentWorldPage + 1} / ${WORLD_STATIONS_PAGES.length}`;
+    prevBtn.disabled = currentWorldPage === 0;
+    nextBtn.disabled = currentWorldPage === WORLD_STATIONS_PAGES.length - 1;
+  } else {
+    pagination.style.display = 'none';
+  }
+}
+
+function changeWorldPage(dir) {
+  currentWorldPage = Math.max(0, Math.min(WORLD_STATIONS_PAGES.length - 1, currentWorldPage + dir));
+  renderWorldGrid();
+}
+
+function selectWorldStation(station) {
+  // Clear any highlighted Australian state from map
+  if (currentState) {
+    document.getElementById(currentState)?.classList.remove('selected');
+    document.getElementById('label-' + currentState)?.classList.remove('selected-label');
+    document.getElementById('ping-' + currentState)?.classList.remove('active');
+  }
+  currentState = null; // null = world station mode
+  window._currentWorldStation = station;
+
+  document.querySelectorAll('.world-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById('world-card-' + station.id);
+  if (card) card.classList.add('selected');
+
+  showStationPanel(station);
+  document.getElementById('sidePanel').classList.add('open');
+  // Push world-view left just like map does
+  document.getElementById('worldView').classList.add('panel-open');
+  updateMiniPlayer();
+}
+
 // ── AMRAP PANEL TOGGLE ────────────────────────────────────────────
 function toggleAmrap() {
   const panel  = document.getElementById('amrapPanel');
