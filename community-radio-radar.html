@@ -219,6 +219,7 @@
     position: relative;
     margin-left: 16rem;
     transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--bg);
   }
   .app.amrap-hidden {
     margin-left: 0;
@@ -895,20 +896,22 @@
     .map-container {
       flex: 1;
       min-height: 0;
-      padding: 8px;
+      padding: 4px 8px;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
+      background: var(--bg);
+      overflow: hidden;
     }
     .map-container.panel-open { margin-right: 0; }
 
     svg#australia-map {
       margin: 0 auto;
       display: block;
+      width: 100%;
+      height: 100%;
       max-height: 100%;
       max-width: 100%;
-      width: auto;
-      height: auto;
     }
 
     /* Stack footer text vertically so they don't overlap */
@@ -1061,6 +1064,7 @@
     overflow-y: auto;
     position: relative;
     transition: margin-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--bg);
   }
   .world-view.active { display: flex; }
   .world-view::-webkit-scrollbar { width: 4px; }
@@ -1448,15 +1452,24 @@
     display: none;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    /* Height includes safe area — tab buttons sit in the 48px, safe area is padding below */
     height: calc(48px + env(safe-area-inset-bottom, 0px));
     padding-bottom: env(safe-area-inset-bottom, 0px);
     background: var(--panel);
     border-top: 1px solid var(--border);
     z-index: 100;
     flex-direction: row;
-    /* Extend bg colour into safe area via box-shadow trick */
-    box-shadow: 0 calc(env(safe-area-inset-bottom, 0px)) 0 calc(env(safe-area-inset-bottom, 0px)) var(--panel);
+  }
+  /* Fills the iPhone home-indicator safe area below the tab bar */
+  .safe-area-filler {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: env(safe-area-inset-bottom, 0px);
+    background: var(--panel);
+    z-index: 101;
+  }
+  @media (max-width: 700px) {
+    .safe-area-filler { display: block; }
   }
   .mobile-tab {
     flex: 1;
@@ -1483,6 +1496,7 @@
   .amrap-mobile-sheet {
     display: none;
     position: fixed;
+    background: var(--bg);
     left: 0; right: 0;
     bottom: calc(48px + env(safe-area-inset-bottom, 0px));
     top: calc(48px + env(safe-area-inset-top, 0px));
@@ -2685,6 +2699,7 @@ init();
 loadAMRAP();
 loadChartsFromAPI();
 </script><!-- Mobile Tab Bar -->
+<div class="safe-area-filler" id="safeAreaFiller"></div>
 <nav class="mobile-tabs" id="mobileTabs">
   <button class="mobile-tab active" id="tab-map" onclick="switchMobileTab('map')">
     <span class="mobile-tab-icon mobile-tab-ascii">▣</span>
