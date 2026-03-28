@@ -2,13 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#00ff41">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Radio Radar">
-  <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Community Radio Radar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oswald:wght@300;400;600&family=VT323&display=swap" rel="stylesheet">
@@ -37,18 +31,24 @@
     font-size: 14px;
   }
 
-  @media (min-width: 1920px) { html { font-size: 16px; } }
-  @media (min-width: 2560px) { html { font-size: 20px; } }
-  @media (min-width: 3840px) { html { font-size: 26px; } }
+  @media (min-width: 1920px) {
+    html { font-size: 16px; }
+  }
+
+  @media (min-width: 2560px) {
+    html { font-size: 20px; }
+  }
+
+  @media (min-width: 3840px) {
+    html { font-size: 26px; }
+  }
+  }
 
   /* SCANLINES */
   body::after {
     content: '';
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background: repeating-linear-gradient(
       0deg,
       transparent,
@@ -64,10 +64,7 @@
   body::before {
     content: '';
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     opacity: 0.03;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     pointer-events: none;
@@ -76,93 +73,17 @@
 
   /* HEADER */
   header {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 14px 28px;
     border-bottom: 1px solid var(--border);
     background: var(--panel);
     position: relative;
     z-index: 100;
   }
-  /* Centre column holds the WORLD button */
-  .header-centre {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-  }
-  /* Right column aligns to the right */
-  .header-right {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 24px;
-  }
-
-  .mini-player {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(0,255,65,0.08);
-    border: 1px solid var(--border);
-    padding: 6px 6px 6px 14px;
-    border-radius: 2px;
-    animation: fadeIn 0.3s ease;
-  }
-
-  @media (max-width: 700px) {
-    .mini-player {
-      display: none !important;
-    }
-  }
-  .mini-player-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.78rem;
-    color: var(--green);
-    letter-spacing: 2px;
-  }
-  .mini-player-stop {
-    background: rgba(0,255,65,0.12);
-    border: 1px solid var(--border);
-    color: var(--green);
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 8px 14px;
-    line-height: 1;
-    opacity: 0.9;
-  }
-  .mini-player-stop:hover { opacity: 1; background: rgba(0,255,65,0.22); }
-
-  .mini-waveform {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    height: 20px;
-  }
-  .mini-wave-bar {
-    width: 2px;
-    height: 3px;
-    background: var(--green-dim);
-    border-radius: 1px;
-    transition: height 0.15s ease;
-  }
-  .mini-wave-bar.active {
-    background: var(--green);
-    animation: wave-dance 0.8s ease-in-out infinite alternate;
-  }
-  .mini-wave-bar:nth-child(1) { animation-delay: 0.0s; }
-  .mini-wave-bar:nth-child(2) { animation-delay: 0.15s; }
-  .mini-wave-bar:nth-child(3) { animation-delay: 0.3s; }
-  .mini-wave-bar:nth-child(4) { animation-delay: 0.45s; }
-  .mini-wave-bar:nth-child(5) { animation-delay: 0.6s; }
 
   .logo {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-  }
-  .logo-row {
     display: flex;
     align-items: baseline;
     gap: 12px;
@@ -184,7 +105,11 @@
     text-transform: uppercase;
   }
 
-
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
 
   .signal-indicator {
     display: flex;
@@ -216,12 +141,6 @@
     display: flex;
     height: calc(100vh - 57px);
     position: relative;
-    margin-left: 16rem;
-    transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    background: var(--bg);
-  }
-  .app.amrap-hidden {
-    margin-left: 0;
   }
 
   /* MAP AREA */
@@ -236,11 +155,7 @@
   }
 
   .map-container.panel-open {
-    margin-right: 400px;
-  }
-  .world-view.panel-open {
-    margin-right: 400px;
-    transition: margin-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-right: 28rem;
   }
 
   /* GRID BACKGROUND */
@@ -266,13 +181,11 @@
   }
 
   svg#australia-map {
+    width: 100%;
+    max-width: 680px;
     height: auto;
     filter: drop-shadow(0 0 30px rgba(0,255,65,0.08));
   }
-
-  @media (min-width: 1920px) { svg#australia-map { max-width: 900px; } }
-  @media (min-width: 2560px) { svg#australia-map { max-width: 1020px; } }
-  @media (min-width: 3840px) { svg#australia-map { max-width: 1200px; } }
 
   .state-path {
     fill: var(--inactive);
@@ -365,13 +278,13 @@
   /* SIDE PANEL */
   .side-panel {
     position: fixed;
-    right: -420px;
+    right: -30rem;
     top: 57px;
-    width: 400px;
+    width: 28rem;
     height: calc(100vh - 57px);
     background: var(--panel);
     border-left: 1px solid var(--border);
-    z-index: 50;
+    z-index: 200;
     transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
@@ -410,17 +323,6 @@
     font-size: 0.75rem;
     color: var(--green-dim);
     letter-spacing: 2px;
-  }
-
-  .panel-local-time {
-    font-size: 0.6rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    margin-top: 6px;
-    font-family: 'Share Tech Mono', monospace;
-  }
-  .panel-local-time span {
-    color: var(--accent);
   }
 
   .panel-close {
@@ -483,16 +385,6 @@
     transition: all 0.2s;
     flex-shrink: 0;
     clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
-  }
-
-  .play-btn.buffering {
-    animation: bufferPulse 0.6s ease-in-out infinite;
-  }
-
-  @keyframes bufferPulse {
-    0%   { background: var(--green-dark); box-shadow: 0 0 4px rgba(0,255,65,0.2); color: var(--green); }
-    50%  { background: var(--green-dim);  box-shadow: 0 0 24px rgba(0,255,65,0.7); color: var(--bg); }
-    100% { background: var(--green-dark); box-shadow: 0 0 4px rgba(0,255,65,0.2); color: var(--green); }
   }
 
   .play-btn:hover, .play-btn.playing {
@@ -568,13 +460,14 @@
   /* CHARTS */
   .charts-section {
     flex: 1;
-    overflow-y: auto;
+    min-height: 0;
+    overflow-y: scroll;
     padding: 14px 24px 20px;
   }
 
   .charts-section::-webkit-scrollbar { width: 4px; }
   .charts-section::-webkit-scrollbar-track { background: var(--bg); }
-  .charts-section::-webkit-scrollbar-thumb { background: var(--border); }
+  .charts-section::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
 
   .charts-header {
     display: flex;
@@ -596,32 +489,26 @@
     letter-spacing: 1px;
   }
 
-  .chart-entry {
+  .chart-entry:hover {
+    background: rgba(0, 255, 65, 0.04);
+    padding-left: 4px;
+    transition: all 0.15s;
+  }
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 11px 0;
+    padding: 8px 0;
     border-bottom: 1px solid rgba(10, 46, 12, 0.5);
     animation: entry-appear 0.3s ease forwards;
     opacity: 0;
-    transition: background 0.15s, padding-left 0.15s, color 0.15s;
-    border-radius: 3px;
-    cursor: pointer;
-  }
-  .chart-entry:hover {
-    background: rgba(0, 255, 65, 0.06);
-    padding-left: 8px;
-  }
-  .chart-entry:hover .chart-track {
-    color: var(--accent);
   }
 
   .chart-num {
     font-family: 'Oswald', sans-serif;
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 300;
     color: var(--muted);
-    width: 26px;
+    width: 24px;
     text-align: right;
     flex-shrink: 0;
   }
@@ -637,27 +524,26 @@
   }
 
   .chart-track {
-    font-size: 0.85rem;
+    font-size: 0.72rem;
     color: var(--text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     letter-spacing: 0.3px;
-    font-weight: 500;
   }
 
   .chart-artist {
-    font-size: 0.72rem;
+    font-size: 0.6rem;
     color: var(--muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-top: 3px;
+    margin-top: 1px;
     letter-spacing: 0.5px;
   }
 
   .chart-weeks {
-    font-size: 0.58rem;
+    font-size: 0.55rem;
     color: #1a4020;
     letter-spacing: 1px;
     flex-shrink: 0;
@@ -845,134 +731,9 @@
   }
 
   /* RESPONSIVE */
-  /* ─── MOBILE ──────────────────────────────────────────────────────────────── */
   @media (max-width: 700px) {
-
-
-
-    /* Header — push below iPhone status bar using safe area */
-    header {
-      padding: 0 12px;
-      height: 48px;
-      display: flex !important;
-      justify-content: space-between !important;
-    }
-    .logo-main { font-size: 0.9rem; }
-    .logo-sub   { display: none; }
-    .header-centre { display: none !important; }
-    .header-right { margin-left: auto; }
-    .signal-indicator { display: none !important; }
-    .signal-bar { display: none !important; }
-
-    /* Hide AMRAP panel — accessible via tab bar instead */
-    .amrap-panel { display: none !important; }
-    .amrap-toggle { display: none !important; }
-
-    /* App layout — full width, no left offset */
-    .app {
-      margin-left: 0 !important;
-      height: calc(var(--app-height, 100vh) - 48px - var(--tab-height, 48px));
-      background: var(--bg);
-      overflow: hidden;
-      flex-direction: column;
-    }
-
-    /* Map takes full width */
-    .map-container {
-      flex: 1;
-      min-height: 0;
-      padding: 4px 8px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      background: var(--bg);
-      overflow: hidden;
-    }
+    .side-panel { width: 100vw; }
     .map-container.panel-open { margin-right: 0; }
-
-    svg#australia-map {
-      margin: 0 auto;
-      display: block;
-      width: 100%;
-      height: 100%;
-      max-height: 100%;
-      max-width: 100%;
-    }
-
-    /* Stack footer text vertically so they don't overlap */
-    .corner-tag {
-      bottom: 28px;
-      left: 12px;
-      font-size: 0.42rem;
-      letter-spacing: 1px;
-    }
-    .map-hint {
-      font-size: 0.42rem;
-      letter-spacing: 1px;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap;
-    }
-
-    /* Station panel slides up from bottom as a sheet */
-    .side-panel {
-      position: fixed !important;
-      left: 0 !important;
-      right: 0 !important;
-      bottom: 48px !important;
-      top: auto !important;
-      width: 100vw !important;
-      height: 75vh !important;
-      border-left: none !important;
-      border-top: 1px solid var(--border);
-      transform: translateY(110%);
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      z-index: 50;
-      overflow-y: auto;
-    }
-    .side-panel.open {
-      transform: translateY(0) !important;
-      right: 0 !important;
-    }
-
-    /* Tab bar */
-    .mobile-tabs {
-      display: flex !important;
-    }
-
-    /* AMRAP mobile sheet */
-    .amrap-mobile-sheet {
-      display: flex !important;
-    }
-
-    /* Drag handle on panel */
-    .side-panel::before {
-      display: none;
-    }
-    .panel-drag-handle {
-      width: 40px;
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      margin: 10px auto 4px;
-      flex-shrink: 0;
-      cursor: grab;
-    }
-
-    /* Panel header tighter — right padding makes room for the ✕ button */
-    .panel-header {
-      padding: 8px 56px 12px 16px;
-    }
-
-    /* Close button — bigger for thumbs, repositioned so it doesn't overlap station name */
-    .panel-close {
-      width: 36px;
-      height: 36px;
-      font-size: 1.2rem;
-      top: 12px;
-      right: 12px;
-    }
   }
 
   .uc-chart-msg {
@@ -1035,226 +796,10 @@
     opacity: 0.5;
   }
 
-  /* ─── WORLD VIEW ────────────────────────────────────────────────────────── */
-  .world-view {
-    display: none;
-    flex: 1;
-    flex-direction: column;
-    padding: 20px 28px;
-    overflow-y: auto;
-    position: relative;
-    transition: margin-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    background: var(--bg);
-  }
-  .world-view.active { display: flex; }
-  .world-view::-webkit-scrollbar { width: 4px; }
-  .world-view::-webkit-scrollbar-track { background: var(--bg); }
-  .world-view::-webkit-scrollbar-thumb { background: var(--border); }
-
-  .world-title {
-    font-size: 0.6rem;
-    color: var(--muted);
-    letter-spacing: 5px;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-  }
-
-  .world-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 220px);
-    gap: 18px;
-    align-content: center;
-    justify-content: center;
-    flex: 1;
-  }
-
-  .world-card {
-    background: var(--panel);
-    border: 1px solid #0a2e0c;
-    padding: 28px 18px;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: 8px;
-    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
-    min-height: 170px;
-  }
-  .world-card:hover {
-    border-color: var(--green);
-    background: var(--green-dark);
-    box-shadow: 0 0 20px rgba(0,255,65,0.15);
-  }
-  .world-card.selected {
-    border-color: var(--green);
-    background: var(--green-dark);
-    box-shadow: 0 0 24px rgba(0,255,65,0.25);
-  }
-  .world-card-flag {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 2px;
-    color: var(--muted);
-    line-height: 1;
-    border: 1px solid var(--border);
-    padding: 2px 6px;
-  }
-  .world-card-name {
-    font-family: 'Oswald', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--green);
-    line-height: 1.1;
-    text-shadow: 0 0 12px rgba(0,255,65,0.3);
-  }
-  .world-card-location {
-    font-size: 0.62rem;
-    color: var(--muted);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-  .world-card-freq {
-    font-size: 0.58rem;
-    color: var(--green-dim);
-    letter-spacing: 1px;
-  }
-
-  /* World ASCII art section (replaces chart data) */
-  .world-ascii-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    padding: 20px 0;
-    gap: 14px;
-  }
-  .world-ascii-art {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.5rem;
-    color: var(--green-dim);
-    line-height: 1.4;
-    text-align: center;
-    white-space: pre;
-    animation: world-ascii-pulse 4s ease-in-out infinite;
-  }
-  @keyframes world-ascii-pulse {
-    0%, 100% { opacity: 0.5; text-shadow: none; }
-    50% { opacity: 0.9; text-shadow: 0 0 8px rgba(0,255,65,0.5); }
-  }
-  .world-ascii-label {
-    font-size: 0.5rem;
-    color: var(--muted);
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    text-align: center;
-  }
-  .world-card-ping {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    opacity: 0;
-  }
-  .world-card.selected .world-card-ping {
-    opacity: 1;
-    box-shadow: 0 0 8px var(--green);
-    animation: world-ping 1.8s ease-out infinite;
-  }
-  @keyframes world-ping {
-    0% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(3); opacity: 0; }
-  }
-
-  /* Pagination */
-  .world-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    padding: 16px 0 4px;
-    flex-shrink: 0;
-  }
-  .world-page-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 2px;
-    padding: 6px 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .world-page-btn:hover:not(:disabled) {
-    border-color: var(--green);
-    color: var(--green);
-  }
-  .world-page-btn:disabled { opacity: 0.3; cursor: default; }
-  .world-page-indicator {
-    font-size: 0.55rem;
-    color: var(--muted);
-    letter-spacing: 2px;
-  }
-
-  /* World toggle button in header */
-  .world-toggle-btn {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 3px;
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 6px 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-transform: uppercase;
-  }
-  @media (max-width: 700px) {
-    .world-toggle-btn { display: none !important; }
-    .header-centre { display: none !important; }
-  }
-  .world-toggle-btn:hover {
-    border-color: var(--green);
-    color: var(--green);
-    background: var(--green-glow);
-  }
-  .world-toggle-btn.active {
-    border-color: var(--green);
-    color: var(--green);
-    background: var(--green-glow);
-  }
-
-  /* Mobile world tab */
-  @media (max-width: 700px) {
-    .world-view {
-      padding: 12px;
-    }
-    .world-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-    .world-card {
-      padding: 18px 12px;
-      min-height: 120px;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-    .world-card-name { font-size: 1.05rem; }
-    .world-card-location { font-size: 0.58rem; letter-spacing: 1px; }
-    .world-card-flag { font-size: 0.65rem; }
-  }
+  /* ─── AMRAP LEFT PANEL ──────────────────────────────────────── */
   .amrap-panel {
     position: fixed;
-    left: 0; top: 57px; bottom: 0;
+    left: 0; top: 0; bottom: 0;
     width: 16rem;
     background: var(--panel);
     border-right: 1px solid var(--border);
@@ -1263,33 +808,7 @@
     z-index: 10;
     padding: 0;
     overflow: hidden;
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .amrap-panel.collapsed {
-    transform: translateX(-16rem);
-  }
-  .amrap-toggle {
-    position: fixed;
-    left: 16rem;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 11;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-left: none;
-    color: var(--accent);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.55rem;
-    letter-spacing: 0.08em;
-    writing-mode: vertical-rl;
-    padding: 10px 5px;
-    cursor: pointer;
-    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.15s;
-    border-radius: 0 4px 4px 0;
-    line-height: 1;
-  }
-  .amrap-toggle:hover { background: rgba(0,255,65,0.08); }
-  .amrap-toggle.collapsed { left: 0; }
   .amrap-header {
     padding: 14px 14px 10px;
     border-bottom: 1px solid var(--border);
@@ -1410,6 +929,12 @@
     line-height: 1.6;
     text-transform: uppercase;
   }
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    padding: 20px 14px;
+    text-align: center;
+  }
   .amrap-loading::after {
     content: '...';
     animation: dots 1.2s steps(3, end) infinite;
@@ -1419,96 +944,18 @@
     33% { content: '..'; }
     66% { content: '...'; }
   }
-  /* ─── MOBILE TAB BAR (hidden on desktop) ───────────────────────────────── */
-  .mobile-tabs {
-    display: none;
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    height: 48px;
-    background: var(--panel);
-    border-top: 1px solid var(--border);
-    z-index: 100;
-    flex-direction: row;
-    align-items: center;
-  }
-  .mobile-tab {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.45rem;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    cursor: pointer;
-    border: none;
-    background: none;
-    transition: color 0.15s, background 0.15s;
-  }
-  .mobile-tab.active { color: var(--accent); }
-  .mobile-tab:active { background: rgba(0,255,65,0.06); }
-  .mobile-tab-icon { font-size: 1.1rem; line-height: 1; }
-  .mobile-tab-ascii { font-family: 'Share Tech Mono', monospace; font-size: 1.3rem; color: inherit; }
-
-  /* ─── AMRAP MOBILE SHEET (hidden on desktop) ───────────────────────────── */
-  .amrap-mobile-sheet {
-    display: none;
-    position: fixed;
-    left: 0; right: 0;
-    bottom: 48px;
-    top: 48px;
-    background: var(--panel);
-    z-index: 50;
-    flex-direction: column;
-    transform: translateY(100%);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow-y: auto;
-  }
-  .amrap-mobile-sheet.open {
-    transform: translateY(0);
+  /* Push main content right to make room for AMRAP panel */
+  body { padding-left: 16rem; }
+  @media (max-width: 900px) {
+    .amrap-panel { display: none; }
+    body { padding-left: 0; }
   }
 
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <div class="logo-row">
-      <div class="logo-main">COMMUNITY RADIO RADAR</div>
-      <div class="logo-sub" id="logoSub">Australia</div>
-    </div>
-  </div>
-  <div class="header-centre">
-    <button class="world-toggle-btn" id="worldToggleBtn" onclick="toggleWorldView()">WORLD</button>
-    <!-- Mini player — right of WORLD btn, only shown when panel closed + playing -->
-    <div class="mini-player" id="miniPlayer" style="display:none">
-      <div class="mini-waveform" id="miniWaveform">
-        <div class="mini-wave-bar"></div>
-        <div class="mini-wave-bar"></div>
-        <div class="mini-wave-bar"></div>
-        <div class="mini-wave-bar"></div>
-        <div class="mini-wave-bar"></div>
-      </div>
-      <span class="mini-player-label" id="miniPlayerLabel">PLAYING</span>
-      <button class="mini-player-stop" onclick="stopAudio()">■</button>
-    </div>
-  </div>
-  <div class="header-right">
-    <div class="signal-indicator">
-      <div class="signal-bar"></div>
-      <div class="signal-bar"></div>
-      <div class="signal-bar"></div>
-      <div class="signal-bar"></div>
-      <div class="signal-bar"></div>
-    </div>
-    <div class="clock" id="clock">--:--:--</div>
-  </div>
-</header>
-
-<!-- AMRAP Metro Chart Panel -->
+  <!-- AMRAP Metro Chart Panel -->
   <div class="amrap-panel" id="amrapPanel">
     <div class="amrap-header">
       <div class="amrap-label">// NATIONAL AIRPLAY</div>
@@ -1523,94 +970,100 @@
     </div>
     <div class="amrap-credits">
       <div class="amrap-credits-text">Concept by Joshua Hibovesky</div>
-      <div class="amrap-credits-text">Station picks taken from station charts / new release shows</div>
+      <div class="amrap-credits-text">Code by Claude AI</div>
     </div>
   </div>
 
-<button class="amrap-toggle" id="amrapToggle" onclick="toggleAmrap()" title="Toggle charts panel">◀ AMRAP CHART</button>
+<header>
+  <div class="logo">
+    <div class="logo-main">COMMUNITY RADIO RADAR</div>
+    <div class="logo-sub">Australia</div>
+  </div>
+  <div class="header-right">
+    <div class="signal-indicator">
+      <div class="signal-bar"></div>
+      <div class="signal-bar"></div>
+      <div class="signal-bar"></div>
+      <div class="signal-bar"></div>
+      <div class="signal-bar"></div>
+    </div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+</header>
 
-<div class="app" id="appContainer">
+<div class="app">
   <div class="map-container" id="mapContainer">
     <div class="map-title">// SELECT A STATE TO TUNE IN</div>
 
     <!-- AUSTRALIA SVG MAP — geographically accurate state boundaries -->
-        <svg id="australia-map" viewBox="0 0 800 700" xmlns="http://www.w3.org/2000/svg">
-      <path id="WA" class="state-path active" d="M 259.3,417.2 L 255.7,417.8 L 253.1,419.6 L 250.3,421.2 L 247.4,422.7 L 244.3,424.0 L 241.2,425.2 L 238.4,426.8 L 235.0,427.7 L 231.9,428.9 L 228.3,429.5 L 224.1,429.5 L 220.5,428.9 L 216.4,428.9 L 213.0,429.9 L 210.4,431.7 L 208.1,433.9 L 205.5,435.7 L 202.9,437.6 L 200.3,439.5 L 197.8,441.3 L 194.7,442.5 L 191.6,442.5 L 189.2,444.7 L 187.9,448.1 L 186.6,451.5 L 185.1,454.6 L 183.8,458.0 L 181.7,460.5 L 179.1,462.4 L 176.3,462.7 L 173.4,463.0 L 170.9,461.1 L 167.2,461.7 L 163.6,462.4 L 160.5,462.4 L 157.4,461.1 L 153.8,460.5 L 149.7,460.5 L 145.5,460.5 L 141.9,461.1 L 138.3,461.7 L 134.4,462.0 L 130.5,462.4 L 128.2,463.3 L 125.9,465.5 L 125.1,468.2 L 123.3,471.0 L 121.2,473.5 L 118.1,473.5 L 115.0,474.7 L 112.7,476.9 L 110.3,479.1 L 107.8,480.9 L 105.2,482.8 L 102.1,484.0 L 98.4,484.6 L 94.8,485.3 L 91.2,484.6 L 87.6,485.3 L 84.0,484.6 L 80.3,484.0 L 77.5,482.5 L 74.7,480.9 L 72.3,478.8 L 70.5,476.0 L 68.4,473.5 L 66.1,471.3 L 62.8,470.4 L 60.2,468.5 L 59.1,464.8 L 58.9,460.2 L 60.2,456.8 L 62.2,454.3 L 64.6,452.1 L 66.6,449.7 L 68.2,446.6 L 68.2,442.9 L 67.7,438.5 L 68.2,434.2 L 68.7,431.1 L 69.2,426.8 L 69.2,421.8 L 68.7,417.5 L 67.7,413.8 L 66.4,410.4 L 64.8,407.3 L 63.5,403.9 L 62.0,400.8 L 60.9,397.0 L 59.7,393.6 L 59.4,390.2 L 58.9,385.9 L 58.4,381.6 L 58.4,376.6 L 58.1,372.0 L 56.6,368.9 L 55.5,365.2 L 54.2,361.8 L 52.7,358.7 L 51.1,355.6 L 49.8,352.2 L 48.3,349.1 L 47.0,345.7 L 47.0,340.7 L 46.5,336.4 L 45.4,332.7 L 43.9,329.6 L 42.1,329.3 L 40.0,326.8 L 38.7,323.4 L 37.7,319.7 L 36.6,316.0 L 35.1,312.9 L 34.8,310.1 L 36.9,307.6 L 39.2,309.8 L 41.3,309.1 L 43.4,306.7 L 45.4,308.5 L 47.2,311.3 L 48.0,307.3 L 47.2,303.3 L 45.2,300.8 L 43.6,297.7 L 42.3,294.3 L 41.3,290.6 L 40.0,287.2 L 38.7,283.8 L 37.4,280.4 L 36.6,276.3 L 37.2,272.0 L 37.9,268.0 L 39.2,264.6 L 40.5,261.2 L 41.3,258.4 L 42.3,254.7 L 41.8,250.3 L 40.8,246.6 L 41.0,242.0 L 41.6,238.9 L 43.1,235.8 L 44.4,232.4 L 46.7,230.2 L 48.8,231.5 L 49.6,235.5 L 50.3,239.5 L 51.9,236.4 L 53.2,233.0 L 55.0,230.2 L 57.1,227.7 L 59.9,226.2 L 62.8,224.6 L 65.3,222.8 L 67.7,220.6 L 69.7,218.1 L 72.1,216.0 L 74.7,214.1 L 77.5,212.6 L 80.1,210.7 L 82.7,208.9 L 85.3,208.2 L 89.1,207.9 L 92.8,208.5 L 95.9,208.5 L 98.4,207.9 L 101.0,206.1 L 103.4,203.9 L 106.5,202.7 L 109.8,201.7 L 113.2,200.8 L 115.3,198.3 L 118.1,196.8 L 121.2,196.8 L 125.1,196.5 L 127.9,196.2 L 130.5,195.5 L 133.9,194.6 L 137.2,193.7 L 139.8,191.8 L 142.7,190.3 L 145.0,188.1 L 147.1,185.6 L 148.9,182.9 L 149.9,179.1 L 151.5,176.0 L 153.3,173.3 L 155.1,170.5 L 157.2,168.0 L 159.2,165.5 L 159.7,162.4 L 159.2,158.1 L 158.7,153.8 L 159.0,149.1 L 160.0,146.6 L 162.1,144.2 L 164.7,142.3 L 166.5,139.5 L 168.3,136.7 L 170.3,134.3 L 172.4,135.5 L 174.0,138.6 L 175.3,142.0 L 176.8,145.1 L 177.8,148.8 L 179.4,148.8 L 181.2,146.0 L 179.9,143.2 L 178.4,140.1 L 177.8,137.0 L 178.4,132.7 L 180.2,129.9 L 182.2,129.9 L 184.8,131.8 L 188.4,132.4 L 190.8,130.2 L 191.8,127.8 L 190.3,124.7 L 190.3,121.0 L 192.3,118.5 L 194.7,116.3 L 196.5,113.5 L 198.5,111.0 L 201.4,110.7 L 200.6,107.3 L 201.9,103.9 L 204.2,101.8 L 206.3,99.3 L 209.4,99.9 L 212.0,101.1 L 213.0,97.4 L 214.3,94.0 L 216.6,92.5 L 219.0,92.2 L 221.0,94.6 L 222.6,92.8 L 224.4,90.0 L 227.2,88.5 L 229.6,89.4 L 232.4,90.9 L 235.0,92.8 L 237.1,95.3 L 239.1,97.7 L 240.9,100.5 L 251.0,294.3 Z"/>
-      <text class="state-label active-label" id="label-WA" x="140" y="318" text-anchor="middle">WA</text>
-      <circle class="radar-ping" id="ping-WA" cx="140" cy="303" r="5"/>
+    <svg id="australia-map" viewBox="0 0 800 700" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- WESTERN AUSTRALIA -->
+      <path id="WA" class="state-path active"
+        d="M 42.9,242.9 L 45.8,233.1 L 55.0,238.0 L 65.0,242.0 L 82.0,228.0 L 100.0,220.0 L 116.0,212.0 L 132.0,211.0 L 165.0,187.0 L 187.0,167.0 L 208.0,153.0 L 217.0,137.0 L 228.0,119.0 L 241.0,107.0 L 254.0,98.0 L 266.0,97.0 L 279.0,99.5 L 293.0,102.0 L 308.4,103.0 L 308.4,427.4 L 272.0,438.0 L 242.0,450.0 L 212.0,460.0 L 182.0,468.0 L 155.0,472.0 L 128.0,473.0 L 105.0,470.0 L 84.0,463.0 C 70.0,457.0 55.0,455.0 45.0,461.0 L 32.0,456.0 L 22.0,443.0 L 16.0,426.0 C 12.0,408.0 11.0,385.0 13.0,360.0 C 15.0,335.0 20.0,308.0 30.0,282.0 Z"
+        />
+      <text class="state-label active-label" id="label-WA" x="155" y="315" text-anchor="middle">WA</text>
+      <circle class="radar-ping" id="ping-WA" cx="155" cy="302" r="5"/>
 
       <!-- NORTHERN TERRITORY -->
-      <!-- NT split into top (TEABBA) and bottom (CAAMA) -->
-      <g id="NT_GROUP">
-        <!-- NT Top half - TEABBA: real NT top border, closes along split line -->
-        <path id="NT_TOP" class="state-path active" d="M 240.9,100.5 L 243.3,102.7 L 244.8,105.8 L 245.3,110.1 L 247.2,107.3 L 250.0,105.8 L 253.1,107.0 L 255.9,108.6 L 258.8,107.6 L 261.9,107.6 L 262.4,105.2 L 260.6,102.4 L 259.6,98.7 L 260.9,95.3 L 262.4,92.2 L 264.2,89.4 L 265.8,86.3 L 267.8,83.8 L 270.4,82.0 L 270.4,78.2 L 271.5,74.5 L 273.0,71.4 L 275.1,69.0 L 277.2,66.5 L 279.5,64.3 L 282.6,63.1 L 285.7,61.8 L 289.3,61.2 L 293.4,61.2 L 297.6,61.2 L 301.2,60.6 L 304.3,59.4 L 304.1,55.3 L 302.5,52.2 L 298.9,52.2 L 296.6,50.7 L 294.5,48.2 L 295.8,45.4 L 297.8,44.8 L 300.7,43.9 L 303.5,43.6 L 305.9,45.1 L 307.4,48.2 L 310.0,46.4 L 312.1,48.8 L 314.1,51.3 L 316.5,53.5 L 319.8,53.2 L 322.4,53.8 L 325.0,55.6 L 327.8,57.2 L 330.2,58.1 L 333.3,58.1 L 336.9,58.7 L 339.7,60.3 L 342.6,60.6 L 345.2,58.7 L 348.3,57.5 L 350.3,60.0 L 352.7,62.1 L 354.7,64.6 L 354.7,62.8 L 355.5,60.0 L 357.6,57.5 L 360.4,57.8 L 362.5,60.3 L 364.6,62.8 L 365.6,66.5 L 364.8,70.5 L 362.8,73.0 L 362.5,76.4 L 361.7,79.2 L 359.1,81.0 L 355.5,81.6 L 352.7,83.2 L 352.2,86.3 L 353.7,89.4 L 353.4,94.0 L 351.9,97.1 L 350.3,100.2 L 349.6,103.0 L 347.0,104.9 L 345.7,107.6 L 348.0,109.8 L 350.6,111.7 L 352.9,113.8 L 355.0,116.3 L 357.6,118.2 L 359.9,120.3 L 362.0,122.8 L 364.8,124.4 L 367.9,125.6 L 371.0,126.8 L 373.9,128.4 L 376.1,169.0 L 244.5,169.0 Z"/>
-        <!-- NT Bottom half - CAAMA: follows real diagonal edges down to bottom -->
-        <path id="NT_BOT" class="state-path active" d="M 244.5,169.0 L 376.1,169.0 L 382.9,294.3 L 251.0,294.3 Z"/>
-        <!-- Dotted dividing line only — no extra border -->
-        <line x1="244.5" y1="169" x2="376.1" y2="169" stroke="rgba(0,255,65,0.8)" stroke-width="1.5" stroke-dasharray="6,5" pointer-events="none"/>
-      </g>
-      <text class="state-label active-label" id="label-NT_TOP" x="305" y="118" text-anchor="middle">NT/ Top</text>
-      <text class="state-label active-label" id="label-NT_BOT" x="318" y="240" text-anchor="middle">NT/ Central</text>
-      <circle class="radar-ping" id="ping-NT_TOP" cx="305" cy="110" r="5"/>
-      <circle class="radar-ping" id="ping-NT_BOT" cx="318" cy="232" r="5"/>
+      <path id="NT" class="state-path coming-soon"
+        d="M 308.4,103.0 L 327.7,77.7 L 347.0,58.3 L 356.6,38.9 L 366.3,31.1 L 385.5,36.9 L 404.8,48.6 L 424.1,73.8 L 443.4,81.6 L 453.0,48.6 L 443.4,48.6 L 456.9,85.5 L 462.7,103.0 L 481.9,126.3 L 481.9,378.9 L 308.4,378.9 Z" />
+      <text class="state-label active-label" id="label-NT" x="392" y="230" text-anchor="middle">NT</text>
+      <circle class="radar-ping" id="ping-NT" cx="392" cy="218" r="5"/>
 
       <!-- SOUTH AUSTRALIA -->
-      <path id="SA" class="state-path active" d="M 391.7,495.2 L 388.4,496.1 L 384.5,496.4 L 381.9,494.5 L 382.2,491.8 L 384.2,489.3 L 385.8,486.2 L 386.3,481.9 L 384.7,478.8 L 380.9,478.5 L 379.1,481.2 L 377.8,484.6 L 375.7,485.9 L 372.6,487.1 L 369.2,488.0 L 366.1,489.3 L 364.1,488.7 L 363.5,485.6 L 364.8,482.2 L 366.9,479.7 L 369.7,478.1 L 372.1,477.2 L 371.8,473.2 L 372.1,468.5 L 372.8,464.5 L 373.6,460.5 L 374.9,457.1 L 376.7,454.3 L 377.5,450.3 L 377.5,445.3 L 375.9,444.1 L 374.4,447.2 L 373.1,450.6 L 371.8,454.0 L 369.7,456.5 L 367.2,458.3 L 364.3,459.9 L 361.7,461.7 L 359.4,463.9 L 357.8,467.0 L 357.1,469.8 L 355.0,472.3 L 352.9,474.7 L 353.2,478.8 L 352.2,481.2 L 349.1,481.9 L 346.2,480.3 L 343.9,478.1 L 342.1,475.4 L 341.3,472.6 L 342.3,470.1 L 341.8,465.8 L 340.5,462.4 L 338.7,459.6 L 336.9,456.8 L 335.6,453.4 L 334.8,450.6 L 333.3,447.5 L 330.7,446.9 L 327.8,445.3 L 326.0,442.5 L 325.3,438.5 L 326.8,435.4 L 325.0,433.9 L 322.9,431.4 L 321.1,428.6 L 318.3,427.1 L 314.1,427.1 L 311.0,425.8 L 308.4,424.0 L 304.8,423.4 L 301.2,424.0 L 298.4,423.7 L 296.3,421.2 L 293.7,419.3 L 291.1,417.5 L 288.8,415.3 L 285.7,414.1 L 282.1,414.7 L 279.0,415.9 L 275.3,416.5 L 271.2,416.5 L 267.1,416.5 L 263.4,417.2 L 259.3,417.2 L 251.0,294.3 L 382.9,294.3 Z"/>
-      <text class="state-label active-label" id="label-SA" x="318" y="377" text-anchor="middle">SA</text>
-      <circle class="radar-ping" id="ping-SA" cx="318" cy="362" r="5"/>
+      <path id="SA" class="state-path active"
+        d="M 308.4,378.9 L 481.9,378.9 L 539.8,378.9 L 539.8,476.0 L 537.8,555.7 L 516.6,563.4 L 501.2,544.0 L 491.6,530.4 L 462.7,509.0 L 439.5,495.4 L 424.1,485.7 L 395.2,437.1 L 366.3,437.1 L 347.0,427.4 L 308.4,427.4 Z"
+        />
+      <text class="state-label active-label" id="label-SA" x="430" y="472" text-anchor="middle">SA</text>
+      <circle class="radar-ping" id="ping-SA" cx="430" cy="459" r="5"/>
 
       <!-- QUEENSLAND -->
-      <path id="QLD" class="state-path active" d="M 373.9,128.4 L 376.2,130.5 L 378.5,132.7 L 380.6,135.2 L 382.7,137.7 L 385.5,139.2 L 389.1,139.8 L 392.5,140.8 L 395.3,142.3 L 397.4,144.8 L 399.0,147.9 L 400.0,150.4 L 402.6,152.2 L 405.2,154.1 L 407.5,155.0 L 410.9,155.9 L 414.5,155.3 L 417.1,153.5 L 419.1,151.0 L 420.4,147.6 L 421.2,144.8 L 422.5,141.4 L 423.8,138.0 L 424.8,134.3 L 426.1,130.9 L 426.9,126.8 L 427.7,122.8 L 428.4,118.8 L 429.2,114.8 L 429.2,111.0 L 429.2,106.1 L 429.2,101.1 L 429.0,96.5 L 428.2,93.7 L 427.7,89.4 L 428.7,85.7 L 429.2,81.3 L 429.7,77.0 L 431.0,73.6 L 431.6,69.9 L 430.0,67.4 L 430.8,63.4 L 432.3,60.3 L 433.6,56.9 L 434.7,53.2 L 435.7,49.5 L 436.5,46.7 L 437.0,42.3 L 438.8,39.5 L 441.1,37.4 L 443.2,34.9 L 445.3,36.8 L 446.6,40.2 L 447.8,43.6 L 448.9,47.3 L 449.7,51.3 L 450.4,55.3 L 452.2,58.1 L 453.0,60.9 L 454.1,64.6 L 455.6,67.7 L 457.2,70.8 L 458.2,74.5 L 459.0,78.5 L 459.2,83.2 L 459.2,88.1 L 460.3,91.9 L 461.3,95.6 L 462.1,98.4 L 464.7,99.0 L 467.5,97.4 L 470.3,95.9 L 472.7,98.0 L 474.5,100.8 L 476.8,103.0 L 479.1,105.2 L 481.5,107.3 L 483.0,110.4 L 484.1,114.1 L 484.6,118.5 L 485.1,122.8 L 486.1,126.5 L 486.1,130.2 L 486.4,134.9 L 487.7,138.3 L 489.5,141.1 L 491.0,144.2 L 492.3,147.6 L 493.9,150.7 L 494.9,154.4 L 494.9,159.3 L 494.4,163.7 L 495.4,166.1 L 497.2,168.9 L 497.5,173.6 L 498.0,177.9 L 499.8,180.7 L 502.4,182.5 L 505.5,183.8 L 508.4,185.3 L 511.2,186.9 L 513.3,189.4 L 515.1,192.1 L 517.9,192.5 L 520.8,194.0 L 523.1,196.2 L 525.7,198.0 L 528.0,200.2 L 530.6,202.0 L 532.7,204.5 L 533.7,207.0 L 532.7,209.5 L 534.2,212.6 L 536.0,215.4 L 537.3,218.8 L 539.1,221.5 L 540.4,225.0 L 540.9,229.3 L 542.0,233.0 L 543.3,236.4 L 545.1,239.2 L 546.9,237.0 L 549.2,236.7 L 551.6,238.9 L 553.9,240.4 L 556.2,238.3 L 558.3,240.7 L 559.1,243.5 L 560.1,247.2 L 560.1,252.2 L 560.6,256.5 L 560.9,259.9 L 564.0,259.9 L 566.0,262.4 L 567.1,264.9 L 568.4,268.3 L 571.2,269.8 L 573.5,272.0 L 575.6,274.5 L 577.2,277.6 L 579.0,280.4 L 581.0,282.8 L 582.8,285.6 L 382.9,294.3 Z"/>
-      <text class="state-label active-label" id="label-QLD" x="470" y="220" text-anchor="middle">QLD</text>
-      <circle class="radar-ping" id="ping-QLD" cx="470" cy="205" r="5"/>
+      <path id="QLD" class="state-path active"
+        d="M 481.9,126.3 L 501.2,155.4 L 520.5,155.4 L 539.8,106.9 L 539.8,23.3 L 559.0,19.4 L 578.3,38.9 L 588.0,58.3 L 597.6,97.1 L 616.9,106.9 L 636.1,145.7 L 655.4,184.6 L 674.7,194.3 L 684.3,209.8 L 694.0,223.4 L 703.6,246.7 L 713.3,262.3 L 722.9,252.6 L 732.5,272.0 L 742.2,281.7 L 748.0,297.3 L 761.4,301.1 L 767.2,310.9 L 771.1,320.6 L 774.9,340.0 L 776.9,363.3 L 780.7,378.9 L 776.9,388.6 L 761.4,386.6 L 751.8,390.5 L 732.5,378.9 L 713.3,369.1 L 694.0,378.9 L 674.7,388.6 L 655.4,378.9 L 539.8,378.9 L 481.9,378.9 L 481.9,126.3 Z"
+        />
+      <text class="state-label active-label" id="label-QLD" x="638" y="252" text-anchor="middle">QLD</text>
+      <circle class="radar-ping" id="ping-QLD" cx="638" cy="239" r="5"/>
 
       <!-- NEW SOUTH WALES -->
-      <path id="NSW" class="state-path active" d="M 582.8,285.6 L 584.4,288.7 L 586.2,291.5 L 588.3,294.0 L 589.3,290.3 L 590.3,286.5 L 591.9,283.5 L 594.0,283.5 L 595.3,286.9 L 594.7,290.0 L 593.7,293.7 L 593.2,296.8 L 592.2,300.5 L 592.7,304.8 L 592.7,308.5 L 592.4,313.2 L 592.2,317.8 L 592.7,322.1 L 592.7,327.1 L 593.2,331.4 L 593.4,334.8 L 595.8,335.8 L 597.1,339.2 L 597.8,343.2 L 598.4,347.5 L 598.9,351.9 L 598.9,356.8 L 598.4,361.1 L 597.8,365.5 L 597.6,368.9 L 596.3,372.3 L 595.5,376.3 L 594.7,380.3 L 593.7,384.0 L 592.7,387.8 L 591.9,391.8 L 590.9,395.5 L 591.1,399.5 L 591.1,404.5 L 590.6,408.8 L 382.9,418.1 L 382.9,294.3 Z"/>
-      <text class="state-label active-label" id="label-NSW" x="498" y="365" text-anchor="middle">NSW</text>
-      <circle class="radar-ping" id="ping-NSW" cx="498" cy="350" r="5"/>
-
-      <!-- VICTORIA -->
-      <path id="VIC" class="state-path active" d="M 590.6,408.8 L 589.6,412.5 L 588.3,415.9 L 586.7,419.0 L 585.2,422.1 L 583.9,425.5 L 583.4,429.9 L 582.1,433.3 L 580.0,435.7 L 577.7,437.9 L 575.3,440.1 L 573.8,443.2 L 572.0,446.0 L 570.2,448.7 L 569.4,451.5 L 568.1,454.9 L 566.8,458.3 L 565.8,462.0 L 564.7,465.8 L 563.2,468.9 L 562.2,472.6 L 561.4,475.4 L 561.6,478.1 L 560.1,481.2 L 559.1,485.0 L 557.5,488.0 L 555.7,490.8 L 554.1,493.9 L 552.8,497.3 L 551.8,501.0 L 551.3,504.1 L 550.8,508.5 L 550.3,512.8 L 549.5,516.8 L 548.7,520.9 L 548.2,525.2 L 548.2,530.1 L 548.2,533.9 L 546.1,536.3 L 543.8,538.5 L 541.2,540.4 L 538.1,541.6 L 534.2,541.9 L 530.3,542.2 L 526.2,542.2 L 522.6,542.8 L 518.4,542.8 L 516.1,545.0 L 514.3,547.8 L 512.5,550.6 L 510.4,553.0 L 508.4,555.5 L 506.0,557.7 L 502.9,558.9 L 499.8,560.2 L 497.2,562.0 L 494.7,563.9 L 491.6,563.9 L 489.0,562.0 L 487.2,559.2 L 484.8,557.1 L 482.5,554.9 L 480.2,555.2 L 477.6,555.8 L 474.5,554.6 L 470.9,554.0 L 467.5,554.9 L 465.2,557.1 L 462.8,559.2 L 460.8,561.7 L 458.7,564.2 L 457.4,565.1 L 454.8,563.3 L 452.2,561.4 L 449.9,559.2 L 447.1,557.7 L 444.5,555.8 L 441.9,554.0 L 438.8,554.0 L 435.4,553.0 L 432.8,553.0 L 430.5,555.2 L 427.9,553.4 L 425.9,550.9 L 423.5,548.7 L 420.7,547.2 L 417.1,546.5 L 414.2,545.0 L 412.2,542.5 L 410.3,539.7 L 408.5,537.0 L 407.0,533.9 L 405.2,531.1 L 403.9,527.7 L 403.4,523.3 L 404.4,519.6 L 404.7,515.6 L 403.4,512.2 L 402.1,508.8 L 400.8,505.4 L 399.2,502.3 L 397.4,499.5 L 395.6,496.7 L 394.3,493.3 L 391.7,495.2 L 382.9,418.1 Z"/>
-      <text class="state-label active-label" id="label-VIC" x="492" y="480" text-anchor="middle">VIC</text>
-      <circle class="radar-ping" id="ping-VIC" cx="492" cy="465" r="5"/>
-
-      <!-- TASMANIA -->
-      <path id="TAS" class="state-path coming-soon" d="M 504.0,669.7 L 502.4,669.7 L 501.1,669.4 L 499.8,669.1 L 498.8,669.7 L 497.8,669.1 L 496.7,668.5 L 495.2,668.5 L 494.1,667.9 L 492.8,667.6 L 492.1,666.6 L 491.3,665.7 L 490.5,664.8 L 489.7,663.9 L 489.2,662.6 L 488.4,661.7 L 487.9,660.5 L 487.4,659.2 L 486.6,658.3 L 486.1,657.0 L 485.6,655.8 L 484.8,654.9 L 484.3,653.6 L 483.8,652.4 L 483.3,651.2 L 482.8,649.9 L 482.0,649.0 L 481.7,647.5 L 481.5,645.9 L 480.9,644.7 L 480.4,643.4 L 480.4,641.6 L 479.9,640.3 L 479.9,638.5 L 479.9,636.6 L 479.9,634.8 L 479.7,633.2 L 478.9,632.3 L 478.4,631.0 L 477.8,629.8 L 477.1,628.9 L 476.6,627.6 L 476.0,626.4 L 475.5,625.2 L 475.3,623.6 L 474.7,622.4 L 474.2,621.1 L 473.7,619.9 L 473.7,618.0 L 473.2,616.8 L 473.2,615.0 L 472.7,613.7 L 472.7,611.9 L 472.7,610.0 L 472.7,608.1 L 472.2,606.9 L 472.2,605.0 L 472.4,603.5 L 473.2,602.6 L 474.0,601.6 L 475.0,601.0 L 476.0,601.6 L 477.3,602.0 L 478.6,602.3 L 479.7,602.9 L 480.7,603.5 L 482.0,603.8 L 483.3,604.1 L 484.3,604.7 L 485.3,605.4 L 486.6,605.7 L 487.7,606.3 L 488.7,606.9 L 490.0,607.2 L 491.0,607.8 L 492.1,608.5 L 493.1,609.1 L 494.1,609.7 L 495.2,610.3 L 496.2,610.9 L 497.8,610.9 L 499.3,610.9 L 500.3,610.3 L 501.4,609.7 L 502.2,610.0 L 503.4,609.7 L 504.5,609.1 L 505.8,608.8 L 507.1,608.5 L 508.1,607.8 L 509.1,607.2 L 510.4,606.9 L 511.7,606.6 L 512.8,606.0 L 514.1,605.7 L 515.3,605.4 L 516.4,604.7 L 517.4,604.1 L 518.7,603.8 L 520.0,603.5 L 521.6,603.5 L 522.6,604.1 L 523.4,605.0 L 524.1,606.0 L 524.9,606.9 L 525.4,608.1 L 525.4,610.0 L 525.4,611.9 L 525.4,613.7 L 525.9,615.0 L 525.9,616.8 L 526.5,618.0 L 526.7,619.0 L 525.9,619.9 L 525.9,621.8 L 525.9,623.6 L 525.9,625.5 L 525.9,627.3 L 525.9,629.2 L 525.9,631.0 L 525.9,632.9 L 525.9,634.8 L 525.4,636.0 L 524.7,636.9 L 523.9,637.9 L 523.1,637.5 L 522.1,636.9 L 521.8,638.5 L 521.8,640.3 L 521.8,642.2 L 522.1,643.7 L 522.3,645.3 L 522.3,647.1 L 521.8,648.4 L 521.0,649.3 L 520.3,650.2 L 520.3,652.1 L 520.3,654.0 L 520.8,655.2 L 520.8,657.0 L 520.5,658.6 L 519.7,659.5 L 519.0,660.5 L 518.2,660.8 L 517.4,659.8 L 516.4,659.2 L 515.3,658.6 L 514.3,658.0 L 513.3,657.4 L 512.5,656.4 L 512.0,657.0 L 512.2,658.6 L 512.0,659.5 L 511.7,661.1 L 511.5,662.6 L 511.2,664.2 L 510.4,665.1 L 509.7,666.0 L 508.6,666.6 L 507.6,666.0 L 506.8,665.7 L 506.3,667.0 L 505.5,667.9 L 504.7,668.8 L 504.0,669.7 Z"/>
-      <text class="state-label active-label" id="label-TAS" x="508" y="631" text-anchor="middle">TAS</text>
-      <circle class="radar-ping" id="ping-TAS" cx="508" cy="616" r="5"/>
-
-
+      <path id="NSW" class="state-path active"
+        d="M 539.8,378.9 L 655.4,378.9 L 674.7,388.6 L 694.0,378.9 L 713.3,369.1 L 732.5,378.9 L 751.8,390.5 L 761.4,386.6 L 776.9,388.6 L 780.7,378.9 L 782.7,398.3 L 776.9,408.0 L 771.1,417.7 L 761.4,437.1 L 751.8,446.9 L 742.2,466.3 L 736.4,474.1 L 728.7,485.7 L 726.7,495.4 L 717.1,509.0 L 713.3,524.6 L 709.4,534.3 L 703.6,544.0 L 680.5,544.0 L 655.4,514.9 L 645.8,509.0 L 616.9,514.9 L 597.6,514.9 L 588.0,505.1 L 559.0,495.4 L 539.8,476.0 Z"
+        />
+      <text class="state-label active-label" id="label-NSW" x="672" y="460" text-anchor="middle">NSW</text>
+      <circle class="radar-ping" id="ping-NSW" cx="672" cy="447" r="5"/>
 
       <!-- ACT -->
       <path id="ACT" class="state-path coming-soon act-path"
-        d="M 517.3,387.0 L 541.3,387.0 L 541.3,411.0 L 517.3,411.0 Z"/>
-      <text class="state-label active-label" id="label-ACT" x="529.3" y="403.0" text-anchor="middle" font-size="7">ACT</text>
-      <circle class="radar-ping" id="ping-ACT" cx="529.3" cy="399.0" r="3"/>
+        d="M 690.1,497.4 L 701.7,497.4 L 701.7,512.9 L 690.1,512.9 Z" />
+      <text class="state-label active-label" id="label-ACT" x="696" y="508" text-anchor="middle" font-size="6">ACT</text>
+      <circle class="radar-ping" id="ping-ACT" cx="696" cy="505" r="3"/>
+
+      <!-- VICTORIA -->
+      <path id="VIC" class="state-path active"
+        d="M 539.8,476.0 L 559.0,495.4 L 588.0,505.1 L 597.6,514.9 L 616.9,514.9 L 645.8,509.0 L 655.4,514.9 L 680.5,544.0 L 703.6,544.0 L 711.3,544.0 L 694.0,553.7 L 674.7,561.5 L 665.1,563.4 L 655.4,565.4 L 645.8,569.3 L 636.1,569.3 L 616.9,563.4 L 607.2,557.6 L 597.6,555.7 L 588.0,565.4 L 578.3,569.3 L 568.7,565.4 L 555.2,561.5 L 537.8,555.7 Z"
+        />
+      <text class="state-label active-label" id="label-VIC" x="622" y="550" text-anchor="middle">VIC</text>
+      <circle class="radar-ping" id="ping-VIC" cx="622" cy="537" r="5"/>
+
+      <!-- TASMANIA -->
+      <path id="TAS" class="state-path coming-soon"
+        d="M 609.2,592.6 L 616.9,602.3 L 636.1,612.0 L 665.1,612.0 L 674.7,621.7 L 680.5,631.4 L 674.7,641.1 L 665.1,650.9 L 655.4,660.6 L 636.1,662.5 L 616.9,650.9 L 607.2,641.1 L 597.6,621.7 L 603.4,612.0 Z" />
+      <text class="state-label active-label" id="label-TAS" x="637" y="638" text-anchor="middle">TAS</text>
+      <circle class="radar-ping" id="ping-TAS" cx="637" cy="625" r="5"/>
+
     </svg>
 
     <div class="map-hint" id="mapHint">▶ CLICK A HIGHLIGHTED STATE TO TUNE IN</div>
     <div class="corner-tag">FREQ // <span id="activeFreq">---.-FM</span></div>
   </div>
 
-  <!-- WORLD VIEW -->
-  <div class="world-view" id="worldView">
-    <div class="world-title">// SELECT A STATION TO TUNE IN · WORLD EDITION</div>
-    <div class="world-grid" id="worldGrid"></div>
-    <div class="world-pagination" id="worldPagination" style="display:none">
-      <button class="world-page-btn" id="worldPrevBtn" onclick="changeWorldPage(-1)">◀ PREV</button>
-      <span class="world-page-indicator" id="worldPageIndicator">PAGE 1 / 1</span>
-      <button class="world-page-btn" id="worldNextBtn" onclick="changeWorldPage(1)">NEXT ▶</button>
-    </div>
-  </div>
-
   <!-- SIDE PANEL -->
   <div class="side-panel" id="sidePanel">
-    <div class="panel-drag-handle"></div>
     <!-- Shared close button always present -->
     <button class="panel-close" id="panelCloseBtn">✕</button>
 
     <!-- NORMAL STATION VIEW -->
-    <div id="normalPanelView">
+    <div id="normalPanelView" style="display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden;">
       <div class="panel-header">
         <div class="panel-state-tag" id="panelStateTag">// STATE</div>
         <div class="panel-station-name" id="panelStationName">STATION</div>
@@ -1618,7 +1071,7 @@
       </div>
 
       <div class="player-section">
-        <div class="player-label">// LIVE BROADCAST &nbsp;<span id="panelLocalTime" style="font-size:0.55rem; color:var(--muted); letter-spacing:4px;"></span></div>
+        <div class="player-label">// LIVE BROADCAST</div>
         <div class="player-controls">
           <button class="play-btn" id="playBtn">▶</button>
           <div class="waveform" id="waveform"></div>
@@ -1662,19 +1115,20 @@
   </div>
 </div>
 
-<audio id="audioPlayer" preload="none" playsinline x-webkit-airplay="allow"></audio>
+<audio id="audioPlayer" preload="none"></audio>
 
 <script>
 // ─── DATA ─────────────────────────────────────────────────────────────────────
 
 const UNDER_CONSTRUCTION = {
+  ACT: { name: 'Canberra / ACT',     abbr: 'ACT', city: 'Canberra', reason: 'Station selection in progress' }
 };
 
 const STATIONS = {
   QLD: {
-    name: '4ZZZ', fullName: 'Four Triple Zed', freq: '102.1FM', city: 'Brisbane', state: 'Queensland', timezone: 'Australia/Brisbane',
+    name: '4ZZZ', fullName: 'Four Triple Zed', freq: '102.1FM', city: 'Brisbane', state: 'Queensland',
     stream: 'https://iheart.4zzz.org.au/4zzz',
-    website: 'https://www.4zzz.org.au', chartUrl: 'https://4zzz.org.au/program/the-chart-show',
+    website: 'https://www.4zzz.org.au', chartUrl: 'https://www.4zzz.org.au/hot-100',
     bio: "Brisbane's realest radio since 1975. Independent, volunteer-powered, no-playlist broadcasting covering rock, hip-hop, indie, dub, punk, electronica and everything in between.",
     chartData: [
       { pos:1,  track:'Shadows & Light',   artist:'Tired Lion' },
@@ -1695,7 +1149,7 @@ const STATIONS = {
     ]
   },
   NSW: {
-    name: 'FBI Radio', fullName: 'FBI 94.5FM', freq: '94.5FM', city: 'Sydney', state: 'New South Wales', timezone: 'Australia/Sydney',
+    name: 'FBI Radio', fullName: 'FBI 94.5FM', freq: '94.5FM', city: 'Sydney', state: 'New South Wales',
     stream: 'https://streamer.fbiradio.com/stream',
     website: 'https://www.fbi.radio', chartUrl: 'https://www.fbi.radio/charts',
     bio: "Sydney's home for independent music since 2003. Listener-supported and volunteer-driven, FBI champions local artists and brings you music you won't hear anywhere else.",
@@ -1718,9 +1172,9 @@ const STATIONS = {
     ]
   },
   VIC: {
-    name: 'Triple R', fullName: '3RRR 102.7FM', freq: '102.7FM', city: 'Melbourne', state: 'Victoria', timezone: 'Australia/Melbourne',
+    name: 'Triple R', fullName: '3RRR 102.7FM', freq: '102.7FM', city: 'Melbourne', state: 'Victoria',
     stream: 'https://ondemand.rrr.org.au/getstream?id=web1',
-    website: 'https://www.rrr.org.au', chartUrl: 'https://www.rrr.org.au/explore/soundscape',
+    website: 'https://www.rrr.org.au', chartUrl: 'https://www.rrr.org.au/explore/features/charts',
     bio: "Melbourne's independent community broadcaster since 1976. Triple R is subscriber-supported and plays the music commercial radio ignores — adventurous, eclectic, and fiercely local.",
     chartData: [
       { pos:1,  track:'The Neon Remains',   artist:'Courtney Barnett' },
@@ -1741,9 +1195,9 @@ const STATIONS = {
     ]
   },
   WA: {
-    name: 'RTRFM', fullName: 'RTR FM 92.1', freq: '92.1FM', city: 'Perth', state: 'Western Australia', timezone: 'Australia/Perth',
+    name: 'RTRFM', fullName: 'RTR FM 92.1', freq: '92.1FM', city: 'Perth', state: 'Western Australia',
     stream: 'https://live.rtrfm.com.au/stream1',
-    website: 'https://rtrfm.com.au', chartUrl: 'https://rtrfm.com.au/featured-music/',
+    website: 'https://rtrfm.com.au', chartUrl: 'https://rtrfm.com.au/charts/',
     bio: "Perth's community radio heartbeat since 1977. RTRFM is 100% volunteer-run and listener-funded, dedicated to showcasing independent music and Western Australian artists.",
     chartData: [
       { pos:1,  track:'The Wheel',               artist:'Stella Donnelly' },
@@ -1764,9 +1218,9 @@ const STATIONS = {
     ]
   },
   SA: {
-    name: 'Three D Radio', fullName: 'Three D Radio 93.7FM', freq: '93.7FM', city: 'Adelaide', state: 'South Australia', timezone: 'Australia/Adelaide',
+    name: 'Three D Radio', fullName: 'Three D Radio 93.7FM', freq: '93.7FM', city: 'Adelaide', state: 'South Australia',
     stream: 'https://sounds.threedradio.com/stream',
-    website: 'https://threedradio.com', chartUrl: 'https://threedradio.com/chart-category/top-20-1/',
+    website: 'https://threedradio.com', chartUrl: 'https://threedradio.com/charts/',
     bio: '100% volunteer-run from Adelaide since 1975. Three D Radio champions independent and local music, recognising the Kaurna people and their connection to the land it broadcasts from.',
     chartData: [
       { pos:1,  track:'Teenager',        artist:'Teenage Joans' },
@@ -1786,173 +1240,25 @@ const STATIONS = {
       { pos:15, track:'All These Things',artist:'Mia Dyson' },
     ]
   },
-  NT_TOP: {
-    name: 'TEABBA Radio', fullName: 'TEABBA 88.0FM', freq: '88.0FM', city: 'Darwin', state: 'Northern Territory', timezone: 'Australia/Darwin',
-    stream: 'https://firstnationsmedia.stream/8014/stream',
-    website: 'https://www.teabba.com.au/radio', chartUrl: '',
-    bio: "The Top End Aboriginal Bush Broadcasting Association broadcasts 24/7 into 29 remote Indigenous communities across the Top End. Programmed from Darwin with local shows in language — community announcements, weather, school shout-outs and music from the bush.",
-    chartData: []
-  },
-  NT_BOT: {
-    name: 'CAAMA Radio', fullName: 'CAAMA 8KIN FM', freq: '8KIN FM', city: 'Alice Springs', state: 'Northern Territory', timezone: 'Australia/Darwin',
+  NT: {
+    name: 'CAAMA Radio', fullName: 'CAAMA 8KIN FM', freq: '8KIN FM', city: 'Alice Springs', state: 'Northern Territory',
     stream: 'https://streamer.radio.co/sa67d9a81d/listen',
     website: 'https://caama.com.au', chartUrl: '',
     bio: "The voice of Central Australia since 1985. CAAMA Radio broadcasts in Aboriginal languages and English from Alice Springs, championing First Nations music, culture and stories from the heart of the continent.",
     chartData: []
   },
   TAS: {
-    name: 'Edge Radio', fullName: 'Edge Radio 99.3FM', freq: '99.3FM', city: 'Hobart', state: 'Tasmania', timezone: 'Australia/Hobart',
+    name: 'Edge Radio', fullName: 'Edge Radio 99.3FM', freq: '99.3FM', city: 'Hobart', state: 'Tasmania',
     stream: 'https://streaming.edgeradio.org.au/radio/8000/stream',
     website: 'https://www.edgeradio.org.au', chartUrl: '',
     bio: "Hobart's only youth community station since 2003. Volunteer-run from the University of Tasmania, Edge Radio plays 50% Australian music — nearly half of that Tasmanian — and provides a platform for emerging local artists and youth voices.",
     chartData: []
-  },
-  ACT: {
-    name: 'Radio National', fullName: 'ABC Radio National', freq: 'RN 846AM', city: 'Canberra', state: 'Australian Capital Territory', timezone: 'Australia/Sydney',
-    stream: 'https://live-radio01.mediahubaustralia.com/2RNW/mp3/',
-    website: 'https://www.abc.net.au/radionational', chartUrl: '',
-    bio: "Radio National! For when community radio isn't quite cutting it. What could be more communal than Ian McNamara?",
-    chartData: []
   }
 };
-
-// ─── WORLD STATIONS (9 cards, paginated) ─────────────────────────────────────
-const WORLD_STATIONS_PAGES = [
-  [
-    {
-      id: 'alhara',
-      name: 'Radio Alhara',
-      fullName: 'Radio AlHara راديو الحارة',
-      city: 'Bethlehem',
-      country: 'Palestine',
-      flag: '[PS]',
-      freq: 'Online',
-      timezone: 'Asia/Hebron',
-      stream: 'http://stream.radiojar.com/78cxy6wkxtzuv',
-      website: 'https://radioalhara.net',
-      bio: 'Born in March 2020 as a quarantine radio out of Bethlehem, Ramallah and Amman, Radio Alhara became a vital meeting point for Arab artists and listeners worldwide. Broadcasting eclectic music, cultural dialogue and sounds from across the Middle East and North Africa — a neighbourhood on the airwaves.',
-      chartData: []
-    },
-    {
-      id: 'refuge',
-      name: 'Refuge Worldwide',
-      fullName: 'Refuge Worldwide Berlin',
-      city: 'Berlin',
-      country: 'Germany',
-      flag: '[DE]',
-      freq: 'Online',
-      timezone: 'Europe/Berlin',
-      stream: 'https://streaming.radio.co/s3699c5e49/listen',
-      website: 'https://refugeworldwide.com',
-      bio: 'Community radio and event space from Neukölln, Berlin. Founded in solidarity with grassroots organisations, Refuge Worldwide broadcasts 24/7 with a focus on platforming diverse voices, running free educational workshops and hosting shows from across the electronic, jazz, hip-hop and experimental spectrum.',
-      chartData: []
-    },
-    {
-      id: '20ft',
-      name: '20ft Radio',
-      fullName: '20ft Radio Kyiv',
-      city: 'Kyiv',
-      country: 'Ukraine',
-      flag: '[UA]',
-      freq: 'Online',
-      timezone: 'Europe/Kyiv',
-      stream: 'https://20ft-radio.radiocult.fm/stream',
-      website: 'https://20ftradio.net',
-      bio: 'Broadcasting from a 20-foot shipping container in a factory garden on Kyrylivska Street, Kyiv. Since 2016, 20ft has championed Ukrainian and international underground music — electronic, jazz, experimental and beyond — continuing to broadcast through adversity as a defiant cultural beacon.',
-      chartData: []
-    },
-    {
-      id: 'ddr',
-      name: 'Dublin Digital Radio',
-      fullName: 'Dublin Digital Radio ddr.',
-      city: 'Dublin',
-      country: 'Ireland',
-      flag: '[IE]',
-      freq: 'Online',
-      timezone: 'Europe/Dublin',
-      stream: 'https://dublin-digital-radio.radiocult.fm/stream',
-      website: 'https://listen.dublindigitalradio.com',
-      bio: 'Award-winning community station broadcasting from Dublin since 2016. Wholly funded by its members, ddr. is run democratically by a growing community of volunteers and broadcasters, championing underground music, bold storytelling and the voices shaping a more adventurous cultural future in Ireland.',
-      chartData: []
-    },
-    {
-      id: 'hanoi',
-      name: 'Hanoi Community Radio',
-      fullName: 'Hà Nội Community Radio',
-      city: 'Hanoi',
-      country: 'Vietnam',
-      flag: '[VN]',
-      freq: 'Online',
-      timezone: 'Asia/Ho_Chi_Minh',
-      stream: 'https://ha-noi-community-radio.radiocult.fm/stream',
-      website: 'https://www.hanoicommunityradio.com',
-      bio: 'Hà Nội Community Radio is a platform for residents and artists of Vietnam and Southeast Asia. With resident shows spanning disco, house, folk-electronic fusion and experimental sounds, HCR connects Hanoi\'s creative underground to the world through monthly DJ live streams from local bars and iconic landscapes.',
-      chartData: []
-    },
-    {
-      id: 'aporee',
-      name: 'Radio Aporee',
-      fullName: 'Radio Aporee: Maps',
-      city: 'Berlin',
-      country: 'Germany',
-      flag: '[DE]',
-      freq: 'Online',
-      timezone: 'Europe/Berlin',
-      stream: 'https://radio.aporee.org:8443/aporee',
-      website: 'https://radio.aporee.org',
-      bio: 'A global soundmap and radio project — field recordings, acoustic ecology and sonic art contributed by thousands of listeners from every corner of the planet. Radio Aporee streams a continuous journey through the world\'s soundscapes: rain on rooftops in Tokyo, market noise in Lagos, silence in Arctic tundra.',
-      chartData: []
-    },
-    {
-      id: 'resonance',
-      name: 'Resonance FM',
-      fullName: 'Resonance 104.4 FM',
-      city: 'London',
-      country: 'United Kingdom',
-      flag: '[GB]',
-      freq: '104.4 FM',
-      timezone: 'Europe/London',
-      stream: 'https://icecast.resonancefm.com/resonance',
-      website: 'https://www.resonancefm.com',
-      bio: 'London\'s groundbreaking 24/7 arts radio station since 2002. Broadcasting on 104.4 FM and globally online, Resonance is staffed by two permanent employees and over 300 volunteers — 105 weekly programmes spanning radiophonic art, experimental music, community voices and alternative culture. Once you\'ve heard Resonance, radio will never sound the same.',
-      chartData: []
-    },
-    {
-      id: 'rfb',
-      name: 'Radio Free Brooklyn',
-      fullName: 'Radio Free Brooklyn RFB',
-      city: 'Brooklyn',
-      country: 'USA',
-      flag: '[US]',
-      freq: 'Online',
-      timezone: 'America/New_York',
-      stream: 'http://192.111.140.6:9300/stream',
-      website: 'https://www.radiofreebrooklyn.org',
-      bio: 'This is what Brooklyn sounds like. A non-profit, freeform internet station broadcasting 24/7 from Bushwick since 2015. Radio Free Brooklyn gives a global voice to local artists, residents and community organizers — 78 original programmes, zero commercial interference, pure NYC energy.',
-      chartData: []
-    },
-    {
-      id: 'centraal',
-      name: 'Radio Centraal',
-      fullName: 'Radio Centraal Antwerpen',
-      city: 'Antwerp',
-      country: 'Belgium',
-      flag: '[BE]',
-      freq: '106.7 FM',
-      timezone: 'Europe/Brussels',
-      stream: 'https://streams.movemedia.eu/centraal',
-      website: 'https://www.radiocentraal.be',
-      bio: 'Antwerp\'s beloved pirate-turned-legal community radio, broadcasting since 1980. Radio Centraal is run entirely by volunteers and plays an eclectic mix of world music, jazz, experimental sounds and local culture — the true voice of the city\'s multicultural Borgerhout neighbourhood.',
-      chartData: []
-    }
-  ]
-];
 
 // ─── APP STATE ────────────────────────────────────────────────────────────────
 let currentState = null;
 let isPlaying    = false;
-let currentView  = 'australia'; // 'australia' or 'world'
-let currentWorldPage = 0;
 
 // ─── INIT (runs after all functions are defined) ───────────────────────────────
 function init() {
@@ -1974,62 +1280,18 @@ function init() {
     wf.appendChild(bar);
   }
 
+  // Load live chart data from local server
+  loadChartsFromAPI();
+  loadAMRAP();
+
   // Map click listeners
-  ['WA','SA','QLD','NSW','VIC','TAS','ACT'].forEach(code => {
+  ['WA','SA','QLD','NSW','VIC','NT','TAS','ACT'].forEach(code => {
     const el = document.getElementById(code);
     if (el) el.addEventListener('click', () => selectState(code));
   });
-  // NT is split — top = TEABBA, bottom = CAAMA
-  const ntTop = document.getElementById('NT_TOP');
-  const ntBot = document.getElementById('NT_BOT');
-  if (ntTop) ntTop.addEventListener('click', () => selectState('NT_TOP'));
-  if (ntBot) ntBot.addEventListener('click', () => selectState('NT_BOT'));
 
   // Close button
   document.getElementById('panelCloseBtn').addEventListener('click', closePanel);
-
-  // ── SWIPE DOWN TO CLOSE (mobile) ────────────────────────────────────────────
-  const panel = document.getElementById('sidePanel');
-  let swipeStartY = 0;
-  let swipeCurrentY = 0;
-  let isSwiping = false;
-
-  panel.addEventListener('touchstart', e => {
-    // Only start swipe if touching near the top of the panel (drag handle area)
-    const panelTop = panel.getBoundingClientRect().top;
-    const touchY = e.touches[0].clientY;
-    if (touchY - panelTop < 60) {
-      swipeStartY = touchY;
-      isSwiping = true;
-      panel.style.transition = 'none';
-    }
-  }, { passive: true });
-
-  panel.addEventListener('touchmove', e => {
-    if (!isSwiping) return;
-    swipeCurrentY = e.touches[0].clientY;
-    const delta = swipeCurrentY - swipeStartY;
-    if (delta > 0) {
-      panel.style.transform = `translateY(${delta}px)`;
-    }
-  }, { passive: true });
-
-  panel.addEventListener('touchend', () => {
-    if (!isSwiping) return;
-    isSwiping = false;
-    panel.style.transition = '';
-    const delta = swipeCurrentY - swipeStartY;
-    if (delta > 80) {
-      // Swiped down far enough — close
-      closePanel();
-    } else {
-      // Snap back
-      panel.style.transform = '';
-    }
-    swipeStartY = 0;
-    swipeCurrentY = 0;
-  });
-  // ────────────────────────────────────────────────────────────────────────────
 
   // Play button
   document.getElementById('playBtn').addEventListener('click', togglePlay);
@@ -2039,7 +1301,7 @@ function init() {
     if (isPlaying) {
       isPlaying = false;
       document.getElementById('playBtn').textContent = '▶';
-      document.getElementById('playBtn').classList.remove('playing', 'buffering');
+      document.getElementById('playBtn').classList.remove('playing');
       document.getElementById('playerStatus').textContent = 'NO SIGNAL';
       document.getElementById('playerStatus').className = 'player-status';
       stopWaveAnimation();
@@ -2054,15 +1316,15 @@ function selectState(code) {
 
   if (!station && !uc) return;
 
-  // Deselect old state visuals (but keep audio playing)
+  // Deselect old
   if (currentState) {
     document.getElementById(currentState)?.classList.remove('selected');
     document.getElementById('label-' + currentState)?.classList.remove('selected-label');
     document.getElementById('ping-'  + currentState)?.classList.remove('active');
+    if (isPlaying) stopAudio();
   }
 
   currentState = code;
-  window._currentWorldStation = null; // clear world station when Aus selected
 
   // Highlight new state on map
   document.getElementById(code)?.classList.add('selected');
@@ -2078,57 +1340,26 @@ function selectState(code) {
 
   document.getElementById('sidePanel').classList.add('open');
   document.getElementById('mapContainer').classList.add('panel-open');
-  updateMiniPlayer();
 }
 
 function showStationPanel(station) {
-  document.getElementById('normalPanelView').style.display = 'block';
+  document.getElementById('normalPanelView').style.display = 'flex';
   document.getElementById('ucPanelView').style.display     = 'none';
 
-  document.getElementById('panelStateTag').textContent    = '// ' + (station.state || station.country || '').toUpperCase();
+  document.getElementById('panelStateTag').textContent    = '// ' + station.state.toUpperCase();
   document.getElementById('panelStationName').textContent = station.name;
-  document.getElementById('panelFreq').textContent        = station.freq + ' · ' + (station.city || '');
-
-  // Local time clock with TZ abbreviation
-  if (window._localTimerInterval) clearInterval(window._localTimerInterval);
-  const timeEl = document.getElementById('panelLocalTime');
-  const tz = station.timezone || 'Australia/Sydney';
-  function updateLocalTime() {
-    const now = new Date();
-    const t = now.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: tz });
-    // Get short TZ name (e.g. AEST, GMT+1, CET)
-    const tzName = now.toLocaleDateString('en-AU', { timeZone: tz, timeZoneName: 'short' }).split(', ').pop() || '';
-    timeEl.innerHTML = t.toUpperCase() + '<span style="margin-left:6px;opacity:0.6;font-size:0.9em;">' + tzName + '</span>';
-  }
-  updateLocalTime();
-  window._localTimerInterval = setInterval(updateLocalTime, 1000);
+  document.getElementById('panelFreq').textContent        = station.freq + ' · ' + station.city;
   document.getElementById('bioText').textContent          = station.bio;
   document.getElementById('stationLink').href             = station.website;
   document.getElementById('stationLink').textContent      = 'VISIT ' + station.name.toUpperCase() + ' ↗';
   document.getElementById('activeFreq').textContent       = station.freq;
 
-  // Update player UI based on what's currently playing
-  if (!isPlaying) {
-    document.getElementById('playBtn').textContent      = '▶';
-    document.getElementById('playBtn').className        = 'play-btn';
-    document.getElementById('playerStatus').textContent = 'STANDBY';
-    document.getElementById('playerStatus').className   = 'player-status';
-    stopWaveAnimation();
-  } else if (window._lastPlayedStation === station) {
-    // This is the station currently playing — show active UI
-    document.getElementById('playBtn').textContent      = '■';
-    document.getElementById('playBtn').className        = 'play-btn playing';
-    document.getElementById('playerStatus').textContent = '● LIVE';
-    document.getElementById('playerStatus').className   = 'player-status live';
-    startWaveAnimation();
-  } else {
-    // Different station is playing — show ▶, single press will stop old and start new
-    document.getElementById('playBtn').textContent      = '▶';
-    document.getElementById('playBtn').className        = 'play-btn';
-    document.getElementById('playerStatus').textContent = 'TAP TO SWITCH';
-    document.getElementById('playerStatus').className   = 'player-status';
-    stopWaveAnimation();
-  }
+  // Reset player UI
+  document.getElementById('playBtn').textContent      = '▶';
+  document.getElementById('playBtn').className        = 'play-btn';
+  document.getElementById('playerStatus').textContent = 'STANDBY';
+  document.getElementById('playerStatus').className   = 'player-status';
+  stopWaveAnimation();
 
   loadCharts(station);
 }
@@ -2146,15 +1377,8 @@ function showUCPanel(uc) {
 }
 
 function closePanel() {
-  // Keep audio playing — just close the panel
-  if (window._localTimerInterval) clearInterval(window._localTimerInterval);
-  if (window._worldAsciiTimer) { clearInterval(window._worldAsciiTimer); window._worldAsciiTimer = null; }
-  document.getElementById('panelLocalTime').innerHTML = '';
-  document.getElementById('worldView').classList.remove('panel-open');
-  const panel = document.getElementById('sidePanel');
-  panel.style.transform = '';
-  panel.style.transition = '';
-  panel.classList.remove('open');
+  stopAudio();
+  document.getElementById('sidePanel').classList.remove('open');
   document.getElementById('mapContainer').classList.remove('panel-open');
   document.getElementById('mapHint').style.opacity = '';
 
@@ -2162,121 +1386,44 @@ function closePanel() {
     document.getElementById(currentState)?.classList.remove('selected');
     document.getElementById('label-' + currentState)?.classList.remove('selected-label');
     document.getElementById('ping-'  + currentState)?.classList.remove('active');
-    // Only clear currentState if nothing is playing — keep it for resume
-    if (!isPlaying) currentState = null;
+    currentState = null;
   }
   document.getElementById('activeFreq').textContent = '---.-FM';
-
-  // Show mini player in header if audio is still going
-  updateMiniPlayer();
-}
-
-function updateMiniPlayer() {
-  const mini = document.getElementById('miniPlayer');
-  if (!mini) return;
-  // Show whenever a station has been played (persists through panel open/close)
-  if (window._lastPlayedStation) {
-    const st = window._lastPlayedStation;
-    mini.style.display = 'flex';
-    document.getElementById('miniPlayerLabel').textContent = st.name + ' ' + st.freq;
-    // Sync wave animation with play state
-    if (isPlaying) {
-      document.querySelectorAll('.mini-wave-bar').forEach(b => b.classList.add('active'));
-    } else {
-      document.querySelectorAll('.mini-wave-bar').forEach(b => b.classList.remove('active'));
-    }
-  } else {
-    mini.style.display = 'none';
-  }
 }
 
 // ─── CHARTS ───────────────────────────────────────────────────────────────────
-// ASCII art options for world stations
-const WORLD_ASCII_FRAMES = [
-  // Globe spinning
-  [
-    `      .-""""-.`,
-    `    .'        '.`,
-    `   /   O    O  \\`,
-    `  :   \\  __  /  :`,
-    `  |    '----'    |`,
-    `  :              :`,
-    `   \\            /`,
-    `    '.        .'`,
-    `      '-....-'`
-  ],
-  [
-    `      .-""""-.`,
-    `    .'   //   '.`,
-    `   /  O  //  O  \\`,
-    `  :    \\_//    :`,
-    `  |   / \\\\   |`,
-    `  :              :`,
-    `   \\   ||||    /`,
-    `    '.        .'`,
-    `      '-....-'`
-  ]
-];
-
-const WORLD_RADIO_ASCII = [
-  `  -=))) TRANSMITTING (((=-  `,
-  `  ~~~~ SIGNAL DETECTED ~~~~  `,
-  `  >>>>> TUNING IN... <<<<<  `,
-  `  ~~~ FREQUENCIES LOCKED ~~~  `
-];
-
 function loadCharts(station) {
   const container = document.getElementById('chartContainer');
 
-  // World stations — show animated ASCII art instead of charts
   if (!station.chartData || station.chartData.length === 0) {
-    document.getElementById('chartRefresh').textContent = 'WORLD BROADCAST';
-
-    // Pick an ASCII art based on station id for variety
-    const asciiArts = {
-      'alhara':    ['#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','###%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','######%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','########%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','###########%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','#############%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','##################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','#####################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','#######################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','##########################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','############################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%','##############################*----------------------------------------------------------------------------------------------------------','################################*--------------------------------------------------------------------------------------------------------','###################################=-----------------------------------------------------------------------------------------------------','#####################################*---------------------------------------------------------------------------------------------------','########################################-------------------------------------------------------------------------------------------------','###########################################----------------------------------------------------------------------------------------------','#############################################--------------------------------------------------------------------------------------------','###########################################----------------------------------------------------------------------------------------------','########################################+------------------------------------------------------------------------------------------------','######################################---------------------------------------------------------------------------------------------------','###################################+-----------------------------------------------------------------------------------------------------','#################################--------------------------------------------------------------------------------------------------------','##############################*----------------------------------------------------------------------------------------------------------','############################*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','#########################*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','#######################*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','#####################++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','##################*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','################+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','#############*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','###########++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','########*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','######*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','###*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++','#*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'],
-      'refuge':    ['----------------------------------------------------------------------------------------------------','----------------------------------------------------------------------------------------------------','----------------------------------------------------------------------------------------------------','----------------------------------------=+#%@@@@@@@@@@@@#+=-----------------------------------------','----------------------------------=%@@@@@@*@@*-@+-=@-*@@*@@@@@@@+-----------------------------------','------------------------------*@@@@#@%=--%%---##---+@---*@--=#@%%@@@#-------------------------------','---------------------------@@@#-=@#----=@----=@-----#-----@#----+@+-+@@@=---------------------------','------------------------@@@=--+@=-----%+-----*=-----=@-----+@------@*--=@@@-------------------------','---------------------+@@#---+@-------@-------@-------@=-----=@-------@*---*@@*----------------------','-------------------*@@=--*@@@%*=----@=------*@--------*-------@----=*#@@@*---@@%--------------------','-----------------*@@-----#@-----=*%@@@@@%#*+@=========@+*#%@@@@@%#=-----#@-----@@%------------------','---------------=@@=-----@+--------+*@@@@@=--@---------@---@@@@@*@--------=@------@@=----------------','--------------@@+-----=@---------=@@@@@@@@--@---------@*-@@@@@@@#+---------@=-----+@@---------------','-------------@@------=@----------@-@@@@@@@*+@---------=%+@@@@@@@=@----------@+------@@=-------------','-----------+@%-------@----------*%=@@@@@@@@@+----------@+@@@@@@@=+@----------@+------*@*------------','----------#@@*=-----@=----------@--@@@@@@@+@-----------@=@@@@@@@--@-----------@-----=+%@%-----------','---------*@*---=%@@@%*=--------=#--#@@@@@@-@-----------@-@@@@@@@--#%--------=*%@@@%+---=@@----------','--------+@*-------##----*#%@@@@@%*==%@@@@--@-----------%--@@@@@==+#@@@@@%%*=---=%-------+@#---------','-------=@#--------@-----------=@-----=++***@**######***@#**++=-----#=-----------@+-------*@+--------','-------@@--------@+-----------*=-----------*-----------##----------+@------------@--------@@=-------','------%@---------@------------@-----------=*-----------*@-----------@------------%+--------@@-------','------@%--------#+------------@-----------+*--==-------=@-----------@=-----------=@--------*@=------','-----#@-*@@@@@@@#@@@@@*------=@-----------=@@@=@@@@=----@-----------#*------------@---------@@------','-----@@---@@@@@@---@@@@@@----*%----------+@@@@=-*@@-----@------------#------------*+--------%@------','----=@*---@@@@@@---%@@@@@#---%+----------@@@@@=--=%-----@------------%--------+@--+%--------+@+-----','----*@=---@@@@@@---%@@@@@+---+#@@@@@%--*%@@@@@%%%+--=@@@----#@@@----*%@@@@@@@@@@---@@@@@@%---@%-----','----%@----@@@@@@--=@@@@@=---#@@--@@@@@---@@@@@=--+@@@@@@-*@@@@@@--+@@+--@@@@@=+@-%@+--@@@@@--@@-----','----@@----@@@@@@@@@@@*-----+@@@---@@@@---@@@@@=---=@@@@@--@@@@@@--@@@@---@@@@@--@@@@--=@@@@--@@-----','----@@----@@@@@@*@@@@@@----@@@@@-=@@@----@@@@@=---=@@@@@--@@@@@@--@@@@@---@@@%--@@@@#-=@@@---@@-----','----%@----@@@@@@-#@@@@@@---@@@@@@@%------@@@@@=---=@@@@@--@@@@@@---@@@@@=-*@@---@@@@@@@*-----@@-----','----#@=---@@@@@@--#@@@@@@=-=@@@@@@@*-----@@@@@=---=@@@@@--@@@@@@---@=%@@@@%-----+@@@@@@@+----@@-----','----+@+---@@@@@@---+@@@@@@=--@@@@@@@@@*--@@@@@=----@@@@@@@@@@@@@--@@@@@@@@@@+----=@@@@@@@@@+=@*-----','----=@%-=======*@=---=======-##-+**+----==%+====----=**=@-=======-@@@@@@@@@@@@*---+*=***+---#@=-----','-----@@--------=@=-----------+@-----------%+------------@---------%@@@@@@@@@@@@---@---------@@------','------@#--------@@-----------=@-----------**-----------=@--------@@@-------=@@---#@--------=@*------','------@@---------@%-----------@-----------=*-----------+@---------@@@@@@%@@=----=@*--------@@-------','-------@@--------@@*----------#=--------==+#+++++++++++%@==--------=@-----------@@--------+@+-------','-------*@+-------=@@*--+##%@@@@@@%*+==-----#-----------%+----==+*%@@@@@@%##*=-=@%#-------=@#--------','--------%@=--+%@@@@@@%---------@-----------@-----------%-----------@---------*@#@@@@%*---@@---------','---------@@+-------@-%@--------**----------@-----------@----------+@--------#%-@=------=@@----------','----------@@-------=@-+@*-------@----------@-----------@----------@=-------@=-#+-------@@-----------','-----------%@=------+#--@@=-----@#---------@=----------@----------@------%@--%@------=@@------------','------------+@#------#@---@@+----@---------#%----------@---------@=----#@---*%------*@%-------------','--------------@@------*@----@@%--*@---------@---------%#--------=*--=@%----*#------@@+--------------','---------------%@%-----=@-----#@@%@=--------@---------@--------=@+@@+-----@*-----*@@----------------','-----------------@@*-----@+------#@@@%%@@@@@@@@@%%%@@@@@@@@@%#%@@+-------@=----=@@=-----------------','------------------=@@*----*@@@@%*+=-@*@@@@@@@%-------=%%@@@@@+@==+*%@@@@%----+@@+-------------------','---------------------@@@#+=-@#------=@----=+#@@@@@@@@@#==----@+------+@=-=#@@@=---------------------','-----------------------*@@+---@+------@=-----@=------@------@=-----=@=---@@@------------------------','--------------------------@@@#=-@@=----@*----+@-----*=----=@-----#@--*@@@=--------------------------','-----------------------------#@@@#*@#=--+@=---@+----@----@*---*@#*@@@%------------------------------','---------------------------------*@@@@@@#++@*--@---@--*@*=#@@@@@@#=---------------------------------','--------------------------------------=*%@@@@@@@@@@@@@@@@@%*=---------------------------------------','----------------------------------------------------------------------------------------------------','----------------------------------------------------------------------------------------------------'],
-      '20ft':      ['####################################################################################################','####################################################################################################','####################################################################################################','####################################################################################################','###############################=#####################################+##############################','###############################=#####################################+##############################','###############################=#################+.##################+##############################','###############################=#################..:#################+##############################','###############################=####+.+#########*...##########-.*####+##############################','###############################=####+...+########...########=...*####+##############################','###############################=####+..:.:#######...#######:....*####+##############################','###############################=####+.:#:.:######..:######:.:#:.*####+##############################','###############################=####+.:##..-#####:.-#####=.:##:.*####+##############################','###############################=####+.:##=.:#####-.-#####..+##:.*####+##############################','###############################=####+.:##*..#####-.-#####..###:.*####+##############################','###############################=####+.:###..*####-.-####=.:###:.*####+##############################','###############################=####+.:###:.:####..:####-.-###:.*####+##############################','###############################=####+.:###+.:###+...####:.=###:.*####+##############################','...............................-####+.:##+..:###:...:###..:+##:.*####=..............................','...............................-####+.:#-.:####=..*..*####:.:#..*####=..............................','...............................-####+.....+####..+#+..####+.....*####=..............................','...............................-####+.:#=..-##..+###-..*#-..+#:.*####=..............................','...............................-####+.:###-......=#-......=###:.*####=..............................','...............................-####+.:#####:.:#:...:#:.=#####:.*####=..............................','...............................-####+.:#####..###-.-##-.:#####:.*####=..............................','...............................-####+...........................*####=..............................','...............................:############+..##-.-##..+###########**..............................','...............................:=############..-#-.-#:.:############-:..............................','................................:-*###########:.:-.:..:###########*=:...............................','..................................:-=+#########=.....*#########=+-:.................................','.......................................==+#######+.+#######+-=......................................','...........................................:*-#########-+:..........................................','...............................................-=+*+=:..............................................','....................................................................................................','....................................................................................................','....................................................................................................'],
-      'ddr':       ['------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','--------------%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@--------------','--------------%@#--------------------------------------------------------*@@--------------','--------------%@#--------------------------------------------------------*@@--------------','--------------%@#--------------------------------------------------------*@@--------------','--------------%@#---------------@@-@@+---------@@-@@#--------------------*@@--------------','--------------%@#---------------@@-@@+---------@@-@@%--------------------*@@--------------','--------------%@#------------------@@+------------@@%--------------------*@@--------------','--------------%@#-----------=%@@*--@@+------#@@#=-@@%--------------------*@@--------------','--------------%@#---------@@@@=+@@@@@+---@@@@+=@@@@@%--@@---#%@@@--------*@@--------------','--------------%@#--------@@-------@@@+--@@-------*@@%--@@@@@@@-----------*@@--------------','--------------%@#-------@@---------@@+-@@+--------@@%--@@+---------------*@@--------------','--------------%@#-------@@---------@@+-@@+--------@@%--@@----------------*@@--------------','--------------%@#--------@@-------@@@+--@@+------*@@%--@@----------------*@@--------------','--------------%@#--------=@@@@%@@@@@@+---@@@@%%@@@@@%--@@----------------*@@--------------','--------------%@#-----------+*%%*=-@@+-----+*%%*=-@@%--@@---@@-----------*@@--------------','--------------%@#--------------------------------------------------------*@@--------------','--------------%@#--------------------------------------------------------*@@--------------','--------------%@#--------------------------------------------------------*@@--------------','--------------%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@--------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------','------------------------------------------------------------------------------------------'],
-      'hanoi':     ['::::::::::::::::::::::::::::::::::::::::::::::::::::::--------::::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::-------:::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::',':::::-:::::::::::::::::::::::::::::-----::::::---*#=::::::::::::::::::::::::::::::::::::::::::::::::: ',':::::::---::::::::::::::::::::::::::::----------*###=-::::::::::::::::::::::::::::::::::::::::::::::: ','::::::::::--:::::::::::::::::::::::::::::---===+#####-----::::::::::::::::::::::::::::::::::::::::::: ',':::::::::::::::::::::::::::::::::::::::::::::::+######===--:::::::::::::::::::::::::::::::::::::::::: ',':::::::::::::::::::::::::::::::::::::::::::::::*###############=:::::::::::::::::::::::::::::::::::: :',':::::::::::::::::::::::::::::::::::::=#######################*=---::::::::::::::::::::::::::::::::::: ',':::::::::::::::::::::::::::::::::::::::-*##################*---------:::::::::::::::::::::::::::::::: ','::::::::::::::::::::::::::::::::::::::::::=*#############*::::::::::::::::::::::::::::::::::::::::::: ',':::::::::::::::::::::::::::::::::::::::::::::*##########+:::::::::::::::::::::::::::::::::::::::::::::  ','::::::::::::::::::::::::::::::::::::::::::::=############=::-----:::::::::::::::::::::::::::::::::::: ','::::::::::::::::::::::::::::::::::::::::::::*#####=:+#####::::------::::::::::::::::::::::::::::::::: ',':::::::::::::::::::::::::::::::::::::::::::-####-:::::+###-:::::::::--::::::::::::::::::::::::::::::: ',':::::::::::::::::::::::::::::::::::::::::::*#+-::::::::-*#=:::::::::::-:::::::::::::::::::::::::::::: ','::::::::::::::::::::::::::::::::::::::::::--:::::::::::::-+:::::::::::::::::::::::::::::::::::::::::: ','-----::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: ','---------------=======----::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: ','-::::::::::::::::------=======--::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: ','::::::::::::::::::::::::::::----=====---:::::::::::::::::::::::::::::::::::::::::---::::::::::::::::: ',':::::::::::::::::::::::::::::::::::::::::::::-----------:::::::::::::::::::----====--::::::::::::::::: ','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::-----------------------------:::::::::::::: ','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::-------:::::::---::::::::::::: ','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::'],
-      'aporee':    ['                                                                            .......................................................................   ','  .........................:=*%%%%%%%%%%%%%%%*=:.........................   ','  .....................=%%%%%%%%%%%%%%%%%%%%%%%%%%%=.....................   ','  .................:#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:.................   ','  ...............*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*...............   ','  .............%%%%%%%%%%%%%%%%%%%%%%@%%%%%%%%%%%%%%%%%%%%%%.............   ','  ...........%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%...........   ','  .........*%%%%%%%%%%%%%%%%%%%%%%%%%##%%%%%%%%%%%%%%%%%%%%%%%%*.........   ','  ........%%%%%%%%%%%%%%%%%%%%%%%%%%@#-%%%%%%%%%%%%%%%%%%%%%%%%%%........   ','  ......-%%%%%%%%%%%*%%%%%%%%%%%%%%%@#.%%%%%%%%%%%%%%%%*%%%%%%%%%%=......   ','  .....-%%%%%%%%%%%%%=-%%%%%%%%#%%%%@#.*%%%%*%%%%%%%*-*%%%%%%%%%%%%-.....   ','  ....-%%%%%%%%%%%%%%%#-:+%%%%%=+%%@@#.-%%%:#%%%%%+--%%%%%%%%%%%%%%%-....   ','  ....%%%%%%%%%%%%%%%%%%=-:-#%%%:=%@@#.:%%--%%%*=-:=%%%%%%%%%%%%%%%%%:...   ','  ...*%%%%%%%%%%%%%%%%%%%+=-::=%+.:@@#..+:.%%===::#%%%%%%%%%%%%%%%%%%*...   ','  ..:%%%%%%%%%%%%%%%%%%%%%#==-::::=@@#..::-===:::%%%%%%%%%%%%%%%%%%%%%:..   ','  ..%%%%%%%%%%%%%%%%%#*#%%%%===:::*@@#..:===-::+%%%%#*%%%%%%%%%%%%%%%%%..   ','  ..%%%%%%%%%%%%%%%%%%%%*-:..-===:@@@#...=-::::-:.:%%%%%%%%%%%%%%%%%%%%..   ','  .:%%%%%%%%%%%%%%%%%%%%%%#-:.....-@@#..*@@@@%*+%%%%%%%%%%%%%%%%%%%%%%%-.   ','  .-%%%%%%%%%%%%#+-.................=#*@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%=.   ','  .-%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@%*%.................-+#%%%%%%%%%%%%=.   ','  .:%%%%%%%%%%%%%%%%%%%%%%%**#@@@@%..+@@*.....::+%%%%%%%%%%%%%%%%%%%%%%-.   ','  ..%%%%%%%%%%%%%%%%%%%%=.:--::::=:..+@@@--===:..:-%%%%%%%%%%%%%%%%%%%%..   ','  ..%%%%%%%%%%%%%%%%%##%%%%#:::-==-..+@@@:::-==*%%%%##%%%%%%%%%%%%%%%%%..   ','  ..:%%%%%%%%%%%%%%%%%%%%%+::-===::..+@@*:::::-==%%%%%%%%%%%%%%%%%%%%%:..   ','  ...*%%%%%%%%%%%%%%%%%%%-:-==*%-:-:.+@@#.:%#-::==#%%%%%%%%%%%%%%%%%%*...   ','  ...:%%%%%%%%%%%%%%%%%#:-=+%%%%.+%=.+@@%%:=%%%+::=+%%%%%%%%%%%%%%%%%:...   ','  ....-%%%%%%%%%%%%%%%+-=*%%%%%-*%%*.+@@%%%:#%%%%%-:=%%%%%%%%%%%%%%%-....   ','  .....-%%%%%%%%%%%%%-+%%%%%%%##%%%%.+@@%%%%#%%%%%%%*:*%%%%%%%%%%%%-.....   ','  ......-%%%%%%%%%%##%%%%%%%%%%%%%%%:+@%%%%%%%%%%%%%%%%*%%%%%%%%%%=......   ','  ........%%%%%%%%%%%%%%%%%%%%%%%%%%*+@%%%%%%%%%%%%%%%%%%%%%%%%%%........   ','  .........*%%%%%%%%%%%%%%%%%%%%%%%%%*@%%%%%%%%%%%%%%%%%%%%%%%%#.........   ','  ...........%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%:..........   ','  .............%%%%%%%%%%%%%%%%%%%%%%@%%%%%%%%%%%%%%%%%%%%%%.............   ','  ...............*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*...............   ','  .................:#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#-.................   ','  .....................=%%%%%%%%%%%%%%%%%%%%%%%%%%%+.....................   ','  .........................:=*%%%%%%%%%%%%%%%*=:.........................   ','  .......................................................................   '],
-      'resonance': ['                                                                                                     ##%%%%%%%%%%%%%#                                                     ','                                                                     #%%%%%%##         #%%%%%%#                                             ','                                                                     #%%%%%%%%%                 #%%%%#                                      ','                                                                     #%%%%%%%%%%%%                     %%%#                                  ','                                                                  #%%%%%%%%%%%%%%                        %%%                              ','                                                               #%%%%%%%%%%%%%%%%                          %%#                           ','                                                            %%%%%%%%%%%%%%%%%%                            %%#                       ','                                                        #%%%%%%%%%%%%%%%%%#%%%%%%%%%%%##                 %%#                     ','                                                      %%%%%%%%%%%%%%%     %%%%%%%%%%%%%%%%               %%%                   ','                                                    #%%%%%%%%%%%%%%%     %%%%%%%%%%%%%%%%%%              %%%                  ','                                                   %%%%%%%%%%%%%%%%     #%%%%%%%%%%%%%%%%%%              %%#                ','                                                 %%%%%%%%%%%%%%%%%                 #%%%%%%#              %%               ','                                                %%%%%%%%%%%%%%%%%%                 %%%%%%%%              %%%              ','                                               %%%%%%%%%%%%%%%%%%                 %%%%%%%%               %%              ','                                               %%%%%%%%%%%%%%%%%%                #%%%%%%%                %%              ','                                                #%%%%%%%%%%%%%%%%%     %%%%%%%%%%%%%%%%%%                 %%#             ','                                                %%%%%%%%%%%%%%%%%%     %%%%%%%%%%%%%%%%#                  %%#             ','                                                %%%%%%%%%%%%%%%%%%     %%%%%%%%%%%%%%                     %%              ','                                                %%%%%%%%%%%%%%%%%%            +%%%%%%%                   #%%               ','                                                %%%%%%%%%%%%%%%%%             *%%%%%%%                  %%%               ','                                                %%%%%%%%%%%%%%%%%              #%%%%%%#                #%%                 ','                                                 %%%%%%%%%%%%%%%%               #%%%%%%#               %%*                  ','                                                  %%%%%%%%%%%%%%%                %%%%%%%#             %%#                    ','                                                    %%%%%%%%%%%%%%                 %%%%%%%*           %%*                      ','                                                      %%%%%%%%%%%%%%%%%%%                             #%                         ','                                                        #%%%%%%%%%%%%%%%%%                           %%#                            ','                                                           %%%%%%%%%%%%%%%%                         %#%                                ','                                                               %%%%%%%%%%%%%%                       %%%                                    ','                                                                   #%%%%%%%%%%%                    %%%%                                         ','                                                                       #%%%%%%%%                %%%%%#                                               ','                                                                           #%%%%#%%%%%%%%%%%#%%%%#                              %%%%%#                      ','                                                                               #%%##%%##                      %%%%### #%%    %%%%%%%                                                    ','                                                                   %#**%####%%    %%%%%%%%%%%%%#%%%%# %%%%%#%%%%%%%#%%%%%%%%%%%% %%%%% %%%%%#%%  %##%#%%    %%%%%%#%%##%%%%%%#*%%  *%%%%% #%*+###%%%%%  %%%%%  %#%##%%%               ','                                                              %%  %%%%%# %##%##%%%%# #%%%%% *%+%%  %%%%%  %%%%% #%*%# ###               ','                                                         %#  ##%#%%%%# %%%%# #%%%% ### *%+#%%%## ##  ##%#%%%# #%%%%'],
-      'rfb':       ['..............................................................................','..............................................................................','..............................................................................','...................................x$&&&&$+...................................','................................x&&XX&&$X$$$&+................................','..............................+&X$XXXxxxxX$$&X&:..............................','.............................X&$$XxxX&$XxxxxXX&&+.............................','............................xXX$xxxxX;$&$$xxxX&$X+............................','...........................;&&&xxxxxXx$&$xxxxxX&x&:...........................','...........................$$$$xxxxXx&&X$xxxxxx&X$X...........................','..........................:&xXxxxxX+$$+X$xxxxxxX$&$...........................','..........................;$XXxxxxX&+++XXxxxxxxx$x$:..........................','..........................+&&&Xxxxx$x++XXxxxxxxx&&&:..........................','..........................:&$&xxxxx$X+xx$xxxxxxX&&&...........................','...........................$&&XxxxxXx++$$xxxxxx&&&X...........................','...........................+&xxXxxxXx+XX+XxxxxX&$$;...........................','............................X$$&+++X++++x$$XxXX$X+............................','.............................$$$&x+++++++x$$X$XxX.............................','..............................X$X$&X++++++X&XX$+..............................','...............................:$X$X&&&$&xXX$X................................','..................................;$&X$X&&X:..................................','..............................................................................','..............................................................................','..............................................................................'],
-      'ACT':       ['                                                                                 .............................................................   ','  ..---::::::::::::::-:::::-:::::::::::::::::::::::::-:::----:.   ','  ..:............::::::::::::::::::::::::::::::::::::::::::.::.   ','  ..:.-----------------------------------------------------.::.   ','  ..:.------------=++--------------------------------------.::.   ','  ..:.:----+-----##----------------------------------------.::.   ','  ..:.:-----==--%@=----------------------------------------.::.   ','  ..:.:---+**#*%##----+*=---=#%@@%%#=----------------------.::.   ','  ..:.:-*#+==---*#---#%@%#%@@@@@@@%%%%%%=------------------.::.   ','  ..:.:=---*@@@+--=+--:::=@@%%@@@@@@@@@@%%*----------------.::.   ','  ..:.:---#@@@@=+%====:::-:=@@@@%%@@@@%%@@@@*--------------.:-.   ','  ..:.:--+@@@@@------*-%%==--#%=--=%%%@@@%@@%%-------------.:-.   ','  ..:.:--*@@@@*------=%**+=---*#-::::::*%@%%@%%------------.:-.   ','  ..:.:--+@@@@*-----+@@@#--==-----===--::#%@%%@%-----------.:-.   ','  ..:.:--=@@@@#----@@@@@=---==+=-+#*#@+-::-#%%%%*----------.:-.   ','  ..:.:---%@@@%---#@@%%@@@+----=+*++#+-:----#%%%%=---------.:-.   ','  ..:.:---+@@@@=--@@%@@@@@@+*@@#--=*--#@%%=--#%%@%*=-------.:-.   ','  ..:.----=@@@@+-=@@@@@@@@@%@@@@#---+=*+*#=--#@@@@@@@=-----.:-.   ','  ..:.:----#@%@*-=@@@%@@@@@@@@@@@*::::-=+--=+*@@@@@@@@=----.:-.   ','  ..:.:----=@@@#--@@@%@@@@@@@@@@=-----:---%##%*@%@@@@@%----.:-.   ','  ..:.:-----%@@*--%@@%%@@%@%%@%+=--+*+=:-=-+#%@*%@@@@@@*---.:-.   ','  ..:.:-----%%@+--*@@%%@@@@@%@%#-------:-:+=*%@=#+%@@@@%---.:-.   ','  ..:.:-----%%%---=%@@%%%@@@%%@@%=::::-+%%-=+@@-+++@@@@%---.:-.   ','  ..:.:----+%%-----*%@@%%@@%@%@@@%-=@@@@@#--=%*-::-@@@@%---.:-.   ','  ..:.:----%%=------#%@@%%@@@@%@@%-=@@@@@%---+*:::::+%@@=--.:-.   ','  ..:.:---+*--------=%@@@%@@@%@%@@--%@@@@%---##*:-=--+@%---.:-.   ','  ..:.:--------------*%%@@*%%@%%%@---%@%@%*--#*-*+---=%%---.:-.   ','  ..:.:---------------%%%%==#%@%%%=--+@@@@@=-#*-+%=@@@@%---.:-.   ','  ..:.:---------------=%#%=-@%%%%%*---*@%@@#-##--=*%@@@#---.:-.   ','  ..:.:----------------###=-@@%%%%%=---%@%@@=*#----%@@@*---..-.   ','  ..:.:----------------=##--%%%@%%%*----#%@@%-%+---#%@%=---..-.   ','  ..:.:-----------------*---%%@%+%%#----=@%@%=+#---*%@%----..-.   ','  ..:.:---------------------@%@*-*%#-----#@%@=-#=--=%%%=---..-.   ','  ..:.:---------------------@%%--=#*-----=@%@=--*---*#%#---..-.   ','  ..:.:---------------------%%+--=#+------%%%=---+---#+*+--..-.   ','  ..:.:--------------------=#*---=#-------%%%--------+==#=-..-.   ','  ..:.:--------------------##-----=-------%%=-----------++-..-.   ','  ..:.:----------------------------------=%*-------------=-..-.   ','  ..:.:----------------------------------=*----------------..-.   ','  ..:.:----------------------------------------------------..-.   ','  ..:..::::::::::::::::::::::................................-.   ','  ..-------:::::--::-----------:::::::::::::::::::::::::::::::.   ','  .............................................................   ','  ........................::::::::::.:::.......................   '],
-      'NT_TOP':    ['                                                                                         ','                                                                                         ','                                                                                         ','                                                                                         ','                                    ##                                                   ','                  %             #%#%%%%                                  %%              ','                %%%%%%%%%%%%% %#%%%%%% %%%                              ##               ','                %%%%%%%%%%%%         %%%%%% ##                                           ','               %%%%%%%%%%%#          #%%%%%%%%%%%%                 %                     ','                       %              %%%%%%%%%%%%%%%   %#      %%%%   %%                ','                       %%#%   %# %%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%% %%%%%%             ','                      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%# #%%%%%%            ','                  %#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%             ','                 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%               ','               %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#               ','               %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                ','                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%# %                   ','            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                     ','            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%%#            ','            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   %%%%%             ','         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   %%%%%%            ','      %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        #%             ','          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                        ','            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                          ','     %%#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                         ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#                     ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                  ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %##           ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#%%#          ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%         ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%      ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#*+-:....:=*##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#*:.............:+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%=.................:#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%+...................:#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%:....................#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%#*=:..:-+#%%%%%:....................#%%%%#+-:..:-+#%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%#-..........:*%%%=...................:#%%#-..........:#%%%%%%%%%%%%%#   ','     %%%%%%%%%%#=..............-#%#:..................*%#=..............-#%%%%%%%%%%%#   ','     %%%%%%%%%%-................:*%*:................=##-................:#%%%%%%%%%%#   ','     %%%%%%%%#:..................:#%+...............=#%=...................*%%%%%%%%%#   ','     %%%%%%%#=....................-%%#:...........:*%%+....................-#%%%%%%%%#   ','     %%%%%%%#-.....................*%%%+:.......:=#%%#:....................:*%%%%%%%%#   ','     %%%%%%%#-.....................+%@@%%#*===+##%@@%*:....................:#%%%%%%%%#   ','     %%%%%%%%*:....................*%@@@@@@@@@@@@@@@%#:....................+%%%%%%%%%#   ','     %%%%%%%%%#-..................:#@@@@@@@@@@@@@@@@@%=..................:#%%%%%%%%%%#   ','     %%%%%%%%%%%#=:..............-%%@@@@@@@@@@@@@@@@@@%=:.............:-#%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%#*=-:.....:-+#%@@@@@@@@@@@@@@@@@@@@@%#*=:.....:-=+##%%%%%%%%%%%%%%#   ','     %%%%%%%%%#########%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%#########%%%%%%%%%%%   ','     %%%%%%#+:.........:-+#%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%#*=:.........:=*%%%%%%%%   ','     %%%%#=................:+%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@%#:................-#%%%%%%   ','     %%%%=...................:*%@@@@@@@@@@@@@@@@@@@@@@@@@%#-...................-#%%%%%   ','     %%%#.....................:#%@@@@@@@@@@@@@@@@@@@@@@@@%-.....................+%%%%%   ','     %%%*......................+%@@@@@@@@@@@@@@@@@@@@@@@@#......................=%%%%%   ','     %%%#......................#%@@@@@@@@@@@@@@@@@@@@@@@@%-.....................+%%%%%   ','     %%%%-....................+#@@@@@@@@@@@@@@@@@@@@@@@@@%*:....................#%%%%%   ','     %%%%*...................+#%@@@@@@@@@@@@@@@@@@@@@@@@@@%*...................=%%%%%%   ','     %%%%#=................-#%%%##*+**#%@@@@@@@@@%#**+**##%%#=:...............-#%%%%%%   ','     %%%%%#+.............-#%%*-:.......:+%@@@@@%#-........-+#%#+:............-#%%%%%%%   ','     %%%%%%%#=:......:-*%%#-.............=#%@@#+.............-*%%#=::.....:-#%%%%%%%%%   ','     %%%%%%%%%%#####%%%%#=................+%%%*:...............-#%%%%#####%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%#:..................#%%-.................:*%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%#:...................+%#....................*%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%-....................=%*....................:#%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%#:....................+%#....................:*%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%=....................#%%:...................:#%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%#-..................=%%%*..................:#%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%#+:...............-#%%%#+................=#%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%*-:..........:=#%%%%%%+:...........-+#%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%##*-:....-*#%%%%%%%%%#*=:....-+##%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#   ','                                                                                         ','                                                                                         ','                                                                                         ','                                                                                         ','                                                                                         '],
-      'TAS':       ['#*###*#####*******+++***###+++=+++++*****+++##%%%@%#####**+*+=***-::-***=::::.-+**+=-:    ','%####%#######*+=++**++++***#**++==+++***+******###%#*=-++=====:-=    :.:.....:=+*#+::.  .:','#%%##%%%%#**#*++=++***++########*#**++**##***+++++==-==++=+::=:.       :--:   :=:.:.    :-','%%%%########*+++++****+=*%###%%##%###***##%*:::::*++=======-:..    .   ::::---++:.       .','@@%%#%%#%%##++=+++*##*+++#@@%#####**##*##*::%::*-::--===**+-:::..:-=:::::=++=---:..       ','%@@@%%%%@%##*+=++++*%@@@@@@%%%##**+**#++-:*::::::*:::-=++++===:=+***+::..-+#+-::::::..   .','##%%##%@@%***++***#%%%@@%%%%%#*###***#=:+::::::::::*::-=++++=::-+++#*-:::-=+--::::... :::=','%####%%%%%%##***%%@%%%@@%%%%%#**###*+:=+::::::::::::=+::=++=-::-**-=+--:::--::...  .  :::.','%#*#%%@%%##**##**##%%%@@%%%@%#**+*+:-#::::::::::::::::=-::--::.:++=+==-==::..    .::......','%%#%%%%%###*****#####%@%%%%%%%%#*::*::::::::::::::::::::#:::-::-=+*+---....      .::::::::','+##%@@%%###*****#*++*#%#%%#%%%#-:%::::::::::::::::::::::::#::::::=+=-::::. ...:.....:::.::','+*#%%%%%%##*+*###*+++#@%#**##+:+-:::::::::::::::::::::::::::*::-----:::--:   .. ...  ..:::','@%%%#%#####*#**%%#++++%%#**=:=+::::::::::::::::::::::::::::::-=::-=+==-++-::--.....  .::::','+%%%%%%#*##*#####*++++##+*:-*::::::::::::::::::::::::::::::::::*-::=++#%*=-=*-..:...... .:','%#%%%###******##%#*+**+*::#::::::::::::::::::::::::::::::::::::::+:::+=--===+:  ..  .   .:','##%##%#**#######%%*+++::*::::::::::::::::::::::::::::::::::::::::::#:::..::.:. ..      ..:','%@@@%%###**%#%#***+-::@::::::::::::::::::::::::::::::::::::::::::::::*::      .        ...','#%%%%%%%%##%#%#*++-:+=::::::::::::::=%@@@@#=::::::::::::::::::::::::::=+:   ...:          ','#%####**##%#%%%#=:++:::::::::::::+@@@@@@@@@@@@@@*:::::::::-:::::::::::::=::...:.       .:.:','##%######%%%##*:-*:::::::::::::-@@@@@@@@@@@@@@@@@@@@@##@@@@@@@@@%*-::=::::*::...  .   .:::','%##%#*#%%%%%*::#::::::::::::::@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*#@@@@@-:::::=::  .....:::.','@@%%%%%@@@@-:*::::::::::::::::@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@=%+::::::::::::.:::::..:','@@@@@@@@@=:%-:::::::::::::::::::+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#::::::::::::::::::.......:','@@@@@@@*:==:::::::::::::::::%@%::#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@=:::::::::::::::::::.   .:','@@@@@%:-*::::::::::::::::::+@@@@@@@@@@@@@@@@@@@@::*@@@@@@@@@@@@:@::::::::::::::::::-::  ..','@@@@@%:%:::::::::::::::::-@@@@@@*@@@@@@@@@@@@@@@#::::@@*@@@@@@@+:%-::::::::::::::::=:: . .','@@@@@@#:-*:::-+****#%%@@@@@@@@@@@@@@@@@@#***@@@@@@%:=@-:::::::-**-:::::::::::::::-+::.....:','@@@@@%%#=:+=::::::::::=+*=:::::@@@@@%@@*:::::@@@@@::@@@:::::::::::::::::::::::::=::.......','@@@%%%@%#*::#::::::::::::::::::-@@@:::::-++::%@@@=:::%@@@%#:::::::::::::::::::+::.::::::::','@@%%%%####*+::#:::::::::::::::::@@@=::::::::::@@@:::::::::::::::::::::::::::-:::......::..','@@@@@%####***-:=+:::::::::::::::::@@@@-:::::::@@@-::::::::::::::::::::::::::::.   ..::....','%%%%%%#*##%#*++::*-:::::::::::::::::=::::::::::+@@@@@-::::::::::::::::::*:::.:......:::..:','%%%%%%####%##**+=::#::::::::::::::::::::::::::::::::::::::::::::::::::*:.     .... ...  ..','@%%%%%##**##%##*+++:-+::::::::::::::::::::::::::::::::::::::::::::::*::.      .  ....  :. ','%*#%@@%%%##%%##+====::%=::::::::::::::::::::::::::::::::::::::::::#::        .. ....  .. .','*%@@@@%%%%#%##*-==+**+::*:::::::::::::::::::::::::::::::::::::::*-::      .     .:::.  ...','@@%%#%######%#*+++##++*=:-#:::::::::::::::::::::::::::::::::::+-::. .:..       . .:..... .','%@%%##%%%%%##**#*##%@@%%%*:+=:::::::::::::::::::::::::::::::+*:=:..   .  ..:.        -=:..','@%%@@%#%@%%%%%@@@%#**+++==+::#::::::::::::::::::::::::::::-*:::=:....:::::....... ....::::','%@@@@@@@@%%%%%%%%#*#**+*##**=::*:::::::::::::::::::::::::*::::-:... .:::..::-:::::. :... .','@@%#@@%###%%%#*###%%###%#*+=*+=:++:::::::::::::::::::::%:-=:::::::..:.:::::.....::.   .  .','@@%####*+*%##+#%@%%%%#%%##*++***::#::::::::::::::::::#:::-::...:-::::::::::::::--::.  .:::','%@@%###*+**##**%%%#**#*#*==+*##*=-::*::::::::::::::*-::-::--::..::.:::::::::::::..:. ::..','@@@@*#***#*#**#%%#***++##+-++#=----::*+::::::::::*=:-:::::::-:::::::::::::::---::::.  .:::','@@@%%%#%*+**##%%##*++***++++++++++=+=::*-::::::=*:::.::.::.-=-:::::::--::::::----:.   .:::','@%%#%##**+**###*+****+++*++**+==--+*#+=::%:::-*::---:::::.:=-=----------:::::::::.   ..::-','%%###+++*##**##*+++*****+++##++==+*+***=::=@%::-:--::=-::=--=----====--:--:::-:::..  .:::-','%%##*****++****++*****##**+*##*++++=-*=:--=:.  :-=-==-:::-:-=====---------:-*%%%@%#%#%%%%%'],
-      'NT_BOT':    ['                                      *##+    @@@@@+:..@@@@=...-@@@@@#  ','                                     :####.   -@@@@@:..-@@@@:...*@@@@@+ ','                                      .==.    .@@@@@:..:@@@@*:..:@@@@@@ ','                                             .@@@@@=...=@@@@@:..:*@@@@@.','                                 +###:      %@@@@@=...=@@@@@#:..:%@@@@@ ','                                 *###=    =@@@@@#:..:@@@@@@%:...@@@@@@: ','                          =**.    .:    .@@@@@@-..:#@@@@@@*:..+@@@@@@-  ','                         +####         #@@@@@@...+@@@@@@@:..:@@@@@@@:   ','                         .###-       +@@@@@@#:.:@@@@@@@#...*@@@@@@@     ','                  -###.         *@@@@@@@@@@@@@@@@@@@@@:..-@@@@@@@#      ','                  ####=      @@@@@@@@@@@@@@@@@@@@@@@@@@@#@@@@@@@.       ','                  +##*    +@@@@@@@@@@@#+++*%@@@@@@@@@@@@@@@@@@*         ','             -*+        +@@@@@@@=....:::::......:#@@@@@@@@@@@           ','            -####     :@@@@@@-..:-*@@@@@@@@@@+::...:@@@@@@@*            ','            :####    +@@@@@:.:=@@@@@@@@@@@@@@@@@#:...=@@@@@@            ','              --    *@@@@-..+@@@@@@@@@@@@@@@@@@@@@%:..:@@@@@*           ','         +###-     =@@@@-.:@@@@@@%:.:-==-::.-%@@@@@@-..-@@@@@           ','         *###+     @@@@*::@@@@@%:.=@@@@@@@@@-.:%@@@@@:.:#@@@@-          ','          -+=     .@@@@=.+@@@@%::%@@@@@@@@@@@@::@@@@@%..=@@@@#          ','          -=:     -@@@@-.@@@@@=.*@@@@@+-+@@@@@@.+@@@@@:.-@@@@@          ','         ####=    .@@@@=.@@@@@::%@@@@-...=@@@@@:-@@@@@:.-@@@@@          ','         -###-     @@@@+.@@@@@=.#@@@@@=:=@@@@@@:=@@@@@..-@@@@@          ','                   *@@@%:+@@@@%:-@@@@@@@@@@@@@=:*@@@@#.:*@@@@+          ','            +###-   @@@@=.@@@@@#::*@@@@@@@@@+:.=@@@@@:.:@@@@@           ','            *###-   -@@@@-:@@@@@@*:::-==-::..:@@@@@@-:.@@@@@#           ','              .      +@@@@::@@@@@@@@@%#**#@@@@@@@@@-::@@@@@@            ','           +#*:       *@@@@%.-@@@@@@@@@@@@@@@@@@@=::%@@@@@@             ','          ####*       @@@@@@@#::-#@@@@@@@@@@%+::.-%@@@@@@+              ','          .**-      +@@@@@@@@@@@#:.::.........:%@@@@@@@*                ','      .-.          @@@@@@#.:@@@@@@@@@@@%%@@@@@@@@@@@@                   ','    :####+       *@@@@@@-...#@@@@@@@@@@@@@@@@@@@@+                      ','    .*##*       @@@@@@%:..-@@@@@*:..#@@@@@@#-                           ','              .@@@@@@+..:@@@@@@=..:@@@@@                                ','   +##*      :@@@@@@:..-@@@@@@:..-@@@@@                                 ','  :####.     #@@@@@:..-@@@@@@...=@@@@@                                  ','    :.       #@@@@@...-@@@@@*..:%@@@@@                                  ','      ..     =@@@@@:..:#@@@@@:.:%@@@@@:                                 ','    +####     @@@@@@:..:@@@@@#..:@@@@@%                                 ','    -##*.     .@@@@@#...=@@@@@*..:@@@@@:                                '],
-      'centraal':  ['::::::::::::::::::::::::::::::::::::::::::;;;::::::::::::::::::::::::::::::::::::::::::::::',':::::::::::::::::::::::::::::::::::::::::;XXxx+;;;;:::::::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::xXXXXXXxx+;:::::::::::::::::::::::::::::::::::::',':::::::::::::::::::::::::::::::::::::::::;xXX$XXXXXXXx;:::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::;;+xXXXXXXXXX;::::::::::::::::::::::::::::::::::',':::::::::::::::::::::::::::::::::::::::::::::::;+XXXXXXx::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::;+XXXXXXX;;;;;::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::;+XXXXXXXXXXXx;:::::::::::::::::::::::::::::',':::::::::::::::::::::::::::::::::::::::::::::::;xXXXXXXXXXXX+:::::::::::::::::::::::::::::',':::::::::::::::::::::::::::::::::::::::::::;;::;xXXXXXXXXXXX+:::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::;+;;:;xXXXXXXXXXXXx;::::::::::::::::::::::::::::',':::::::;;:::::::::::::::::::::::::::::::::++::;xxXXXXXXXXXXX+;::::::::::::::::::::::::::::','::::::+++:::::::::::::::::::::::::::;;+::;xxxX$XxxxXXXXXXXXX+:::::::::::::::::::::::::::::',':::::;++x;:::::::::::::::::::::::::::;++;+xX;XXXxxXXXXXXXXXX+:::::::::::::::::::::::::::::','::::;;+xx:::::::::::::::::::::::::::::;xx+xXxXXx+xxXXXXXXXXX+:::::::::::::::::::::::::::::','::::;+xXx:::::::::::::::::::::::::::;:;+XXXXXXXXXXXXXXXXXXXX+:::::::::::::::::::::::::::::','::::;xxxx+;;++;;;:::::::::::::::::;xXXXXXXXXXXXXXXxxXXXXXXXX+:::::::::::::::::::::::::::::',':::::;+xxxxxxxxxx++;;:::::::::::;xXX$XXXXXXXXXXXXXXXXXXXXXXX+:::::::::::::::::::::::::::::',':::::::;;xxxxXXxxXxxxx+;;::::::+XXXXxxxXXXXXXXX$XXXxxXXXXXXXx;::::::::::::::::::::::::::::','::::::::;+xxXXxxXXXXXXXxx++;::;xX$X+XXXxxxxXXXXXXXXxxxxxxxxXx;::::::::::::::::::::::::::::',':::::::::+xxXXXXXXXXXXXXXXXxx++xXXxxXxxXxXxxXXXXXxxxxxxxxxxxx;::::::::::::::::::::::::::::',':::::::::+xXXXXXXXXXXXXXXXXXxxxxxxxxXXXxxxxxX$Xxxxxxxxxxxxxxx+;;;;;;::::::::::::::::::::::',':::::::::;xXXXXXXXXXXXXXXXXXXXXXXXxxxXXXXxxXXXxxxxxxXXXXxxxxxxxx+++x+;::::::::::::::::::::',':::::::::::::;+++++xXXXXXXXXXXXXXXXXXxxxxXXxx+xxxxXXXXXXxxXXxxx+xxXXx+:;X$+:::::::::::::::','::::::::::::::::::::;xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxxxXXXxXXXxXxXxx;;&Xx&X::::::::::::::','::::::::::::::::::::::;;xXXXXXXXXX$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX+::;&&+$X;::::::::::::',':::::::::::::::::::::::::;+XXXXXXXXXXX$XXXXXXXXXXXXXXXXXXXXXXXXXXXX+;:::;&&+$$;:::::::::::','::::::::::::::::::::::::::::+xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX++&&&$&&&&xX&+::::::::::','::::::::::::::::::::::::;:+&&x;;xXXXXXXXXxxxxXXXXX$XxxXXXXXXXXxX;::X$$&x;&&&xX&+:::::::::','::::::::::::::::::::::;$&&&&+x+:;x&XXXXXx&&xxxXxxXXXxXXX&&&$XXXXX;x;X&&&&$+&&&+&&X::::::::','::::::::::::::::::::::X&&&&&x+X+$&&&XXX+;;x&XXxXXXXXX&&&x&&&XX&&&$&&&&&x$&X+&&&&+:::::::::',':::::::::::::::::::::::$&&&&&$;&&&&&&&+&&&&&&&XXXXXXXX&+:x&&&&;&&&&$Xx&&&&&&x;::::::::::::','::::::::::::::::::::::::$&&&$++;&&&;&$&&&&&xX&&XXXXXXX$&&xX&&&+;&&&&&&+&&&X:::::::::::::::',':::::::::::::::::::::::::$&;&&&X+&&;;&x&&$;x&&xx&&$&&&&&&&xX&&&++&&&&&&$+&&$::::::::::::::','::::::::::::::::::::;+x$&&&:&&&&X;&&;+&&&&&&&x&&X&&&$&&$+&&&&&&&;x&&&X+&&$::::::::::::::::','::::::::::::::::::;&&&&XX;&&;x&&xx&&&+X&&&x+&:&&&&&$;&&&&+$&&$X$$XX+;$&+:::;;;++::::::::::','::::::::::::::::;X&&x&&&&&;X&&&&&&&xX&&&$&&&&&+$&X&&&;&&&&X&&$XXXXX+;::::::;+;;;::::::::::','::::::::::::::::x&++&&&&$&&;X&&&&&;::$&&+$&&&&&$$$$$&&xX&&&&&XXXXX$x;x;:::;+x;+;::::::::::',':::::::::::::::::;$x+&&&X+X&$+;XX;:::;&&$+X&&x&&XXXXX$&&&&XXXX$$$$$&x;+;+x++X+;:::::::::::',':::::::::::::::::::;$++&&&+:::::::::::+&&&&&&&$X;xXXXX$$$$$$$&&&$$$$$+;X;;::::::::::::::::',':::::::::::::::::::::+$&&X:::::::::::::+$X+;::::;xX$$$$X$$X$$&$X$$$$Xx;::++x;:::::::::::::',':::::::::::::::::::::::;;:::::::::::::::::::::+++X&&$$$&$$$X$&$X$$$$$&xxXxX+::::::::::::::',':::::::::::::::::::::::::::::::::::::::;++X+++;;XxX$&$$X$X$$$$$X$$$$&$$;:;::::::::::::::::','::::::::::::::::::::::::::::::::::::x+;;:xx+;:;;xXX$XXX$$&$$$$$$&$$XXXXX;:::::::::::::::::','::::::::::::::::::::::::::::::::::::;;x++;xX;+::+$$X$&$&$$$$$X$XXXXXXXXXX;::::::::::::::::',':::::::::::::::::::::::::::::::::::::+;;;;;:$+x;+&&X&XX$X$XXXXXXXXXXXXXXX+;:::::::::::::::',':::::::::::::::::::::::::::::::::::::::::;+;+:$+xXXXxXXXXXXXXXXXXXXXXXXXXxx;::::::::::::::',':::::::::::::::::::::::::::::::::::::::::::;;:;::;xxXXXXXXXXXXXXXXXXXXXXXXxx;:::::::::::::',':::::::::::::::::::::::::::::::::::::::::::::::::;+xXXXX$XXXXxxx$XXXXXXXXXXXx;::::::::::::','::::::::::::::::::::::;+x+;::::::::::::::::::::::;++xxxxxxxXX;::;xXXXXXXXXXXXx;:::::::::::',':::::::::::::::::::;;+XXXXX::::::::::::::::::::::;+++xxxxxXXXXXXXXXXXXXXXXXXXXx;::::::::::',':::::::::::::::;+XXXXXXXXXX+:::::::::::::::::::;++x++xxxxxXXXXXXXXXXXXXXXXXXXXXx+:::::::::',':::::::::::;xXXXXXXXXXXXXX$X;;;:;:::::::::::::+XX+xxxxxxxXXXXXXXXXXXXXXXXXXXXXXXX;::::::::',':::::::::;XXXXXXXXX$XXXXXXXXXXX$XXXXXXXX+;;::+XXXxxxxxxxXX$XXXXXXXXXXX$XXXXXXXXXx:::::::::',':::::::::;xXx+++xXXXXXXXXXXXXXXXXXXXXXX$XXXXX$X;;+xxxxxxXXx;::::;::;;++xXXXXXXx;::::::::::','::::::::::::::++;+::;;+XXXXXXXXXXXXXXXXXXXXXXXXXXXXxxxXXXX+:::::::::::::::::::::::::::::::',':::::::::::::;;;+;;x+++:;;;+xXXXXXXXXXXXXXXXXXXXXXXXXXXXXx;:::::::::::::::::::::::::::::::',':::::::::::::::::::;;;;+xx;xx;;;;;xXXXXXXXXXXXXXXXXXXXXXX;::::::::::::::::::::::::::::::::',':::::::::::::::::::::::::;;;;;;:::::::;+xXXXXXXXXXXXXXXX+:::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::;:;:::::::::::;;xxXXXXXXXXXx;:::::::::::::::::::::::::::::::::',':::::::::::::::::::::::::::::::::::::::::::::::;+xxxx+;:::::::::::::::::::::::::::::::::::','::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::'],
-    };
-
-    const art = asciiArts[station.id] || asciiArts[currentState] || asciiArts['resonance'];
-    let frame = 0;
-    const labels = ['// SIGNAL LOCKED', '// TRANSMITTING', '// WORLDWIDE', '// ON AIR'];
-
-    container.innerHTML = '<div class="world-ascii-section"><pre class="world-ascii-art" id="worldAsciiArt"></pre><div class="world-ascii-label" id="worldAsciiLabel"></div></div>';
-
-    const artEl   = document.getElementById('worldAsciiArt');
-    const labelEl = document.getElementById('worldAsciiLabel');
-
-    function updateAscii() {
-      if (!artEl) return;
-      artEl.textContent   = art.join('\n');
-      labelEl.textContent = labels[frame % labels.length];
-      frame++;
-    }
-    updateAscii();
-    if (window._worldAsciiTimer) clearInterval(window._worldAsciiTimer);
-    window._worldAsciiTimer = setInterval(updateAscii, 2200);
+    const now = new Date();
+    document.getElementById('chartRefresh').textContent = 'NO DATA';
+    container.innerHTML = `
+      <div class="uc-chart-msg">
+        <div class="uc-chart-ascii">[ CHART DATA ]\n[ UNAVAILABLE ]</div>
+        <div class="uc-chart-bars">
+          <div class="uc-bar-row"><span class="uc-bar-label">TREBLE</span><div class="uc-progress-bar"><div class="uc-progress-fill"></div></div></div>
+          <div class="uc-bar-row"><span class="uc-bar-label">BASS</span><div class="uc-progress-bar"><div class="uc-progress-fill" style="animation-delay:0.3s"></div></div></div>
+          <div class="uc-bar-row"><span class="uc-bar-label">VOLUME</span><div class="uc-progress-bar"><div class="uc-progress-fill" style="animation-delay:0.6s"></div></div></div>
+        </div>
+        <div class="uc-chart-note">DATA COMING SOON</div>
+      </div>`;
     return;
   }
 
   container.innerHTML = '<div class="chart-loading">LOADING CHART DATA</div>';
+  document.getElementById('chartRefresh').textContent = '';
 
   const now = new Date();
   document.getElementById('chartRefresh').textContent =
     'UPDATED ' + now.toLocaleDateString('en-AU', { day: '2-digit', month: 'short' }).toUpperCase();
 
-  setTimeout(() => renderCharts(station), 800 + Math.random() * 400);
+  // Capture which state we're loading for — ignore result if user switched away
+  const loadingFor = currentState;
+  setTimeout(() => {
+    if (currentState !== loadingFor) return;
+    renderCharts(station);
+  }, 800 + Math.random() * 400);
 }
 
 function renderCharts(station) {
@@ -2284,12 +1431,13 @@ function renderCharts(station) {
   container.innerHTML = '';
 
   station.chartData.forEach((entry, i) => {
+    const searchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(entry.artist + ' ' + entry.track);
     const el = document.createElement('div');
     el.className = 'chart-entry';
     el.style.animationDelay = (i * 0.04) + 's';
     el.style.cursor = 'pointer';
     el.title = 'Search ' + entry.artist + ' — ' + entry.track;
-    el.onclick = () => window.open('https://www.google.com/search?q=' + encodeURIComponent(entry.artist + ' ' + entry.track), '_blank');
+    el.onclick = () => window.open(searchUrl, '_blank');
     el.innerHTML =
       '<div class="chart-num ' + (entry.pos <= 3 ? 'top3' : '') + '">' +
         String(entry.pos).padStart(2, '0') +
@@ -2298,202 +1446,31 @@ function renderCharts(station) {
         '<div class="chart-track">'  + entry.track  + '</div>' +
         '<div class="chart-artist">' + entry.artist + '</div>' +
       '</div>' +
-      '<div class="chart-weeks">WK' + (Math.floor(Math.random() * 8) + 1) + '</div>';
+      '<div class="chart-weeks">↗</div>';
     container.appendChild(el);
   });
 
   const note = document.createElement('div');
   note.className = 'chart-source-note';
-  note.innerHTML = 'SOURCE: <a href="' + (station.chartSourceUrl || station.chartUrl) + '" target="_blank">' +
-    station.name.toUpperCase() + ' CHARTS ↗</a>';
+  const srcUrl = station.chartSourceUrl || station.chartUrl;
+  note.innerHTML = 'SOURCE: <a href="' + srcUrl + '" target="_blank">' +
+    station.name.toUpperCase() + ' ↗</a>';
+  if (station.chartSubtitle) {
+    const sub = document.createElement('div');
+    sub.className = 'chart-source-note';
+    sub.style.marginTop = '4px';
+    sub.textContent = station.chartSubtitle.toUpperCase();
+    container.appendChild(sub);
+  }
   container.appendChild(note);
 }
 
-// ─── AUDIO ────────────────────────────────────────────────────────────────────
-function togglePlay() {
-  // Determine which station the panel is showing RIGHT NOW
-  const panelStation = currentState ? STATIONS[currentState] : window._currentWorldStation;
-  if (isPlaying) {
-    if (window._lastPlayedStation === panelStation) {
-      pauseAudio();
-    } else {
-      // Different station is playing — stop old, start new
-      stopAudio();
-      startAudio();
-    }
-  } else {
-    const audio = document.getElementById('audioPlayer');
-    if (audio.src && window._lastPlayedStation && window._lastPlayedStation !== panelStation) {
-      stopAudio();
-    }
-    startAudio();
-  }
-}
 
-function pauseAudio() {
-  const audio = document.getElementById('audioPlayer');
-  audio._userStopped = true;
-  audio.onpause = null;
-  audio.pause();
-  // Don't clear src — keep it so we can resume
-  isPlaying = false;
-  document.getElementById('playBtn').textContent = '▶';
-  document.getElementById('playBtn').classList.remove('playing', 'buffering');
-  document.getElementById('playerStatus').textContent = 'PAUSED';
-  document.getElementById('playerStatus').className   = 'player-status';
-  stopWaveAnimation();
-  if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-}
-
-// ─── AUDIO ────────────────────────────────────────────────────────────────────
-function startAudio() {
-  // Determine the current station — prioritise panel-visible station
-  // currentState is set for Australian stations, null for world stations
-  const stationByState = currentState ? STATIONS[currentState] : null;
-  const station = stationByState || window._currentWorldStation || window._lastPlayedStation;
-  if (!station || !station.stream) { console.warn('[Audio] No station to play'); return; }
-
-  const audio   = document.getElementById('audioPlayer');
-  const playBtn = document.getElementById('playBtn');
-
-  playBtn.classList.add('buffering');
-  playBtn.textContent = '▶';
-  document.getElementById('playerStatus').textContent = 'BUFFERING...';
-
-  // If already has the right src (paused), just resume — otherwise load fresh
-  const targetSrc = station.stream;
-  if (audio.src !== targetSrc || audio.readyState === 0) {
-    audio.src = targetSrc;
-    audio.load();
-  }
-  audio.play().then(() => {
-    isPlaying = true;
-    window._lastPlayedStation = station;
-    playBtn.classList.remove('buffering');
-    playBtn.textContent = '■';
-    playBtn.classList.add('playing');
-    document.getElementById('playerStatus').textContent = '● LIVE';
-    document.getElementById('playerStatus').className   = 'player-status live';
-    startWaveAnimation();
-    updateMiniPlayer();
-
-    // ── MEDIA SESSION ────────────────────────────────────────────
-    if ('mediaSession' in navigator) {
-      const st = station;
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title:  st.fullName || st.name,
-        artist: (st.freq || '') + ' · ' + (st.city || ''),
-        album:  'Community Radio Radar',
-        artwork: [
-          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-        ]
-      });
-      navigator.mediaSession.playbackState = 'playing';
-      navigator.mediaSession.setActionHandler('play', () => {
-        if (!isPlaying) {
-          startAudio();
-        } else if (audio.paused) {
-          audio.src = station.stream;
-          audio.load();
-          audio.play().catch(() => {
-            document.getElementById('playerStatus').textContent = 'NO SIGNAL';
-          });
-        }
-      });
-      navigator.mediaSession.setActionHandler('pause', () => { if (isPlaying) stopAudio(); });
-      navigator.mediaSession.setActionHandler('stop',  () => { if (isPlaying) stopAudio(); });
-    }
-    // ─────────────────────────────────────────────────────────────
-
-    // ── iOS SCREEN LOCK RECOVERY ─────────────────────────────────
-    // iOS suspends the JS engine on lock — setTimeout won't fire.
-    // Instead listen for page becoming visible again after unlock.
-    audio._userStopped = false;
-
-    audio.onpause = () => {
-      if (audio._userStopped) return;
-      document.getElementById('playerStatus').textContent = 'RECONNECTING...';
-      document.getElementById('playerStatus').className   = 'player-status';
-      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-    };
-
-    const onWakeUp = () => {
-      if (audio._userStopped || !isPlaying) return;
-      if (audio.paused) {
-        document.getElementById('playerStatus').textContent = 'RECONNECTING...';
-        audio.src = station.stream;
-        audio.load();
-        audio.play().then(() => {
-          document.getElementById('playerStatus').textContent = '● LIVE';
-          document.getElementById('playerStatus').className   = 'player-status live';
-          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
-        }).catch(() => {
-          isPlaying = false;
-          document.getElementById('playBtn').textContent = '▶';
-          document.getElementById('playBtn').classList.remove('playing', 'buffering');
-          document.getElementById('playerStatus').textContent = 'TAP TO RESUME';
-          document.getElementById('playerStatus').className   = 'player-status';
-          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-        });
-      }
-    };
-
-    // Remove previous listeners to avoid stacking on re-play
-    document.removeEventListener('visibilitychange', window._onVisibility);
-    window._onVisibility = () => { if (document.visibilityState === 'visible') onWakeUp(); };
-    document.addEventListener('visibilitychange', window._onVisibility);
-
-    // pageshow fires when returning from bfcache — common on iOS Safari
-    window.removeEventListener('pageshow', window._onPageShow);
-    window._onPageShow = (e) => { if (e.persisted) onWakeUp(); };
-    window.addEventListener('pageshow', window._onPageShow);
-    // ─────────────────────────────────────────────────────────────
-
-  }).catch(() => {
-    playBtn.classList.remove('buffering');
-    document.getElementById('playerStatus').textContent = 'NO SIGNAL';
-  });
-}
-
-function stopAudio() {
-  const audio = document.getElementById('audioPlayer');
-  audio._userStopped = true;  // tell pause handler this was intentional
-  audio.onpause = null;
-  audio.pause();
-  audio.src = '';
-  isPlaying = false;
-  window._lastPlayedStation = null;  // clear so mini player disappears
-  document.getElementById('playBtn').textContent = '▶';
-  document.getElementById('playBtn').classList.remove('playing', 'buffering');
-  document.getElementById('playerStatus').textContent = 'STANDBY';
-  document.getElementById('playerStatus').className   = 'player-status';
-  stopWaveAnimation();
-  updateMiniPlayer();
-
-  // ── MEDIA SESSION ────────────────────────────────────────────
-  if ('mediaSession' in navigator) {
-    navigator.mediaSession.playbackState = 'none';
-    navigator.mediaSession.metadata = null;
-  }
-  // ─────────────────────────────────────────────────────────────
-}
-
-function startWaveAnimation() {
-  document.querySelectorAll('.wave-bar, .mini-wave-bar').forEach(b => b.classList.add('active'));
-}
-
-function stopWaveAnimation() {
-  document.querySelectorAll('.wave-bar, .mini-wave-bar').forEach(b => {
-    b.classList.remove('active');
-    b.style.height = '3px';
-  });
-}
 
 // ─── AMRAP METRO CHART ────────────────────────────────────────────────────────
 async function loadAMRAP() {
   try {
-    const res = await fetch('/amrap');
+    const res = await fetch('http://localhost:5000/amrap');
     if (!res.ok) throw new Error('not ready');
     const data = await res.json();
     renderAMRAP(data);
@@ -2507,7 +1484,7 @@ async function loadAMRAP() {
 
 function renderAMRAP(data) {
   const tracks = document.getElementById('amrapTracks');
-  const week   = document.getElementById('amrapWeek');
+  const week = document.getElementById('amrapWeek');
 
   if (data.generated_at) {
     const d = new Date(data.generated_at);
@@ -2521,42 +1498,17 @@ function renderAMRAP(data) {
     el.style.cursor = 'pointer';
     el.title = 'Search ' + (t.artist || '') + ' — ' + (t.title || '');
     el.onclick = () => window.open('https://www.google.com/search?q=' + encodeURIComponent((t.artist || '') + ' ' + (t.title || '')), '_blank');
-
-    // Thumb: try local path first, fall back to remote S3 URL, then text placeholder
-    const thumb = document.createElement('div');
-    thumb.className = 'amrap-thumb';
-    const src = t.localImg || t.imgSrc || '';
-    const fallback = t.remoteImg || '';
-    if (src || fallback) {
-      const img = document.createElement('img');
-      img.src = src || fallback;
-      img.alt = t.title || '';
-      img.loading = 'lazy';
-      img.onerror = function() {
-        if (!this._tried && fallback && this.src !== fallback) {
-          this._tried = true;
-          this.src = fallback;
-        } else {
-          this.parentElement.innerHTML = '<div class="amrap-thumb-placeholder">ART</div>';
-        }
-      };
-      thumb.appendChild(img);
-    } else {
-      thumb.innerHTML = '<div class="amrap-thumb-placeholder">ART</div>';
-    }
-
-    const rank = document.createElement('div');
-    rank.className = 'amrap-rank' + (i === 0 ? ' top1' : '');
-    rank.textContent = i + 1;
-
-    const info = document.createElement('div');
-    info.className = 'amrap-info';
-    info.innerHTML = '<div class="amrap-track">' + (t.title || '') + '</div>' +
-                     '<div class="amrap-artist">' + (t.artist || '') + '</div>';
-
-    el.appendChild(rank);
-    el.appendChild(thumb);
-    el.appendChild(info);
+    el.innerHTML =
+      '<div class="amrap-rank ' + (i === 0 ? 'top1' : '') + '">' + (i + 1) + '</div>' +
+      '<div class="amrap-thumb">' +
+        (t.localImg || t.imgSrc
+          ? '<img src="' + (t.localImg || t.imgSrc) + '" alt="' + (t.imgAlt || t.title || '').replace(/"/g, '') + '" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=amrap-thumb-placeholder>ART</div>\'">'
+          : '<div class="amrap-thumb-placeholder">ART</div>') +
+      '</div>' +
+      '<div class="amrap-info">' +
+        '<div class="amrap-track">' + (t.title || '') + '</div>' +
+        '<div class="amrap-artist">' + (t.artist || '') + '</div>' +
+      '</div>';
     tracks.appendChild(el);
   });
 }
@@ -2565,7 +1517,7 @@ function renderAMRAP(data) {
 async function loadChartsFromAPI() {
   try {
     // Try local server first, then fall back to placeholder data
-    const res = await fetch('/charts');
+    const res = await fetch('http://localhost:5000/charts');
     if (!res.ok) return;
     const data = await res.json();
 
@@ -2597,366 +1549,53 @@ async function loadChartsFromAPI() {
   }
 }
 
-// ─── MOBILE TAB SWITCHING ─────────────────────────────────────────────────────
-function switchMobileTab(tab) {
-  const mapContainer   = document.getElementById('mapContainer');
-  const worldView      = document.getElementById('worldView');
-  const sidePanel      = document.getElementById('sidePanel');
-  const amrapSheet     = document.getElementById('amrapMobileSheet');
-  const tabMap         = document.getElementById('tab-map');
-  const tabWorld       = document.getElementById('tab-world');
-  const tabAmrap       = document.getElementById('tab-amrap');
-
-  // Close all sheets first
-  if (amrapSheet) amrapSheet.classList.remove('open');
-  if (tabMap) tabMap.classList.remove('active');
-  if (tabWorld) tabWorld.classList.remove('active');
-  if (tabAmrap) tabAmrap.classList.remove('active');
-
-  const logoSub = document.getElementById('logoSub');
-  if (tab === 'map') {
-    worldView.classList.remove('active');
-    worldView.classList.remove('panel-open');
-    sidePanel.classList.remove('open');
-    mapContainer.style.display = '';
-    tabMap.classList.add('active');
-    currentView = 'australia';
-    if (logoSub) logoSub.textContent = 'Australia';
-  } else if (tab === 'world') {
-    worldView.classList.add('active');
-    mapContainer.style.display = 'none';
-    if (tabWorld) tabWorld.classList.add('active');
-    // Close side panel cleanly — also remove panel-open from worldView
-    // so the grid doesn't stay squished when coming back to WORLD tab
-    sidePanel.classList.remove('open');
-    worldView.classList.remove('panel-open');
-    currentView = 'world';
-    if (logoSub) logoSub.textContent = 'World';
-    renderWorldGrid();
-  } else if (tab === 'amrap') {
-    worldView.classList.remove('active');
-    mapContainer.style.display = '';
-    if (!amrapSheet.dataset.populated) {
-      const amrapPanel = document.getElementById('amrapPanel');
-      amrapSheet.innerHTML = amrapPanel.innerHTML;
-      amrapSheet.dataset.populated = '1';
-    }
-    amrapSheet.classList.add('open');
-    if (tabAmrap) tabAmrap.classList.add('active');
-    sidePanel.classList.remove('open');
-    mapContainer.classList.remove('panel-open');
-    currentView = 'australia';
-  }
+// ─── AUDIO ────────────────────────────────────────────────────────────────────
+function togglePlay() {
+  if (isPlaying) stopAudio(); else startAudio();
 }
 
-// Re-sync mobile AMRAP sheet when data loads
-const _origRenderAMRAP = renderAMRAP;
-// Patch renderAMRAP to also update mobile sheet
-const _patchedRenderAMRAP = function(data) {
-  _origRenderAMRAP(data);
-  const sheet = document.getElementById('amrapMobileSheet');
-  if (sheet) sheet.dataset.populated = ''; // force re-clone next open
-};
+function startAudio() {
+  if (!currentState || !STATIONS[currentState]) return;
+  const audio = document.getElementById('audioPlayer');
+  audio.src = STATIONS[currentState].stream;
+  audio.load();
+  audio.play().then(() => {
+    isPlaying = true;
+    document.getElementById('playBtn').textContent = '■';
+    document.getElementById('playBtn').classList.add('playing');
+    document.getElementById('playerStatus').textContent = '● LIVE';
+    document.getElementById('playerStatus').className   = 'player-status live';
+    startWaveAnimation();
+  }).catch(() => {
+    document.getElementById('playerStatus').textContent = 'NO SIGNAL';
+  });
+}
+
+function stopAudio() {
+  const audio = document.getElementById('audioPlayer');
+  audio.pause();
+  audio.src = '';
+  isPlaying = false;
+  document.getElementById('playBtn').textContent = '▶';
+  document.getElementById('playBtn').classList.remove('playing');
+  document.getElementById('playerStatus').textContent = 'STANDBY';
+  document.getElementById('playerStatus').className   = 'player-status';
+  stopWaveAnimation();
+}
+
+function startWaveAnimation() {
+  document.querySelectorAll('.wave-bar').forEach(b => b.classList.add('active'));
+}
+
+function stopWaveAnimation() {
+  document.querySelectorAll('.wave-bar').forEach(b => {
+    b.classList.remove('active');
+    b.style.height = '4px';
+  });
+}
 
 // ─── KICK OFF ─────────────────────────────────────────────────────────────────
 init();
-loadAMRAP();
-loadChartsFromAPI();
-</script><!-- Mobile Tab Bar -->
-<nav class="mobile-tabs" id="mobileTabs">
-  <button class="mobile-tab active" id="tab-map" onclick="switchMobileTab('map')">
-    <span class="mobile-tab-icon mobile-tab-ascii">▣</span>
-    MAP
-  </button>
-  <button class="mobile-tab" id="tab-world" onclick="switchMobileTab('world')">
-    <span class="mobile-tab-icon mobile-tab-ascii">◈</span>
-    WORLD
-  </button>
-</nav>
-
-<!-- AMRAP Mobile Sheet (shown when AIRPLAY tab active) -->
-<div class="amrap-mobile-sheet" id="amrapMobileSheet"></div>
-<!-- PWA Service Worker -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then(() => console.log('SW registered'))
-        .catch(e => console.log('SW failed:', e));
-    });
-  }
 </script>
-
-<!-- ═══════════════════════════════════════════════════════════════
-     VISUAL FLAIR — toggle each by flipping its flag to false
-     ═══════════════════════════════════════════════════════════════ -->
-<script>
-// ─── WORLD VIEW ───────────────────────────────────────────────────────────────
-function toggleWorldView() {
-  currentView = currentView === 'australia' ? 'world' : 'australia';
-  const btn = document.getElementById('worldToggleBtn');
-  const mapContainer = document.getElementById('mapContainer');
-  const worldView = document.getElementById('worldView');
-  const amrapPanel = document.getElementById('amrapPanel');
-  const amrapToggle = document.getElementById('amrapToggle');
-  const appContainer = document.getElementById('appContainer');
-
-  const logoSub = document.getElementById('logoSub');
-  if (currentView === 'world') {
-    btn.textContent = 'AUSTRALIA';
-    btn.classList.add('active');
-    mapContainer.style.display = 'none';
-    worldView.classList.add('active');
-    amrapPanel.style.display = 'none';
-    amrapToggle.style.display = 'none';
-    appContainer.classList.add('amrap-hidden');
-    if (logoSub) logoSub.textContent = 'World';
-    closePanel();
-    renderWorldGrid();
-  } else {
-    btn.textContent = 'WORLD';
-    btn.classList.remove('active');
-    mapContainer.style.display = '';
-    worldView.classList.remove('active');
-    amrapPanel.style.display = '';
-    amrapToggle.style.display = '';
-    appContainer.classList.remove('amrap-hidden');
-    if (logoSub) logoSub.textContent = 'Australia';
-  }
-}
-
-function renderWorldGrid() {
-  const grid = document.getElementById('worldGrid');
-  const pagination = document.getElementById('worldPagination');
-  const pageIndicator = document.getElementById('worldPageIndicator');
-  const prevBtn = document.getElementById('worldPrevBtn');
-  const nextBtn = document.getElementById('worldNextBtn');
-  const page = WORLD_STATIONS_PAGES[currentWorldPage];
-  grid.innerHTML = '';
-  page.forEach((station, i) => {
-    const card = document.createElement('div');
-    card.className = 'world-card';
-    card.id = 'world-card-' + station.id;
-    card.onclick = () => selectWorldStation(station);
-    card.innerHTML = `
-      <div class="world-card-ping"></div>
-      <div class="world-card-flag">${station.flag}</div>
-      <div class="world-card-name">${station.name}</div>
-      <div class="world-card-location">${station.city} · ${station.country}</div>
-      <div class="world-card-freq">${station.freq}</div>
-    `;
-    grid.appendChild(card);
-  });
-  if (WORLD_STATIONS_PAGES.length > 1) {
-    pagination.style.display = 'flex';
-    pageIndicator.textContent = `PAGE ${currentWorldPage + 1} / ${WORLD_STATIONS_PAGES.length}`;
-    prevBtn.disabled = currentWorldPage === 0;
-    nextBtn.disabled = currentWorldPage === WORLD_STATIONS_PAGES.length - 1;
-  } else {
-    pagination.style.display = 'none';
-  }
-}
-
-function changeWorldPage(dir) {
-  currentWorldPage = Math.max(0, Math.min(WORLD_STATIONS_PAGES.length - 1, currentWorldPage + dir));
-  renderWorldGrid();
-}
-
-function selectWorldStation(station) {
-  // Clear any highlighted Australian state from map
-  if (currentState) {
-    document.getElementById(currentState)?.classList.remove('selected');
-    document.getElementById('label-' + currentState)?.classList.remove('selected-label');
-    document.getElementById('ping-' + currentState)?.classList.remove('active');
-  }
-  currentState = null; // null = world station mode
-  window._currentWorldStation = station;
-
-  document.querySelectorAll('.world-card').forEach(c => c.classList.remove('selected'));
-  const card = document.getElementById('world-card-' + station.id);
-  if (card) card.classList.add('selected');
-
-  showStationPanel(station);
-  document.getElementById('sidePanel').classList.add('open');
-  // Push world-view left just like map does
-  document.getElementById('worldView').classList.add('panel-open');
-  updateMiniPlayer();
-}
-
-// ── AMRAP PANEL TOGGLE ────────────────────────────────────────────
-function toggleAmrap() {
-  const panel  = document.getElementById('amrapPanel');
-  const toggle = document.getElementById('amrapToggle');
-  const app    = document.getElementById('appContainer');
-  const collapsed = panel.classList.toggle('collapsed');
-  toggle.classList.toggle('collapsed', collapsed);
-  app.classList.toggle('amrap-hidden', collapsed);
-  toggle.textContent = collapsed ? '▶ AMRAP CHART' : '◀ AMRAP CHART';
-}
-
-// ── FEATURE FLAGS ─────────────────────────────────────────────────
-const FLAIR_SCAN_LINE   = false;  // 1. Slow horizontal sweep across map (disabled)
-const FLAIR_GLITCH      = true;   // 2. Occasional label static/scramble
-const FLAIR_COORD_TIP   = true;   // 4. Lat/long tooltip on state hover
-const FLAIR_WAVE_CHARTS = true;   // 7. Waveform flash on chart track hover
-
-// ── 2. LABEL GLITCH ───────────────────────────────────────────────
-if (FLAIR_GLITCH) {
-  const GLITCH_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/\\|#@!%';
-  const glitchLabel = (el) => {
-    const original = el.textContent;
-    const len = original.length;
-    let ticks = 0;
-    const scramble = setInterval(() => {
-      el.textContent = original.split('').map((c, i) =>
-        c === ' ' ? ' ' : (Math.random() < (ticks / 8) ? c : GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)])
-      ).join('');
-      ticks++;
-      if (ticks > 8) { el.textContent = original; clearInterval(scramble); }
-    }, 60);
-  };
-
-  const scheduleGlitch = () => {
-    const labels = [...document.querySelectorAll('.state-label.active-label')];
-    if (labels.length) glitchLabel(labels[Math.floor(Math.random() * labels.length)]);
-    setTimeout(scheduleGlitch, 8000 + Math.random() * 12000);
-  };
-  setTimeout(scheduleGlitch, 5000);
-}
-
-// ── 4. COORDINATE TOOLTIP ─────────────────────────────────────────
-if (FLAIR_COORD_TIP) {
-  // Approx centre coords for each state/region
-  const STATE_COORDS = {
-    WA:     { lat: -25.3, lng: 122.1 },
-    NT_TOP: { lat: -13.5, lng: 131.0 },
-    NT_BOT: { lat: -22.0, lng: 134.5 },
-    QLD:    { lat: -22.5, lng: 144.4 },
-    SA:     { lat: -30.0, lng: 135.8 },
-    NSW:    { lat: -32.1, lng: 147.0 },
-    VIC:    { lat: -37.0, lng: 144.9 },
-    TAS:    { lat: -42.0, lng: 146.5 },
-    ACT:    { lat: -35.5, lng: 149.0 },
-  };
-
-  const tip = document.createElement('div');
-  tip.style.cssText = `
-    position: fixed; pointer-events: none; display: none;
-    font-family: 'Share Tech Mono', monospace; font-size: 0.6rem;
-    color: rgba(0,255,65,0.7); background: rgba(2,10,3,0.85);
-    padding: 3px 6px; border: 1px solid rgba(0,255,65,0.2);
-    letter-spacing: 0.08em; z-index: 9999; white-space: nowrap;
-  `;
-  document.body.appendChild(tip);
-
-  let tipTimeout = null;
-  Object.keys(STATE_COORDS).forEach(code => {
-    const el = document.getElementById(code);
-    if (!el) return;
-    el.addEventListener('mouseenter', (e) => {
-      if (tipTimeout) clearTimeout(tipTimeout);
-      const c = STATE_COORDS[code];
-      tip.textContent = `// ${c.lat}° ${c.lng}°`;
-      tip.style.display = 'block';
-      tipTimeout = setTimeout(() => { tip.style.display = 'none'; }, 1200);
-    });
-    el.addEventListener('mousemove', (e) => {
-      tip.style.left = (e.clientX + 14) + 'px';
-      tip.style.top  = (e.clientY - 20) + 'px';
-    });
-    el.addEventListener('mouseleave', () => {
-      if (tipTimeout) clearTimeout(tipTimeout);
-      tip.style.display = 'none';
-    });
-  });
-}
-
-// ── 7. CHART WAVEFORM HOVER ───────────────────────────────────────
-if (FLAIR_WAVE_CHARTS) {
-  const WAVE_CSS = `
-    .chart-wave { display:none; align-items:center; gap:2px; height:14px; margin-left:auto; padding-right:4px; }
-    .chart-entry:hover .chart-wave { display:flex; }
-    .chart-wave span {
-      display:inline-block; width:2px; background:rgba(0,255,65,0.7);
-      border-radius:1px; animation: cw-pulse 0.5s ease-in-out infinite alternate;
-    }
-    @keyframes cw-pulse {
-      from { transform: scaleY(0.2); opacity:0.4; }
-      to   { transform: scaleY(1);   opacity:1;   }
-    }
-  `;
-  const style = document.createElement('style');
-  style.textContent = WAVE_CSS;
-  document.head.appendChild(style);
-
-  // Patch renderCharts to inject waveform into each entry
-  const _origRenderCharts = window.renderCharts;
-  window.renderCharts = function(station) {
-    _origRenderCharts(station);
-    document.querySelectorAll('.chart-entry').forEach(entry => {
-      const wave = document.createElement('div');
-      wave.className = 'chart-wave';
-      const bars = 5;
-      for (let i = 0; i < bars; i++) {
-        const bar = document.createElement('span');
-        const h = 4 + Math.floor(Math.random() * 10);
-        bar.style.height = h + 'px';
-        bar.style.animationDelay = (i * 0.1) + 's';
-        bar.style.animationDuration = (0.3 + Math.random() * 0.3) + 's';
-        wave.appendChild(bar);
-      }
-      entry.appendChild(wave);
-    });
-  };
-}
-
-  // ── VIEWPORT HEIGHT + iOS SAFE AREA FIX ──────────────────────────────────
-  // Detect iPhone PWA (standalone mode) and apply safe area compensation
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isStandalone = window.navigator.standalone === true;
-
-  function setAppHeight() {
-    document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
-  }
-
-  function applyIOSSafeArea() {
-    if (!isIOS) return;
-    // Measure actual safe-area-inset-bottom via a probe element
-    const probe = document.createElement('div');
-    probe.style.cssText = 'position:fixed;bottom:0;height:env(safe-area-inset-bottom,0px);width:1px;pointer-events:none;visibility:hidden;';
-    document.body.appendChild(probe);
-    const safeBottom = parseFloat(getComputedStyle(probe).height) || 0;
-    document.body.removeChild(probe);
-
-    // If env() works, use it; otherwise hardcode 34px for iPhone home indicator
-    const safeArea = safeBottom > 0 ? safeBottom : (isStandalone ? 34 : 0);
-
-    const tabs = document.getElementById('mobileTabs');
-    if (tabs && safeArea > 0) {
-      tabs.style.height = (48 + safeArea) + 'px';
-      tabs.style.paddingBottom = safeArea + 'px';
-      tabs.style.alignItems = 'flex-start';
-      tabs.style.boxSizing = 'border-box';
-      // Adjust app height to account for taller tab bar
-      const currentH = parseInt(getComputedStyle(document.getElementById('appContainer')).height);
-      document.documentElement.style.setProperty('--tab-height', (48 + safeArea) + 'px');
-    }
-  }
-
-  setAppHeight();
-  window.addEventListener('resize', setAppHeight);
-  window.addEventListener('orientationchange', function() {
-    setTimeout(function() { setAppHeight(); applyIOSSafeArea(); }, 100);
-  });
-
-  // Run after DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applyIOSSafeArea);
-  } else {
-    applyIOSSafeArea();
-  }
-
-</script>
-
 </body>
 </html>
