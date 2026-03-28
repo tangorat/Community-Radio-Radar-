@@ -1,4 +1,4 @@
-const CACHE = 'radio-radar-v8';
+const CACHE = 'radio-radar-v4';
 const STATIC = [
   '/',
   '/manifest.json',
