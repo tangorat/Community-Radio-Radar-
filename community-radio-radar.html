@@ -1429,6 +1429,9 @@
     border-top: 1px solid var(--border);
     z-index: 100;
     flex-direction: row;
+    /* Paint panel colour into iPhone home indicator zone */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-sizing: content-box;
   }
   .mobile-tab {
     flex: 1;
