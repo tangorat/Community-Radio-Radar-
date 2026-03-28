@@ -871,7 +871,7 @@
     /* App layout — full width, no left offset */
     .app {
       margin-left: 0 !important;
-      height: calc(var(--app-height, 100vh) - 48px - 48px);
+      height: calc(var(--app-height, 100vh) - 48px - calc(48px + env(safe-area-inset-bottom, 34px)));
       background: var(--bg);
       overflow: hidden;
       flex-direction: column;
@@ -920,7 +920,7 @@
       position: fixed !important;
       left: 0 !important;
       right: 0 !important;
-      bottom: 48px !important;
+      bottom: calc(48px + env(safe-area-inset-bottom, 34px)) !important;
       top: auto !important;
       width: 100vw !important;
       height: 75vh !important;
@@ -1424,14 +1424,16 @@
     display: none;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: 48px;
+    /* 48px for buttons + safe area (fallback 34px for iPhone home indicator) */
+    height: calc(48px + env(safe-area-inset-bottom, 34px));
     background: var(--panel);
     border-top: 1px solid var(--border);
     z-index: 100;
     flex-direction: row;
-    /* Paint panel colour into iPhone home indicator zone */
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    box-sizing: content-box;
+    /* Buttons only use the top 48px */
+    align-items: flex-start;
+    padding-bottom: env(safe-area-inset-bottom, 34px);
+    box-sizing: border-box;
   }
   .mobile-tab {
     flex: 1;
@@ -1459,7 +1461,7 @@
     display: none;
     position: fixed;
     left: 0; right: 0;
-    bottom: 48px;
+    bottom: calc(48px + env(safe-area-inset-bottom, 34px));
     top: 48px;
     background: var(--panel);
     z-index: 50;
