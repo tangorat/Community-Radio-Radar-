@@ -871,7 +871,7 @@
     /* App layout — full width, no left offset */
     .app {
       margin-left: 0 !important;
-      height: calc(var(--app-height, 100vh) - 48px - calc(48px + env(safe-area-inset-bottom, 34px)));
+      height: calc(var(--app-height, 100vh) - 48px - var(--tab-height, 48px));
       background: var(--bg);
       overflow: hidden;
       flex-direction: column;
@@ -920,7 +920,7 @@
       position: fixed !important;
       left: 0 !important;
       right: 0 !important;
-      bottom: calc(48px + env(safe-area-inset-bottom, 34px)) !important;
+      bottom: 48px !important;
       top: auto !important;
       width: 100vw !important;
       height: 75vh !important;
@@ -1424,16 +1424,12 @@
     display: none;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    /* 48px for buttons + safe area (fallback 34px for iPhone home indicator) */
-    height: calc(48px + env(safe-area-inset-bottom, 34px));
+    height: 48px;
     background: var(--panel);
     border-top: 1px solid var(--border);
     z-index: 100;
     flex-direction: row;
-    /* Buttons only use the top 48px */
-    align-items: flex-start;
-    padding-bottom: env(safe-area-inset-bottom, 34px);
-    box-sizing: border-box;
+    align-items: center;
   }
   .mobile-tab {
     flex: 1;
@@ -1461,7 +1457,7 @@
     display: none;
     position: fixed;
     left: 0; right: 0;
-    bottom: calc(48px + env(safe-area-inset-bottom, 34px));
+    bottom: 48px;
     top: 48px;
     background: var(--panel);
     z-index: 50;
@@ -2914,18 +2910,51 @@ if (FLAIR_WAVE_CHARTS) {
   };
 }
 
-  // ── VIEWPORT HEIGHT FIX ───────────────────────────────────────────────────
-  // iOS Safari reports 100vh incorrectly as PWA. We measure the real
-  // window.innerHeight and expose it as --app-height for mobile layout.
+  // ── VIEWPORT HEIGHT + iOS SAFE AREA FIX ──────────────────────────────────
+  // Detect iPhone PWA (standalone mode) and apply safe area compensation
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true;
+
   function setAppHeight() {
     document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
   }
+
+  function applyIOSSafeArea() {
+    if (!isIOS) return;
+    // Measure actual safe-area-inset-bottom via a probe element
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;bottom:0;height:env(safe-area-inset-bottom,0px);width:1px;pointer-events:none;visibility:hidden;';
+    document.body.appendChild(probe);
+    const safeBottom = parseFloat(getComputedStyle(probe).height) || 0;
+    document.body.removeChild(probe);
+
+    // If env() works, use it; otherwise hardcode 34px for iPhone home indicator
+    const safeArea = safeBottom > 0 ? safeBottom : (isStandalone ? 34 : 0);
+
+    const tabs = document.getElementById('mobileTabs');
+    if (tabs && safeArea > 0) {
+      tabs.style.height = (48 + safeArea) + 'px';
+      tabs.style.paddingBottom = safeArea + 'px';
+      tabs.style.alignItems = 'flex-start';
+      tabs.style.boxSizing = 'border-box';
+      // Adjust app height to account for taller tab bar
+      const currentH = parseInt(getComputedStyle(document.getElementById('appContainer')).height);
+      document.documentElement.style.setProperty('--tab-height', (48 + safeArea) + 'px');
+    }
+  }
+
   setAppHeight();
   window.addEventListener('resize', setAppHeight);
   window.addEventListener('orientationchange', function() {
-    // Small delay to let orientation settle before measuring
-    setTimeout(setAppHeight, 100);
+    setTimeout(function() { setAppHeight(); applyIOSSafeArea(); }, 100);
   });
+
+  // Run after DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applyIOSSafeArea);
+  } else {
+    applyIOSSafeArea();
+  }
 
 </script>
 
