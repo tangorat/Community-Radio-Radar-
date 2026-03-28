@@ -2912,7 +2912,7 @@ if (FLAIR_WAVE_CHARTS) {
 
   // ── VIEWPORT HEIGHT + iOS SAFE AREA FIX ──────────────────────────────────
   // Detect iPhone PWA (standalone mode) and apply safe area compensation
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isStandalone = window.navigator.standalone === true;
 
   function setAppHeight() {
@@ -2920,16 +2920,17 @@ if (FLAIR_WAVE_CHARTS) {
   }
 
   function applyIOSSafeArea() {
-    if (!isIOS) return;
     // Measure actual safe-area-inset-bottom via a probe element
+    // Use 34px as fallback — the standard iPhone home indicator height
     const probe = document.createElement('div');
-    probe.style.cssText = 'position:fixed;bottom:0;height:env(safe-area-inset-bottom,0px);width:1px;pointer-events:none;visibility:hidden;';
+    probe.style.cssText = 'position:fixed;bottom:0;height:env(safe-area-inset-bottom,34px);width:1px;pointer-events:none;visibility:hidden;';
     document.body.appendChild(probe);
     const safeBottom = parseFloat(getComputedStyle(probe).height) || 0;
     document.body.removeChild(probe);
 
-    // If env() works, use it; otherwise hardcode 34px for iPhone home indicator
-    const safeArea = safeBottom > 0 ? safeBottom : (isStandalone ? 34 : 0);
+    // Apply if we measured a safe area, OR if we're on iOS (standalone or not)
+    // Use 34px hardcode for iOS if env() returns 0
+    const safeArea = safeBottom > 0 ? safeBottom : (isIOS ? 34 : 0);
 
     const tabs = document.getElementById('mobileTabs');
     if (tabs && safeArea > 0) {
@@ -2937,8 +2938,6 @@ if (FLAIR_WAVE_CHARTS) {
       tabs.style.paddingBottom = safeArea + 'px';
       tabs.style.alignItems = 'flex-start';
       tabs.style.boxSizing = 'border-box';
-      // Adjust app height to account for taller tab bar
-      const currentH = parseInt(getComputedStyle(document.getElementById('appContainer')).height);
       document.documentElement.style.setProperty('--tab-height', (48 + safeArea) + 'px');
     }
   }
