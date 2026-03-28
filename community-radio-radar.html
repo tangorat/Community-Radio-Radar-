@@ -28,7 +28,16 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  html, body {
+  html {
+    /* Fill the full physical screen including safe areas on iPhone PWA */
+    height: -webkit-fill-available;
+    height: 100dvh;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  body {
+    min-height: -webkit-fill-available;
+    min-height: 100dvh;
     height: 100%;
     background: var(--bg);
     color: var(--text);
@@ -45,10 +54,10 @@
   body::after {
     content: '';
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: -env(safe-area-inset-top, 0px);
+    left: -env(safe-area-inset-left, 0px);
+    right: -env(safe-area-inset-right, 0px);
+    bottom: -env(safe-area-inset-bottom, 0px);
     background: repeating-linear-gradient(
       0deg,
       transparent,
@@ -64,10 +73,10 @@
   body::before {
     content: '';
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: -env(safe-area-inset-top, 0px);
+    left: -env(safe-area-inset-left, 0px);
+    right: -env(safe-area-inset-right, 0px);
+    bottom: -env(safe-area-inset-bottom, 0px);
     opacity: 0.03;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
     pointer-events: none;
@@ -848,12 +857,17 @@
   /* ─── MOBILE ──────────────────────────────────────────────────────────────── */
   @media (max-width: 700px) {
 
-
+    /* Mobile bg reinforcement */
+    html, body { background: var(--bg) !important; }
 
     /* Header — push below iPhone status bar using safe area */
     header {
       padding: 0 12px;
-      height: 48px;
+      padding-top: env(safe-area-inset-top, 0px);
+      height: calc(48px + env(safe-area-inset-top, 0px));
+      align-items: flex-end;
+      padding-bottom: 6px;
+      box-sizing: border-box;
       display: flex !important;
       justify-content: space-between !important;
     }
@@ -868,10 +882,15 @@
     .amrap-panel { display: none !important; }
     .amrap-toggle { display: none !important; }
 
-    /* App layout — full width, no left offset */
+    /* App layout — fill remaining space between header and tab bar */
+    body {
+      display: flex;
+      flex-direction: column;
+    }
     .app {
       margin-left: 0 !important;
-      height: calc(100vh - 48px - 48px);
+      flex: 1 1 0;
+      height: 0; /* flex-grow handles height, this prevents overflow */
       background: var(--bg);
       overflow: hidden;
       flex-direction: column;
@@ -920,10 +939,13 @@
       position: fixed !important;
       left: 0 !important;
       right: 0 !important;
-      bottom: 48px !important;
+      bottom: calc(48px + env(safe-area-inset-bottom, 0px)) !important;
+      /* Ensure panel bg covers any gap */
+      background: var(--panel) !important;
       top: auto !important;
       width: 100vw !important;
       height: 75vh !important;
+      max-height: calc(100dvh - 48px - env(safe-area-inset-top, 0px) - 48px - env(safe-area-inset-bottom, 0px)) !important;
       border-left: none !important;
       border-top: 1px solid var(--border);
       transform: translateY(110%);
@@ -945,6 +967,8 @@
     .amrap-mobile-sheet {
       display: flex !important;
     }
+
+    /* Map hint smaller */
 
     /* Drag handle on panel */
     .side-panel::before {
@@ -1216,6 +1240,8 @@
     cursor: pointer;
     transition: all 0.2s;
     text-transform: uppercase;
+    /* Centred via flex positioning — no absolute needed */
+    order: -1;
   }
   @media (max-width: 700px) {
     .world-toggle-btn { display: none !important; }
@@ -1410,6 +1436,12 @@
     line-height: 1.6;
     text-transform: uppercase;
   }
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    padding: 20px 14px;
+    text-align: center;
+  }
   .amrap-loading::after {
     content: '...';
     animation: dots 1.2s steps(3, end) infinite;
@@ -1424,11 +1456,28 @@
     display: none;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: 48px;
+    height: calc(48px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     background: var(--panel);
     border-top: 1px solid var(--border);
-    z-index: 100;
+    z-index: 150;
     flex-direction: row;
+  }
+  /* Fills the iPhone home-indicator safe area below the tab bar */
+  /* Always-on safe area filler — covers iPhone home indicator void */
+  .safe-area-filler {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px; /* generous fixed height — always covers the home bar */
+    background: var(--panel);
+    z-index: 90; /* below tab bar (150) so tabs sit on top */
+  }
+  @media (min-width: 701px) {
+    /* On desktop, filler sits behind content and is invisible */
+    .safe-area-filler { display: none; }
   }
   .mobile-tab {
     flex: 1;
@@ -1455,9 +1504,10 @@
   .amrap-mobile-sheet {
     display: none;
     position: fixed;
+    background: var(--bg);
     left: 0; right: 0;
-    bottom: 48px;
-    top: 48px;
+    bottom: calc(48px + env(safe-area-inset-bottom, 0px));
+    top: calc(48px + env(safe-area-inset-top, 0px));
     background: var(--panel);
     z-index: 50;
     flex-direction: column;
@@ -2657,6 +2707,7 @@ init();
 loadAMRAP();
 loadChartsFromAPI();
 </script><!-- Mobile Tab Bar -->
+<div class="safe-area-filler" id="safeAreaFiller"></div>
 <nav class="mobile-tabs" id="mobileTabs">
   <button class="mobile-tab active" id="tab-map" onclick="switchMobileTab('map')">
     <span class="mobile-tab-icon mobile-tab-ascii">▣</span>
