@@ -23,6 +23,7 @@
     --text: #b8ffca;
     --muted: #2a5c30;
     --inactive: #0d1f0e;
+    --header-h: 60px;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -79,11 +80,12 @@
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    padding: 14px 28px;
+    padding: 12px 28px;
     border-bottom: 1px solid var(--border);
     background: var(--panel);
     position: relative;
     z-index: 100;
+    flex-shrink: 0;
   }
   /* Centre column holds the WORLD button */
   .header-centre {
@@ -104,7 +106,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: rgba(0,255,65,0.08);
+    background: var(--hover-bg, rgba(0,255,65,0.08));
     border: 1px solid var(--border);
     padding: 6px 6px 6px 14px;
     border-radius: 2px;
@@ -123,7 +125,7 @@
     letter-spacing: 2px;
   }
   .mini-player-stop {
-    background: rgba(0,255,65,0.12);
+    background: var(--hover-bg, rgba(0,255,65,0.12));
     border: 1px solid var(--border);
     color: var(--green);
     font-size: 1.1rem;
@@ -132,7 +134,19 @@
     line-height: 1;
     opacity: 0.9;
   }
-  .mini-player-stop:hover { opacity: 1; background: rgba(0,255,65,0.22); }
+  .mini-player-play {
+    background: none;
+    border: none;
+    color: var(--green);
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 0 6px;
+    opacity: 0.7;
+    font-family: monospace;
+    transition: opacity 0.15s;
+  }
+  .mini-player-play:hover { opacity: 1; }
+  .mini-player-stop:hover { opacity: 1; background: var(--hover-bg, rgba(0,255,65,0.22)); }
 
   .mini-waveform {
     display: flex;
@@ -173,7 +187,7 @@
     font-size: 2.2rem;
     color: var(--green);
     letter-spacing: 3px;
-    text-shadow: 0 0 20px var(--green), 0 0 40px rgba(0,255,65,0.3);
+    text-shadow: 0 0 20px var(--green), 0 0 40px rgba(var(--glow-color,0,255,65),0.3);
     animation: flicker 8s infinite;
   }
 
@@ -214,7 +228,7 @@
   /* LAYOUT */
   .app {
     display: flex;
-    height: calc(100vh - 57px);
+    height: calc(100vh - var(--header-h, 57px));
     position: relative;
     margin-left: 16rem;
     transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -253,8 +267,8 @@
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px);
+      linear-gradient(rgba(var(--glow-color,0,255,65),0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(var(--glow-color,0,255,65),0.03) 1px, transparent 1px);
     background-size: 40px 40px;
     pointer-events: none;
   }
@@ -271,7 +285,7 @@
 
   svg#australia-map {
     height: auto;
-    filter: drop-shadow(0 0 30px rgba(0,255,65,0.08));
+    filter: drop-shadow(0 0 30px rgba(var(--glow-color, 0,255,65),0.08));
   }
 
   @media (min-width: 1920px) { svg#australia-map { max-width: 900px; } }
@@ -294,14 +308,14 @@
     fill: var(--green-dark);
     stroke: var(--green);
     stroke-width: 2;
-    filter: drop-shadow(0 0 12px rgba(0,255,65,0.5));
+    filter: drop-shadow(0 0 12px rgba(var(--glow-color, 0,255,65),0.5));
   }
 
   .state-path.selected {
     fill: var(--green-dark);
     stroke: var(--green);
     stroke-width: 2.5;
-    filter: drop-shadow(0 0 16px rgba(0,255,65,0.6));
+    filter: drop-shadow(0 0 16px rgba(var(--glow-color, 0,255,65),0.6));
   }
 
   .state-path.inactive {
@@ -324,7 +338,7 @@
     stroke: var(--green);
     stroke-width: 2;
     opacity: 1;
-    filter: drop-shadow(0 0 12px rgba(0,255,65,0.5));
+    filter: drop-shadow(0 0 12px rgba(var(--glow-color, 0,255,65),0.5));
   }
 
   .state-path.coming-soon.selected {
@@ -332,7 +346,7 @@
     stroke: var(--green);
     stroke-width: 2.5;
     opacity: 1;
-    filter: drop-shadow(0 0 16px rgba(0,255,65,0.6));
+    filter: drop-shadow(0 0 16px rgba(var(--glow-color, 0,255,65),0.6));
   }
 
 
@@ -370,9 +384,9 @@
   .side-panel {
     position: fixed;
     right: -420px;
-    top: 57px;
+    top: var(--header-h, 57px);
     width: 400px;
-    height: calc(100vh - 57px);
+    height: calc(100vh - var(--header-h, 57px));
     background: var(--panel);
     border-left: 1px solid var(--border);
     z-index: 50;
@@ -494,15 +508,15 @@
   }
 
   @keyframes bufferPulse {
-    0%   { background: var(--green-dark); box-shadow: 0 0 4px rgba(0,255,65,0.2); color: var(--green); }
-    50%  { background: var(--green-dim);  box-shadow: 0 0 24px rgba(0,255,65,0.7); color: var(--bg); }
-    100% { background: var(--green-dark); box-shadow: 0 0 4px rgba(0,255,65,0.2); color: var(--green); }
+    0%   { background: var(--green-dark); box-shadow: 0 0 4px rgba(var(--glow-color,0,255,65),0.2); color: var(--green); }
+    50%  { background: var(--green-dim);  box-shadow: 0 0 24px rgba(var(--glow-color,0,255,65),0.7); color: var(--bg); }
+    100% { background: var(--green-dark); box-shadow: 0 0 4px rgba(var(--glow-color,0,255,65),0.2); color: var(--green); }
   }
 
   .play-btn:hover, .play-btn.playing {
     background: var(--green-dim);
     color: var(--bg);
-    box-shadow: 0 0 20px rgba(0,255,65,0.4);
+    box-shadow: 0 0 20px rgba(var(--glow-color,0,255,65),0.4);
   }
 
   .waveform {
@@ -532,6 +546,7 @@
     color: var(--muted);
     letter-spacing: 1px;
     flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .player-status.live {
@@ -548,7 +563,7 @@
 
   .bio-text {
     font-size: 0.72rem;
-    color: #4a8c52;
+    color: var(--bio-text, var(--fg));
     line-height: 1.7;
     letter-spacing: 0.3px;
   }
@@ -715,6 +730,14 @@
     color: var(--green-dim);
   }
 
+  /* COORD TIP */
+  .coord-tip {
+    color: var(--green);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    opacity: 0.9;
+  }
+
   /* INSTRUCTIONS */
   .map-hint {
     position: absolute;
@@ -745,7 +768,7 @@
   .uc-ascii {
     font-family: 'VT323', monospace;
     font-size: 0.75rem;
-    color: #1a5c22;
+    color: var(--muted);
     line-height: 1.3;
     letter-spacing: 1px;
     white-space: pre;
@@ -1065,9 +1088,10 @@
   .settings-panel {
     position: fixed;
     right: -360px;
-    top: 57px;
+    top: var(--header-h, 57px);
     width: 340px;
-    height: calc(100vh - 57px);
+    height: calc(100vh - var(--header-h, 57px));
+    overflow-y: auto;
     background: var(--panel);
     border-left: 1px solid var(--border);
     z-index: 200;
@@ -1124,7 +1148,7 @@
   }
 
   .setting-pill {
-    background: rgba(0,255,65,0.06);
+    background: var(--hover-bg, rgba(0,255,65,0.06));
     border: 1px solid var(--border);
     color: var(--green);
     font-family: 'Share Tech Mono', monospace;
@@ -1196,6 +1220,7 @@
       width: 100vw;
       border-left: none;
       border-top: 1px solid var(--border);
+      overflow-y: auto;
     }
     .settings-panel.open { right: 0; }
     .settings-btn { display: none; }
@@ -1253,12 +1278,12 @@
   .world-card:hover {
     border-color: var(--green);
     background: var(--green-dark);
-    box-shadow: 0 0 20px rgba(0,255,65,0.15);
+    box-shadow: 0 0 20px rgba(var(--glow-color,0,255,65),0.15);
   }
   .world-card.selected {
     border-color: var(--green);
     background: var(--green-dark);
-    box-shadow: 0 0 24px rgba(0,255,65,0.25);
+    box-shadow: 0 0 24px rgba(var(--glow-color,0,255,65),0.25);
   }
   .world-card-flag {
     font-family: 'Share Tech Mono', monospace;
@@ -1420,7 +1445,7 @@
   }
   .amrap-panel {
     position: fixed;
-    left: 0; top: 57px; bottom: 0;
+    left: 0; top: var(--header-h, 57px); bottom: 0;
     width: 16rem;
     background: var(--panel);
     border-right: 1px solid var(--border);
@@ -1454,7 +1479,7 @@
     border-radius: 0 4px 4px 0;
     line-height: 1;
   }
-  .amrap-toggle:hover { background: rgba(0,255,65,0.08); }
+  .amrap-toggle:hover { background: var(--hover-bg, rgba(0,255,65,0.08)); }
   .amrap-toggle.collapsed { left: 0; }
   .amrap-header {
     padding: 14px 14px 10px;
@@ -1508,8 +1533,8 @@
   }
   .amrap-rank.top1 { color: var(--accent); }
   .amrap-thumb {
-    width: 44px;
-    height: 44px;
+    width: 57px;
+    height: 57px;
     flex-shrink: 0;
     border-radius: 3px;
     overflow: hidden;
@@ -1535,7 +1560,7 @@
   }
   .amrap-info { flex: 1; min-width: 0; }
   .amrap-track {
-    font-size: 0.65rem;
+    font-size: 0.85rem;
     letter-spacing: 0.04em;
     color: var(--fg);
     white-space: nowrap;
@@ -1544,7 +1569,7 @@
     line-height: 1.2;
   }
   .amrap-artist {
-    font-size: 0.58rem;
+    font-size: 0.75rem;
     color: var(--muted);
     letter-spacing: 0.04em;
     margin-top: 2px;
@@ -1637,7 +1662,52 @@
     transform: translateY(0);
   }
 
+
+  /* ── LANDSCAPE MOBILE ─────────────────────────────────────────────────── */
+  @media (max-width: 900px) and (orientation: landscape) {
+    header {
+      height: 36px !important;
+      padding: 0 10px !important;
+    }
+    .app {
+      height: calc(100vh - 36px - 36px) !important;
+    }
+    .mobile-tabs {
+      height: 36px !important;
+    }
+    .side-panel {
+      top: 36px !important;
+      height: calc(100vh - 36px - 36px) !important;
+      bottom: 36px !important;
+    }
+    .settings-panel {
+      top: 36px !important;
+      height: calc(100vh - 36px - 36px) !important;
+    }
+    .map-container {
+      padding: 2px 4px !important;
+    }
+    svg#australia-map {
+      max-height: calc(100vh - 72px) !important;
+    }
+    .logo-row { display: none !important; }
+    .logo { font-size: 0.85rem !important; line-height: 1 !important; }
+    .world-card { min-height: 80px !important; padding: 10px !important; }
+  }
+
 </style>
+<script>
+(function(){
+  const HEADER_H = { small:'56px', medium:'60px', large:'66px', xlarge:'73px' };
+  try {
+    const cfg = JSON.parse(localStorage.getItem('rrCfg') || '{}');
+    const hh = HEADER_H[cfg.fontSize] || '57px';
+    document.documentElement.style.setProperty('--header-h', hh);
+    if (cfg.fontSize) document.documentElement.style.fontSize =
+      { small:'12px', medium:'14px', large:'17px', xlarge:'20px' }[cfg.fontSize] || '14px';
+  } catch(e) {}
+})();
+</script>
 </head>
 <body>
 
@@ -1660,6 +1730,7 @@
         <div class="mini-wave-bar"></div>
       </div>
       <span class="mini-player-label" id="miniPlayerLabel">PLAYING</span>
+      <button class="mini-player-play" id="miniPlayBtn" onclick="togglePlay()" title="Play/Pause">▶</button>
       <button class="mini-player-stop" onclick="stopAudio()">■</button>
     </div>
   </div>
@@ -1715,7 +1786,7 @@
         <!-- NT Bottom half - CAAMA: follows real diagonal edges down to bottom -->
         <path id="NT_BOT" class="state-path active" d="M 244.5,169.0 L 376.1,169.0 L 382.9,294.3 L 251.0,294.3 Z"/>
         <!-- Dotted dividing line only — no extra border -->
-        <line x1="244.5" y1="169" x2="376.1" y2="169" stroke="rgba(0,255,65,0.8)" stroke-width="1.5" stroke-dasharray="6,5" pointer-events="none"/>
+        <line x1="244.5" y1="169" x2="376.1" y2="169" stroke="var(--green-dim)" stroke-width="1.5" stroke-dasharray="6,5" pointer-events="none"/>
       </g>
       <text class="state-label active-label" id="label-NT_TOP" x="305" y="118" text-anchor="middle">NT/ Top</text>
       <text class="state-label active-label" id="label-NT_BOT" x="318" y="240" text-anchor="middle">NT/ Central</text>
@@ -1734,7 +1805,7 @@
 
       <!-- NEW SOUTH WALES -->
       <path id="NSW" class="state-path active" d="M 582.8,285.6 L 584.4,288.7 L 586.2,291.5 L 588.3,294.0 L 589.3,290.3 L 590.3,286.5 L 591.9,283.5 L 594.0,283.5 L 595.3,286.9 L 594.7,290.0 L 593.7,293.7 L 593.2,296.8 L 592.2,300.5 L 592.7,304.8 L 592.7,308.5 L 592.4,313.2 L 592.2,317.8 L 592.7,322.1 L 592.7,327.1 L 593.2,331.4 L 593.4,334.8 L 595.8,335.8 L 597.1,339.2 L 597.8,343.2 L 598.4,347.5 L 598.9,351.9 L 598.9,356.8 L 598.4,361.1 L 597.8,365.5 L 597.6,368.9 L 596.3,372.3 L 595.5,376.3 L 594.7,380.3 L 593.7,384.0 L 592.7,387.8 L 591.9,391.8 L 590.9,395.5 L 591.1,399.5 L 591.1,404.5 L 590.6,408.8 L 382.9,418.1 L 382.9,294.3 Z"/>
-      <text class="state-label active-label" id="label-NSW" x="498" y="365" text-anchor="middle">NSW</text>
+      <text class="state-label active-label" id="label-NSW" x="491" y="362" text-anchor="middle">NSW</text>
       <circle class="radar-ping" id="ping-NSW" cx="498" cy="350" r="5"/>
 
       <!-- VICTORIA -->
@@ -1744,7 +1815,7 @@
 
       <!-- TASMANIA -->
       <path id="TAS" class="state-path coming-soon" d="M 504.0,669.7 L 502.4,669.7 L 501.1,669.4 L 499.8,669.1 L 498.8,669.7 L 497.8,669.1 L 496.7,668.5 L 495.2,668.5 L 494.1,667.9 L 492.8,667.6 L 492.1,666.6 L 491.3,665.7 L 490.5,664.8 L 489.7,663.9 L 489.2,662.6 L 488.4,661.7 L 487.9,660.5 L 487.4,659.2 L 486.6,658.3 L 486.1,657.0 L 485.6,655.8 L 484.8,654.9 L 484.3,653.6 L 483.8,652.4 L 483.3,651.2 L 482.8,649.9 L 482.0,649.0 L 481.7,647.5 L 481.5,645.9 L 480.9,644.7 L 480.4,643.4 L 480.4,641.6 L 479.9,640.3 L 479.9,638.5 L 479.9,636.6 L 479.9,634.8 L 479.7,633.2 L 478.9,632.3 L 478.4,631.0 L 477.8,629.8 L 477.1,628.9 L 476.6,627.6 L 476.0,626.4 L 475.5,625.2 L 475.3,623.6 L 474.7,622.4 L 474.2,621.1 L 473.7,619.9 L 473.7,618.0 L 473.2,616.8 L 473.2,615.0 L 472.7,613.7 L 472.7,611.9 L 472.7,610.0 L 472.7,608.1 L 472.2,606.9 L 472.2,605.0 L 472.4,603.5 L 473.2,602.6 L 474.0,601.6 L 475.0,601.0 L 476.0,601.6 L 477.3,602.0 L 478.6,602.3 L 479.7,602.9 L 480.7,603.5 L 482.0,603.8 L 483.3,604.1 L 484.3,604.7 L 485.3,605.4 L 486.6,605.7 L 487.7,606.3 L 488.7,606.9 L 490.0,607.2 L 491.0,607.8 L 492.1,608.5 L 493.1,609.1 L 494.1,609.7 L 495.2,610.3 L 496.2,610.9 L 497.8,610.9 L 499.3,610.9 L 500.3,610.3 L 501.4,609.7 L 502.2,610.0 L 503.4,609.7 L 504.5,609.1 L 505.8,608.8 L 507.1,608.5 L 508.1,607.8 L 509.1,607.2 L 510.4,606.9 L 511.7,606.6 L 512.8,606.0 L 514.1,605.7 L 515.3,605.4 L 516.4,604.7 L 517.4,604.1 L 518.7,603.8 L 520.0,603.5 L 521.6,603.5 L 522.6,604.1 L 523.4,605.0 L 524.1,606.0 L 524.9,606.9 L 525.4,608.1 L 525.4,610.0 L 525.4,611.9 L 525.4,613.7 L 525.9,615.0 L 525.9,616.8 L 526.5,618.0 L 526.7,619.0 L 525.9,619.9 L 525.9,621.8 L 525.9,623.6 L 525.9,625.5 L 525.9,627.3 L 525.9,629.2 L 525.9,631.0 L 525.9,632.9 L 525.9,634.8 L 525.4,636.0 L 524.7,636.9 L 523.9,637.9 L 523.1,637.5 L 522.1,636.9 L 521.8,638.5 L 521.8,640.3 L 521.8,642.2 L 522.1,643.7 L 522.3,645.3 L 522.3,647.1 L 521.8,648.4 L 521.0,649.3 L 520.3,650.2 L 520.3,652.1 L 520.3,654.0 L 520.8,655.2 L 520.8,657.0 L 520.5,658.6 L 519.7,659.5 L 519.0,660.5 L 518.2,660.8 L 517.4,659.8 L 516.4,659.2 L 515.3,658.6 L 514.3,658.0 L 513.3,657.4 L 512.5,656.4 L 512.0,657.0 L 512.2,658.6 L 512.0,659.5 L 511.7,661.1 L 511.5,662.6 L 511.2,664.2 L 510.4,665.1 L 509.7,666.0 L 508.6,666.6 L 507.6,666.0 L 506.8,665.7 L 506.3,667.0 L 505.5,667.9 L 504.7,668.8 L 504.0,669.7 Z"/>
-      <text class="state-label active-label" id="label-TAS" x="508" y="631" text-anchor="middle">TAS</text>
+      <text class="state-label active-label" id="label-TAS" x="499" y="631" text-anchor="middle">TAS</text>
       <circle class="radar-ping" id="ping-TAS" cx="508" cy="616" r="5"/>
 
 
@@ -2131,11 +2202,21 @@ let currentWorldPage = 0;
 function init() {
   // Clock
   function updateClock() {
-    const t = new Date().toLocaleTimeString('en-AU', { hour12: false, timeZone: 'Australia/Sydney' });
+    const is12 = (typeof CFG !== 'undefined') && CFG.clockFormat === '12hr';
+    const t = new Date().toLocaleTimeString('en-AU', { hour12: is12, timeZone: 'Australia/Sydney' });
     document.getElementById('clock').textContent = t + ' AEST';
   }
   setInterval(updateClock, 1000);
   updateClock();
+
+  // Measure actual header height after full render and set --header-h
+  requestAnimationFrame(() => {
+    const hdrEl = document.querySelector('header');
+    if (hdrEl) {
+      const realH = Math.round(hdrEl.getBoundingClientRect().height);
+      if (realH > 0) document.documentElement.style.setProperty('--header-h', realH + 'px');
+    }
+  });
 
   // Waveform bars
   const wf = document.getElementById('waveform');
@@ -2346,13 +2427,15 @@ function closePanel() {
 
 function updateMiniPlayer() {
   const mini = document.getElementById('miniPlayer');
+  const miniPlay = document.getElementById('miniPlayBtn');
   if (!mini) return;
-  // Show whenever a station has been played (persists through panel open/close)
   if (window._lastPlayedStation) {
     const st = window._lastPlayedStation;
     mini.style.display = 'flex';
-    document.getElementById('miniPlayerLabel').textContent = st.name + ' ' + st.freq;
-    // Sync wave animation with play state
+    document.getElementById('miniPlayerLabel').textContent = st.name + (st.freq ? ' ' + st.freq : '');
+    // Sync play/pause button icon
+    if (miniPlay) miniPlay.textContent = isPlaying ? '■' : '▶';
+    // Sync wave animation
     if (isPlaying) {
       document.querySelectorAll('.mini-wave-bar').forEach(b => b.classList.add('active'));
     } else {
@@ -2360,6 +2443,7 @@ function updateMiniPlayer() {
     }
   } else {
     mini.style.display = 'none';
+    if (miniPlay) miniPlay.textContent = '▶';
   }
 }
 
@@ -2484,19 +2568,20 @@ function renderCharts(station) {
 
 // ─── AUDIO ────────────────────────────────────────────────────────────────────
 function togglePlay() {
-  // Determine which station the panel is showing RIGHT NOW
+  // Determine which station the panel is showing RIGHT NOW (null if panel closed)
   const panelStation = currentState ? STATIONS[currentState] : window._currentWorldStation;
   if (isPlaying) {
-    if (window._lastPlayedStation === panelStation) {
+    if (!panelStation || window._lastPlayedStation === panelStation) {
+      // Mini player or same station — just pause/resume
       pauseAudio();
     } else {
-      // Different station is playing — stop old, start new
+      // Different station in panel — stop old, start new
       stopAudio();
       startAudio();
     }
   } else {
-    const audio = document.getElementById('audioPlayer');
-    if (audio.src && window._lastPlayedStation && window._lastPlayedStation !== panelStation) {
+    if (panelStation && window._lastPlayedStation && window._lastPlayedStation !== panelStation) {
+      // Panel showing different station — stop and play new one
       stopAudio();
     }
     startAudio();
@@ -2515,6 +2600,7 @@ function pauseAudio() {
   document.getElementById('playerStatus').textContent = 'PAUSED';
   document.getElementById('playerStatus').className   = 'player-status';
   stopWaveAnimation();
+  updateMiniPlayer();
   if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
 }
 
@@ -3094,13 +3180,13 @@ if (FLAIR_COORD_TIP) {
   };
 
   const tip = document.createElement('div');
+  tip.id = 'coordTip';
   tip.style.cssText = `
     position: fixed; pointer-events: none; display: none;
     font-family: 'Share Tech Mono', monospace; font-size: 0.6rem;
-    color: rgba(0,255,65,0.7); background: rgba(2,10,3,0.85);
-    padding: 3px 6px; border: 1px solid rgba(0,255,65,0.2);
-    letter-spacing: 0.08em; z-index: 9999; white-space: nowrap;
+    padding: 3px 6px; letter-spacing: 0.08em; z-index: 9999; white-space: nowrap;
   `;
+  tip.className = 'coord-tip';
   document.body.appendChild(tip);
 
   let tipTimeout = null;
@@ -3169,14 +3255,15 @@ if (FLAIR_WAVE_CHARTS) {
 
 // ── SETTINGS ──────────────────────────────────────────────────────────────
 const THEMES = {
-  green:    { '--green': '#00ff41', '--green-dim': '#00c032', '--bg': '#030a04', '--panel': '#050f06', '--border': '#0a2e0c', '--text': '#00c032', '--muted': '#2a5c30', '--inactive': '#050f06', '--fg': '#4a8c52', '--accent': '#00ff41', '--hover-bg': 'rgba(0,255,65,0.08)', '--hover-border': '#00ff41', '--bio-text': '#4a8c52' },
-  amber:    { '--green': '#ffb347', '--green-dim': '#cc8a00', '--bg': '#0a0800', '--panel': '#100e00', '--border': '#2e2000', '--text': '#cc8a00', '--muted': '#5c4a00', '--inactive': '#0a0800', '--fg': '#8c7000', '--accent': '#ffb347', '--hover-bg': 'rgba(255,179,71,0.08)', '--hover-border': '#ffb347', '--bio-text': '#8c7000' },
-  blue:     { '--green': '#44aaff', '--green-dim': '#0088ee', '--bg': '#00050f', '--panel': '#000a1a', '--border': '#001a3a', '--text': '#0088ee', '--muted': '#003a6e', '--inactive': '#00050f', '--fg': '#0055aa', '--accent': '#44aaff', '--hover-bg': 'rgba(68,170,255,0.08)', '--hover-border': '#44aaff', '--bio-text': '#0055aa' },
-  white:    { '--green': '#cccccc', '--green-dim': '#999', '--bg': '#111', '--panel': '#1c1c1c', '--border': '#333', '--text': '#bbb', '--muted': '#666', '--inactive': '#111', '--fg': '#999', '--accent': '#ddd', '--hover-bg': 'rgba(200,200,200,0.1)', '--hover-border': '#ccc', '--bio-text': '#888' },
-  whiteplus:{ '--green': '#2a2a2a', '--green-dim': '#444', '--bg': '#f0ede8', '--panel': '#e8e5e0', '--border': '#ccc', '--text': '#333', '--muted': '#888', '--inactive': '#ddd', '--fg': '#555', '--accent': '#111', '--hover-bg': 'rgba(0,0,0,0.06)', '--hover-border': '#555', '--bio-text': '#555' },
+  green:    { '--green': '#00ff41', '--green-dim': '#00c032', '--bg': '#030a04', '--panel': '#050f06', '--border': '#0a2e0c', '--text': '#00c032', '--muted': '#2a5c30', '--inactive': '#050f06', '--fg': '#4a8c52', '--accent': '#00ff41', '--hover-bg': 'rgba(0,255,65,0.08)', '--hover-border': '#00ff41', '--bio-text': '#4a8c52', '--glow-color': '0,255,65', '--green-dark': '#003810', '--active-fill': '#051a08' },
+  amber:    { '--green': '#ffb347', '--green-dim': '#cc8a00', '--bg': '#0a0800', '--panel': '#100e00', '--border': '#2e2000', '--text': '#cc8a00', '--muted': '#5c4a00', '--inactive': '#0a0800', '--fg': '#8c7000', '--accent': '#ffb347', '--hover-bg': 'rgba(255,179,71,0.08)', '--hover-border': '#ffb347', '--bio-text': '#8c7000', '--glow-color': '255,179,71', '--green-dark': '#1a0e00', '--active-fill': '#120a00' },
+  blue:     { '--green': '#44aaff', '--green-dim': '#0088ee', '--bg': '#00050f', '--panel': '#000a1a', '--border': '#001a3a', '--text': '#0088ee', '--muted': '#003a6e', '--inactive': '#00050f', '--fg': '#0055aa', '--accent': '#44aaff', '--hover-bg': 'rgba(68,170,255,0.08)', '--hover-border': '#44aaff', '--bio-text': '#0055aa', '--glow-color': '68,170,255', '--green-dark': '#000d1f', '--active-fill': '#000814' },
+  white:    { '--green': '#cccccc', '--green-dim': '#999', '--bg': '#111', '--panel': '#1c1c1c', '--border': '#333', '--text': '#bbb', '--muted': '#666', '--inactive': '#111', '--fg': '#999', '--accent': '#ddd', '--hover-bg': 'rgba(200,200,200,0.1)', '--hover-border': '#ccc', '--bio-text': '#888', '--glow-color': '200,200,200', '--green-dark': '#1a1a1a', '--active-fill': '#222' },
+  whiteplus:{ '--green': '#2a2a2a', '--green-dim': '#444', '--bg': '#f0ede8', '--panel': '#e8e5e0', '--border': '#ccc', '--text': '#333', '--muted': '#888', '--inactive': '#ddd', '--fg': '#555', '--accent': '#111', '--hover-bg': 'rgba(0,0,0,0.06)', '--hover-border': '#555', '--bio-text': '#555', '--glow-color': '42,42,42', '--green-dark': '#ddd8d0', '--active-fill': '#e8e4de' },
 };
 
 const FONT_SIZES = { small: '12px', medium: '14px', large: '17px', xlarge: '20px' };
+const HEADER_H   = { small: '56px', medium: '60px', large: '66px', xlarge: '73px' };
 
 const CFG_DEFAULTS = { theme: 'green', fontSize: 'medium', scanLines: 'low', clockFormat: '24hr', contrast: 'normal', lastStation: 'remember' };
 let CFG = Object.assign({}, CFG_DEFAULTS, JSON.parse(localStorage.getItem('rrCfg') || '{}'));
@@ -3195,10 +3282,28 @@ function applyConfig() {
   const scanOpacity = { off: '0', low: '0.03', high: '0.08' };
   root.style.setProperty('--scan-opacity', scanOpacity[CFG.scanLines] || '0.03');
 
+  // Glow color for SVG filters
+  const gc = t['--glow-color'] || '0,255,65';
+  root.style.setProperty('--glow-color', gc);
+
   // Update pill labels
-  // Image contrast
+  // Header height — set from lookup table first, then verify with real measurement
+  const hh = HEADER_H[CFG.fontSize] || '60px';
+  root.style.setProperty('--header-h', hh);
+  // After font-size is applied, measure actual header and correct if needed
+  requestAnimationFrame(() => {
+    const hdrEl = document.querySelector('header');
+    if (hdrEl) {
+      const realH = Math.round(hdrEl.getBoundingClientRect().height);
+      if (realH > 0) root.style.setProperty('--header-h', realH + 'px');
+    }
+  });
+
+  // Display contrast — applied to entire app
   const contrastMap = { low: '80%', normal: '100%', high: '130%' };
-  root.style.setProperty('--img-contrast', contrastMap[CFG.contrast] || '100%');
+  const contrastVal = contrastMap[CFG.contrast] || '100%';
+  root.style.setProperty('--img-contrast', contrastVal);
+  document.getElementById('appContainer').style.filter = CFG.contrast === 'normal' ? '' : 'contrast(' + contrastVal + ')';
 
   document.getElementById('pill-fontSize').textContent = CFG.fontSize.toUpperCase();
   document.getElementById('pill-scanLines').textContent = CFG.scanLines.toUpperCase();
@@ -3207,6 +3312,9 @@ function applyConfig() {
   if (contrastPill) contrastPill.textContent = (CFG.contrast || 'normal').toUpperCase();
   document.getElementById('pill-lastStation').textContent = CFG.lastStation.toUpperCase();
   // Theme swatches
+  // Re-render clock immediately with new format
+  if (typeof updateClock !== 'undefined') updateClock();
+
   document.querySelectorAll('.theme-swatch').forEach(s => {
     s.classList.toggle('active', s.dataset.theme === CFG.theme);
   });
