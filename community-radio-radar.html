@@ -52,9 +52,10 @@
       0deg,
       transparent,
       transparent 3px,
-      rgba(0,0,0,0.08) 3px,
-      rgba(0,0,0,0.08) 4px
+      rgba(0,0,0,1) 3px,
+      rgba(0,0,0,1) 4px
     );
+    opacity: var(--scan-opacity, 0.03);
     pointer-events: none;
     z-index: 9999;
   }
@@ -222,6 +223,9 @@
   .app.amrap-hidden {
     margin-left: 0;
   }
+  .app.amrap-hidden .map-container {
+    margin-right: 0;
+  }
 
   /* MAP AREA */
   .map-container {
@@ -232,10 +236,11 @@
     padding: 20px;
     position: relative;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-right: 16rem; /* Compensates for AMRAP sidebar — centres map on full screen */
   }
 
   .map-container.panel-open {
-    margin-right: 400px;
+    margin-right: calc(400px + 16rem); /* 400px side panel + 16rem AMRAP compensation */
   }
   .world-view.panel-open {
     margin-right: 400px;
@@ -537,6 +542,7 @@
   .station-bio {
     padding: 14px 24px;
     border-bottom: 1px solid var(--border);
+    color: var(--bio-text, var(--fg));
     flex-shrink: 0;
   }
 
@@ -886,6 +892,7 @@
       justify-content: center;
       background: var(--bg);
       overflow: hidden;
+      margin-right: 0; /* No AMRAP panel on mobile */
     }
     .map-container.panel-open { margin-right: 0; }
     .world-view.panel-open { margin-right: 0; }
@@ -1033,6 +1040,165 @@
     font-size: 0.75rem;
     letter-spacing: 0.15em;
     opacity: 0.5;
+  }
+
+
+  /* ── SETTINGS ──────────────────────────────────────────────────────────── */
+  .settings-btn {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: all 0.15s;
+    margin-left: 8px;
+  }
+  .settings-btn:hover {
+    color: var(--green);
+    border-color: var(--green);
+    background: var(--hover-bg, rgba(0,255,65,0.05));
+  }
+
+  .settings-panel {
+    position: fixed;
+    right: -360px;
+    top: 57px;
+    width: 340px;
+    height: calc(100vh - 57px);
+    background: var(--panel);
+    border-left: 1px solid var(--border);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+  }
+  .settings-panel.open { right: 0; }
+
+  .settings-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .settings-title {
+    font-size: 0.65rem;
+    letter-spacing: 4px;
+    color: var(--green);
+  }
+  .settings-close {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    padding: 3px 10px;
+    transition: all 0.15s;
+  }
+  .settings-close:hover { color: var(--green); border-color: var(--hover-border, var(--green)); background: var(--hover-bg, rgba(0,255,65,0.05)); }
+
+  .settings-body { flex: 1; padding: 8px 0; }
+
+  .setting-row {
+    padding: 14px 24px;
+    border-bottom: 1px solid rgba(10,46,12,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .setting-row:last-child { border-bottom: none; }
+
+  .setting-label {
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .setting-pill {
+    background: rgba(0,255,65,0.06);
+    border: 1px solid var(--border);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: all 0.1s;
+    white-space: nowrap;
+  }
+  .setting-pill:hover {
+    background: var(--hover-bg, rgba(0,255,65,0.12));
+    border-color: var(--hover-border, var(--green));
+  }
+
+  .theme-swatches {
+    display: flex;
+    gap: 5px;
+  }
+  .theme-swatch {
+    width: 26px;
+    height: 26px;
+    border: 1px solid #0a2e0c;
+    cursor: pointer;
+    transition: border-color 0.1s;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .theme-swatch.active { border-color: var(--green); }
+  .theme-swatch.active::after {
+    content: '';
+    position: absolute;
+    top: 3px; right: 3px;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  .settings-footer {
+    padding: 12px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .settings-saved {
+    font-size: 0.58rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .settings-saved-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: savedPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes savedPulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* Mobile settings tab */
+  @media (max-width: 700px) {
+    .settings-panel {
+      top: 48px;
+      height: calc(100vh - 48px - 48px);
+      right: -100vw;
+      width: 100vw;
+      border-left: none;
+      border-top: 1px solid var(--border);
+    }
+    .settings-panel.open { right: 0; }
+    .settings-btn { display: none; }
   }
 
   /* ─── WORLD VIEW ────────────────────────────────────────────────────────── */
@@ -1353,6 +1519,7 @@
   .amrap-thumb img {
     width: 100%;
     height: 100%;
+    filter: contrast(var(--img-contrast, 100%));
     object-fit: cover;
     display: block;
   }
@@ -1505,6 +1672,7 @@
       <div class="signal-bar"></div>
     </div>
     <div class="clock" id="clock">--:--:--</div>
+    <button class="settings-btn" onclick="toggleSettings()" title="Settings">◎</button>
   </div>
 </header>
 
@@ -2632,12 +2800,15 @@ function switchMobileTab(tab) {
   const tabMap         = document.getElementById('tab-map');
   const tabWorld       = document.getElementById('tab-world');
   const tabAmrap       = document.getElementById('tab-amrap');
+  const tabConfig      = document.getElementById('tab-config');
 
   // Close all sheets first
   if (amrapSheet) amrapSheet.classList.remove('open');
-  if (tabMap) tabMap.classList.remove('active');
-  if (tabWorld) tabWorld.classList.remove('active');
-  if (tabAmrap) tabAmrap.classList.remove('active');
+  if (tabMap)    tabMap.classList.remove('active');
+  if (tabWorld)  tabWorld.classList.remove('active');
+  if (tabAmrap)  tabAmrap.classList.remove('active');
+  if (tabConfig) tabConfig.classList.remove('active');
+  document.getElementById('settingsPanel').classList.remove('open');
 
   const logoSub = document.getElementById('logoSub');
   if (tab === 'map') {
@@ -2648,6 +2819,13 @@ function switchMobileTab(tab) {
     tabMap.classList.add('active');
     currentView = 'australia';
     if (logoSub) logoSub.textContent = 'Australia';
+  } else if (tab === 'config') {
+    if (tabConfig) tabConfig.classList.add('active');
+    document.getElementById('settingsPanel').classList.add('open');
+    mapContainer.style.display = '';
+    worldView.classList.remove('active');
+    currentView = 'australia';
+    return;
   } else if (tab === 'world') {
     worldView.classList.add('active');
     mapContainer.style.display = 'none';
@@ -2694,11 +2872,62 @@ loadChartsFromAPI();
     <span class="mobile-tab-icon mobile-tab-ascii">▣</span>
     MAP
   </button>
+  <button class="mobile-tab" id="tab-config" onclick="switchMobileTab('config')">
+    <span class="mobile-tab-icon mobile-tab-ascii">◎</span>
+    CONFIG
+  </button>
   <button class="mobile-tab" id="tab-world" onclick="switchMobileTab('world')">
     <span class="mobile-tab-icon mobile-tab-ascii">◈</span>
     WORLD
   </button>
 </nav>
+<!-- ── SETTINGS PANEL ──────────────────────────────────────────────────── -->
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-header">
+    <span class="settings-title">◎ CONFIG</span>
+    <button class="settings-close" onclick="toggleSettings()">✕ CLOSE</button>
+  </div>
+  <div class="settings-body">
+    <div class="setting-row">
+      <span class="setting-label">THEME</span>
+      <div class="theme-swatches" id="themeSwatches">
+        <div class="theme-swatch active" data-theme="green" style="background:#030a04;" onclick="setSetting('theme','green')" title="Green"></div>
+        <div class="theme-swatch" data-theme="amber" style="background:#0a0800;" onclick="setSetting('theme','amber')" title="Amber"></div>
+        <div class="theme-swatch" data-theme="blue" style="background:#00050f;" onclick="setSetting('theme','blue')" title="Blue"></div>
+        <div class="theme-swatch" data-theme="white" style="background:#111;" onclick="setSetting('theme','white')" title="White"></div>
+        <div class="theme-swatch" data-theme="whiteplus" style="background:#ece9e3;border-color:#ccc;" onclick="setSetting('theme','whiteplus')" title="White+"></div>
+      </div>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">FONT SIZE</span>
+      <button class="setting-pill" onclick="cycleSetting('fontSize',['small','medium','large','xlarge'])" id="pill-fontSize">MEDIUM</button>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">SCAN LINES</span>
+      <button class="setting-pill" onclick="cycleSetting('scanLines',['off','low','high'])" id="pill-scanLines">LOW</button>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">CLOCK</span>
+      <button class="setting-pill" onclick="cycleSetting('clockFormat',['24hr','12hr'])" id="pill-clockFormat">24HR</button>
+    </div>
+
+    <div class="setting-row">
+      <span class="setting-label">IMG CONTRAST</span>
+      <button class="setting-pill" onclick="cycleSetting('contrast',['low','normal','high'])" id="pill-contrast">NORMAL</button>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">LAST STATION</span>
+      <button class="setting-pill" onclick="cycleSetting('lastStation',['remember','forget'])" id="pill-lastStation">REMEMBER</button>
+    </div>
+  </div>
+  <div class="settings-footer">
+    <span class="settings-saved">
+      <span class="settings-saved-dot"></span>
+      ALL CHANGES SAVED
+    </span>
+  </div>
+</div>
+
 
 <!-- AMRAP Mobile Sheet (shown when AIRPLAY tab active) -->
 <div class="amrap-mobile-sheet" id="amrapMobileSheet"></div>
@@ -2936,6 +3165,80 @@ if (FLAIR_WAVE_CHARTS) {
 }
 
 
+
+
+// ── SETTINGS ──────────────────────────────────────────────────────────────
+const THEMES = {
+  green:    { '--green': '#00ff41', '--green-dim': '#00c032', '--bg': '#030a04', '--panel': '#050f06', '--border': '#0a2e0c', '--text': '#00c032', '--muted': '#2a5c30', '--inactive': '#050f06', '--fg': '#4a8c52', '--accent': '#00ff41', '--hover-bg': 'rgba(0,255,65,0.08)', '--hover-border': '#00ff41', '--bio-text': '#4a8c52' },
+  amber:    { '--green': '#ffb347', '--green-dim': '#cc8a00', '--bg': '#0a0800', '--panel': '#100e00', '--border': '#2e2000', '--text': '#cc8a00', '--muted': '#5c4a00', '--inactive': '#0a0800', '--fg': '#8c7000', '--accent': '#ffb347', '--hover-bg': 'rgba(255,179,71,0.08)', '--hover-border': '#ffb347', '--bio-text': '#8c7000' },
+  blue:     { '--green': '#44aaff', '--green-dim': '#0088ee', '--bg': '#00050f', '--panel': '#000a1a', '--border': '#001a3a', '--text': '#0088ee', '--muted': '#003a6e', '--inactive': '#00050f', '--fg': '#0055aa', '--accent': '#44aaff', '--hover-bg': 'rgba(68,170,255,0.08)', '--hover-border': '#44aaff', '--bio-text': '#0055aa' },
+  white:    { '--green': '#cccccc', '--green-dim': '#999', '--bg': '#111', '--panel': '#1c1c1c', '--border': '#333', '--text': '#bbb', '--muted': '#666', '--inactive': '#111', '--fg': '#999', '--accent': '#ddd', '--hover-bg': 'rgba(200,200,200,0.1)', '--hover-border': '#ccc', '--bio-text': '#888' },
+  whiteplus:{ '--green': '#2a2a2a', '--green-dim': '#444', '--bg': '#f0ede8', '--panel': '#e8e5e0', '--border': '#ccc', '--text': '#333', '--muted': '#888', '--inactive': '#ddd', '--fg': '#555', '--accent': '#111', '--hover-bg': 'rgba(0,0,0,0.06)', '--hover-border': '#555', '--bio-text': '#555' },
+};
+
+const FONT_SIZES = { small: '12px', medium: '14px', large: '17px', xlarge: '20px' };
+
+const CFG_DEFAULTS = { theme: 'green', fontSize: 'medium', scanLines: 'low', clockFormat: '24hr', contrast: 'normal', lastStation: 'remember' };
+let CFG = Object.assign({}, CFG_DEFAULTS, JSON.parse(localStorage.getItem('rrCfg') || '{}'));
+
+function saveConfig() { localStorage.setItem('rrCfg', JSON.stringify(CFG)); }
+
+function applyConfig() {
+  const root = document.documentElement;
+  // Theme
+  const t = THEMES[CFG.theme] || THEMES.green;
+  for (const [k, v] of Object.entries(t)) root.style.setProperty(k, v);
+  // Font size
+  document.documentElement.style.fontSize = FONT_SIZES[CFG.fontSize] || '14px';
+  // Scan lines
+  const sl = document.querySelector('body::after') || document.body;
+  const scanOpacity = { off: '0', low: '0.03', high: '0.08' };
+  root.style.setProperty('--scan-opacity', scanOpacity[CFG.scanLines] || '0.03');
+
+  // Update pill labels
+  // Image contrast
+  const contrastMap = { low: '80%', normal: '100%', high: '130%' };
+  root.style.setProperty('--img-contrast', contrastMap[CFG.contrast] || '100%');
+
+  document.getElementById('pill-fontSize').textContent = CFG.fontSize.toUpperCase();
+  document.getElementById('pill-scanLines').textContent = CFG.scanLines.toUpperCase();
+  document.getElementById('pill-clockFormat').textContent = CFG.clockFormat.toUpperCase();
+  const contrastPill = document.getElementById('pill-contrast');
+  if (contrastPill) contrastPill.textContent = (CFG.contrast || 'normal').toUpperCase();
+  document.getElementById('pill-lastStation').textContent = CFG.lastStation.toUpperCase();
+  // Theme swatches
+  document.querySelectorAll('.theme-swatch').forEach(s => {
+    s.classList.toggle('active', s.dataset.theme === CFG.theme);
+  });
+}
+
+function cycleSetting(key, options) {
+  const idx = options.indexOf(CFG[key]);
+  CFG[key] = options[(idx + 1) % options.length];
+  saveConfig();
+  applyConfig();
+}
+
+function setSetting(key, value) {
+  CFG[key] = value;
+  saveConfig();
+  applyConfig();
+}
+
+function toggleSettings() {
+  const panel = document.getElementById('settingsPanel');
+  panel.classList.toggle('open');
+}
+
+// Reduce motion CSS
+(function() {
+  const style = document.createElement('style');
+  style.textContent = '.reduce-motion * { animation: none !important; transition: color 0.15s, border-color 0.15s !important; }';
+  document.head.appendChild(style);
+})();
+
+// Apply on load
+applyConfig();
 
 </script>
 
