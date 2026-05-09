@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -196,24 +196,7 @@
     text-transform: uppercase;
   }
 
-  .signal-indicator {
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 20px;
-  }
 
-  .signal-bar {
-    width: 4px;
-    background: var(--green-dim);
-    border-radius: 1px;
-    animation: signal-pulse 1.5s ease-in-out infinite;
-  }
-  .signal-bar:nth-child(1) { height: 5px; animation-delay: 0s; }
-  .signal-bar:nth-child(2) { height: 9px; animation-delay: 0.15s; }
-  .signal-bar:nth-child(3) { height: 13px; animation-delay: 0.3s; }
-  .signal-bar:nth-child(4) { height: 18px; animation-delay: 0.45s; }
-  .signal-bar:nth-child(5) { height: 20px; animation-delay: 0.6s; }
 
   .clock {
     font-size: 0.85rem;
@@ -396,8 +379,10 @@
     right: 0;
   }
 
+  .panel-drag-handle { display: none; }
+
   .panel-header {
-    padding: 20px 24px 16px;
+    padding: 9px 24px 16px;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
   }
@@ -439,7 +424,7 @@
 
   .panel-close {
     position: absolute;
-    top: 18px;
+    top: calc(var(--header-h, 60px) + 4px);
     right: 18px;
     z-index: 10;
     background: none;
@@ -610,6 +595,22 @@
     font-size: 0.55rem;
     color: var(--muted);
     letter-spacing: 1px;
+  }
+
+  .art-toggle-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 2px;
+    padding: 2px 6px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .art-toggle-btn:hover {
+    border-color: var(--green);
+    color: var(--green);
   }
 
   .chart-entry {
@@ -862,6 +863,10 @@
   }
 
   /* RESPONSIVE */
+  #volSlider::-webkit-slider-thumb { -webkit-appearance:none; width:10px; height:10px; background:var(--green); cursor:pointer; border:none; border-radius:0; }
+  #volSlider::-moz-range-thumb { width:10px; height:10px; background:var(--green); cursor:pointer; border:none; border-radius:0; }
+  @media (max-width: 700px) { #volControl { display:none !important; } }
+
   @media (max-width: 700px) {
     header {
       padding: 0 12px;
@@ -949,6 +954,7 @@
       display: none;
     }
     .panel-drag-handle {
+      display: block;
       width: 40px;
       height: 4px;
       background: var(--border);
@@ -958,7 +964,7 @@
       cursor: grab;
     }
     .panel-header {
-      padding: 8px 56px 12px 16px;
+      padding: 13px 56px 12px 16px;
     }
     .panel-close {
       width: 36px;
@@ -1443,7 +1449,7 @@
   .amrap-toggle:hover { background: var(--hover-bg, rgba(0,255,65,0.08)); }
   .amrap-toggle.collapsed { left: 0; }
   .amrap-header {
-    padding: 14px 14px 10px;
+    padding: 19px 14px 10px;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
   }
@@ -1672,6 +1678,21 @@
     .world-card { min-height: 80px !important; padding: 10px !important; }
   }
 
+  .mini-player-pip {
+    background: none;
+    border: none;
+    color: var(--green);
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 0 6px;
+    opacity: 0.55;
+    font-family: 'Share Tech Mono', monospace;
+    transition: opacity 0.15s;
+    letter-spacing: 0;
+  }
+  .mini-player-pip:hover { opacity: 1; }
+  .mini-player-pip.pip-active { opacity: 1; color: var(--accent); }
+
 </style>
 <script>
 (function(){
@@ -1696,28 +1717,32 @@
     </div>
   </div>
   <div class="header-centre">
-    <button class="world-toggle-btn" id="worldToggleBtn" onclick="toggleWorldView()">WORLD</button>
+    <button class="world-toggle-btn" id="worldToggleBtn" onclick="toggleWorldView()" style="margin-right:12px;">WORLD</button>
     <div class="mini-player" id="miniPlayer" style="display:none">
-      <div class="mini-waveform" id="miniWaveform">
-        <div class="mini-wave-bar"></div>
-        <div class="mini-wave-bar"></div>
-        <div class="mini-wave-bar"></div>
-        <div class="mini-wave-bar"></div>
-        <div class="mini-wave-bar"></div>
+      <div id="miniPlayerClickable" onclick="reopenCurrentStation()" style="display:flex;align-items:center;gap:12px;cursor:pointer;flex:1;min-width:0;">
+        <div class="mini-waveform" id="miniWaveform">
+          <div class="mini-wave-bar"></div>
+          <div class="mini-wave-bar"></div>
+          <div class="mini-wave-bar"></div>
+          <div class="mini-wave-bar"></div>
+          <div class="mini-wave-bar"></div>
+        </div>
+        <span class="mini-player-label" id="miniPlayerLabel">PLAYING</span>
       </div>
-      <span class="mini-player-label" id="miniPlayerLabel">PLAYING</span>
       <button class="mini-player-play" id="miniPlayBtn" onclick="togglePlay()" title="Play/Pause">▶</button>
+      <button class="mini-player-pip" id="miniPipBtn" onclick="togglePiP()" title="Pop out widget" style="display:none">⧉</button>
       <button class="mini-player-stop" onclick="stopAudio()">■</button>
     </div>
   </div>
   <div class="header-right">
-    <div class="signal-indicator">
-      <div class="signal-bar"></div>
-      <div class="signal-bar"></div>
-      <div class="signal-bar"></div>
-      <div class="signal-bar"></div>
-      <div class="signal-bar"></div>
+    <div class="vol-control" id="volControl" style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:0.55rem;letter-spacing:2px;color:var(--muted);">VOL</span>
+      <input type="range" id="volSlider" min="0" max="100" value="100" step="1"
+        style="-webkit-appearance:none;appearance:none;width:72px;height:3px;background:var(--border);outline:none;cursor:pointer;"
+        oninput="setVolume(this.value)">
+      <span id="volVal" style="font-size:0.55rem;color:var(--green-dim);letter-spacing:1px;min-width:28px;">100%</span>
     </div>
+
     <div class="clock" id="clock">--:--:--</div>
     <button class="settings-btn" onclick="toggleSettings()" title="Settings">◎</button>
   </div>
@@ -1783,6 +1808,7 @@
       <text class="state-label active-label" id="label-TAS" x="499" y="631" text-anchor="middle">TAS</text>
       <circle class="radar-ping" id="ping-TAS" cx="508" cy="616" r="5"/>
 
+      <rect id="ACT-hitbox" x="514.9" y="384.6" width="28.8" height="28.8" fill="transparent" stroke="none" style="cursor:pointer;"/>
       <path id="ACT" class="state-path coming-soon act-path"
         d="M 517.3,387.0 L 541.3,387.0 L 541.3,411.0 L 517.3,411.0 Z"/>
       <text class="state-label active-label" id="label-ACT" x="529.3" y="403.0" text-anchor="middle" font-size="7">ACT</text>
@@ -1833,7 +1859,10 @@
       <div class="charts-section">
         <div class="charts-header">
           <div class="charts-label">// STATION PICKS</div>
-          <div class="chart-refresh" id="chartRefresh"></div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button id="artToggleBtn" onclick="toggleArtChart()" style="display:none" class="art-toggle-btn">ART</button>
+            <div class="chart-refresh" id="chartRefresh"></div>
+          </div>
         </div>
         <div id="chartContainer">
           <div class="chart-loading">LOADING CHART DATA</div>
@@ -1868,155 +1897,251 @@
 const UNDER_CONSTRUCTION = {
 };
 
+// State defaults (index of default station per state, persisted to localStorage)
+function getStateDefault(code) {
+  try { return parseInt(localStorage.getItem('stDefault_' + code) || '0') || 0; } catch(e) { return 0; }
+}
+function setStateDefault(code, idx) {
+  try { localStorage.setItem('stDefault_' + code, idx); } catch(e) {}
+}
+
 const STATIONS = {
-  QLD: {
-    name: '4ZZZ', fullName: 'Four Triple Zed', freq: '102.1FM', city: 'Brisbane', state: 'Queensland', timezone: 'Australia/Brisbane',
-    stream: 'https://iheart.4zzz.org.au/4zzz',
-    website: 'https://www.4zzz.org.au', chartUrl: 'https://4zzz.org.au/program/the-chart-show',
-    bio: "Brisbane's realest radio since 1975. Independent, volunteer-powered, no-playlist broadcasting covering rock, hip-hop, indie, dub, punk, electronica and everything in between.",
-    chartData: [
-      { pos:1,  track:'Shadows & Light',   artist:'Tired Lion' },
-      { pos:2,  track:'Retrograde',        artist:'Dope Lemon' },
-      { pos:3,  track:'Midnight Frequency',artist:'Methyl Ethel' },
-      { pos:4,  track:'Glass Ceiling',     artist:'Slowly Slowly' },
-      { pos:5,  track:'Desert Highway',    artist:'Hatchie' },
-      { pos:6,  track:'Colour Blind',      artist:'Confidence Man' },
-      { pos:7,  track:'Nerve Endings',     artist:'Spacey Jane' },
-      { pos:8,  track:'Undertow',          artist:'Camp Cope' },
-      { pos:9,  track:'Gold Teeth',        artist:'G Flip' },
-      { pos:10, track:'Infinite Scroll',   artist:'Middle Kids' },
-      { pos:11, track:'Ocean Drive',       artist:'Hockey Dad' },
-      { pos:12, track:'Bitter Sun',        artist:'Gordi' },
-      { pos:13, track:'All Night',         artist:'Vera Blue' },
-      { pos:14, track:'Wildflower',        artist:'Banoffee' },
-      { pos:15, track:'The Mess I Made',   artist:'Parachute' },
-    ]
-  },
-  NSW: {
-    name: 'FBI Radio', fullName: 'FBI 94.5FM', freq: '94.5FM', city: 'Sydney', state: 'New South Wales', timezone: 'Australia/Sydney',
-    stream: 'https://streamer.fbiradio.com/stream',
-    website: 'https://www.fbi.radio', chartUrl: 'https://www.fbi.radio/charts',
-    bio: "Sydney's home for independent music since 2003. Listener-supported and volunteer-driven, FBI champions local artists and brings you music you won't hear anywhere else.",
-    chartData: [
-      { pos:1,  track:'Lose Control',       artist:'Flume ft. Vera Blue' },
-      { pos:2,  track:'Sorry',              artist:'Mallrat' },
-      { pos:3,  track:'Saturn',             artist:'Aldous Harding' },
-      { pos:4,  track:'Pacific',            artist:'Harvey Sutherland' },
-      { pos:5,  track:'Back to Black',      artist:'Julia Stone' },
-      { pos:6,  track:'Glue',               artist:'Bicep' },
-      { pos:7,  track:'Holy Mountain',      artist:'King Gizzard' },
-      { pos:8,  track:'Running',            artist:'Ruel' },
-      { pos:9,  track:'Velvet',             artist:'What So Not' },
-      { pos:10, track:'Sweet Disposition',  artist:'The Temper Trap' },
-      { pos:11, track:'Never Too Late',     artist:'Elizabeth Rose' },
-      { pos:12, track:'Breathe',            artist:"Cosmo's Midnight" },
-      { pos:13, track:'Ordinary Life',      artist:'Sampa The Great' },
-      { pos:14, track:'Running Red Lights', artist:'Pablo Nouvelle' },
-      { pos:15, track:'Motion Sickness',    artist:'Phoebe Bridgers' },
-    ]
-  },
-  VIC: {
-    name: 'Triple R', fullName: '3RRR 102.7FM', freq: '102.7FM', city: 'Melbourne', state: 'Victoria', timezone: 'Australia/Melbourne',
-    stream: 'https://ondemand.rrr.org.au/getstream?id=web1',
-    website: 'https://www.rrr.org.au', chartUrl: 'https://www.rrr.org.au/explore/soundscape',
-    bio: "Melbourne's independent community broadcaster since 1976. Triple R is subscriber-supported and plays the music commercial radio ignores — adventurous, eclectic, and fiercely local.",
-    chartData: [
-      { pos:1,  track:'The Neon Remains',   artist:'Courtney Barnett' },
-      { pos:2,  track:'New Gold',           artist:'Gorillaz ft. Tame Impala' },
-      { pos:3,  track:'Crystallised',       artist:'The XX' },
-      { pos:4,  track:'Atlas Hands',        artist:'Benjamin Francis Leftwich' },
-      { pos:5,  track:'Red Eyes',           artist:'The National' },
-      { pos:6,  track:'Sprawl II',          artist:'Arcade Fire' },
-      { pos:7,  track:'Strange Overtones',  artist:'David Byrne & Brian Eno' },
-      { pos:8,  track:'Sun King',           artist:'Nick Cave & The Bad Seeds' },
-      { pos:9,  track:'Peach Fuzz',         artist:'Pond' },
-      { pos:10, track:'Vines',              artist:'Amyl and the Sniffers' },
-      { pos:11, track:'Head Full of Doubt', artist:'The Avett Brothers' },
-      { pos:12, track:'Upside Down',        artist:'Jack Johnson' },
-      { pos:13, track:'Bloodbuzz Ohio',     artist:'The National' },
-      { pos:14, track:'Bright Side',        artist:'Lior' },
-      { pos:15, track:'Golden Age',         artist:'TV on the Radio' },
-    ]
-  },
-  WA: {
-    name: 'RTRFM', fullName: 'RTR FM 92.1', freq: '92.1FM', city: 'Perth', state: 'Western Australia', timezone: 'Australia/Perth',
-    stream: 'https://live.rtrfm.com.au/stream1',
-    website: 'https://rtrfm.com.au', chartUrl: 'https://rtrfm.com.au/featured-music/',
-    bio: "Perth's community radio heartbeat since 1977. RTRFM is 100% volunteer-run and listener-funded, dedicated to showcasing independent music and Western Australian artists.",
-    chartData: [
-      { pos:1,  track:'The Wheel',               artist:'Stella Donnelly' },
-      { pos:2,  track:'Nightlife',                artist:'Tame Impala' },
-      { pos:3,  track:'Silver Tongue',            artist:'Oh Mercy' },
-      { pos:4,  track:'Porcelain',                artist:'Moby' },
-      { pos:5,  track:'Drive',                    artist:'Flume' },
-      { pos:6,  track:'Concrete Jungle',          artist:'Tired Lion' },
-      { pos:7,  track:'Golden Plains',            artist:'Broderick Smith' },
-      { pos:8,  track:'Paradise',                 artist:'Hiatus Kaiyote' },
-      { pos:9,  track:'Inner Voyage',             artist:'Tash Sultana' },
-      { pos:10, track:'Salt',                     artist:'Ecca Vandal' },
-      { pos:11, track:'Southbound',               artist:'Alex Lahey' },
-      { pos:12, track:'Running With The Wolves',  artist:'Aurora' },
-      { pos:13, track:'Bad Moon Rising',          artist:'Stella Mozgawa' },
-      { pos:14, track:'Bright Lights',            artist:'Ngaiire' },
-      { pos:15, track:"New Year's Day",           artist:'Mount Eerie' },
-    ]
-  },
-  SA: {
-    name: 'Three D Radio', fullName: 'Three D Radio 93.7FM', freq: '93.7FM', city: 'Adelaide', state: 'South Australia', timezone: 'Australia/Adelaide',
-    stream: 'https://sounds.threedradio.com/stream',
-    website: 'https://threedradio.com', chartUrl: 'https://threedradio.com/chart-category/top-20-1/',
-    bio: '100% volunteer-run from Adelaide since 1975. Three D Radio champions independent and local music, recognising the Kaurna people and their connection to the land it broadcasts from.',
-    chartData: [
-      { pos:1,  track:'Teenager',        artist:'Teenage Joans' },
-      { pos:2,  track:'Cruel Summer',    artist:'Banoffee' },
-      { pos:3,  track:'Burn It Down',    artist:'Papa vs Pretty' },
-      { pos:4,  track:'Violet',          artist:'Grenadiers' },
-      { pos:5,  track:'Electric Slide',  artist:'Confidence Man' },
-      { pos:6,  track:'Strange Days',    artist:'Darren Hanlon' },
-      { pos:7,  track:'Under Pressure',  artist:'San Cisco' },
-      { pos:8,  track:'Amber Light',     artist:'Passenger' },
-      { pos:9,  track:'I Go Running',    artist:'Missy Higgins' },
-      { pos:10, track:'Modern Age',      artist:'The Strokes' },
-      { pos:11, track:'Pink Lemonade',   artist:'Luca Brasi' },
-      { pos:12, track:'Reckoner',        artist:'Radiohead' },
-      { pos:13, track:'White Nights',    artist:'Oh Land' },
-      { pos:14, track:'Into The Wild',   artist:'LP' },
-      { pos:15, track:'All These Things',artist:'Mia Dyson' },
-    ]
-  },
-  NT_TOP: {
-    name: 'TEABBA Radio', fullName: 'TEABBA 88.0FM', freq: '88.0FM', city: 'Darwin', state: 'Northern Territory', timezone: 'Australia/Darwin',
-    stream: 'https://firstnationsmedia.stream/8014/stream',
-    website: 'https://www.teabba.com.au/radio', chartUrl: '',
-    bio: "The Top End Aboriginal Bush Broadcasting Association broadcasts 24/7 into 29 remote Indigenous communities across the Top End. Programmed from Darwin with local shows in language — community announcements, weather, school shout-outs and music from the bush.",
-    chartData: []
-  },
-  NT_BOT: {
-    name: 'CAAMA Radio', fullName: 'CAAMA 8KIN FM', freq: '8KIN FM', city: 'Alice Springs', state: 'Northern Territory', timezone: 'Australia/Darwin',
-    stream: 'https://streamer.radio.co/sa67d9a81d/listen',
-    website: 'https://caama.com.au', chartUrl: '',
-    bio: "The voice of Central Australia since 1985. CAAMA Radio broadcasts in Aboriginal languages and English from Alice Springs, championing First Nations music, culture and stories from the heart of the continent.",
-    chartData: []
-  },
-  TAS: {
-    name: 'Edge Radio', fullName: 'Edge Radio 99.3FM', freq: '99.3FM', city: 'Hobart', state: 'Tasmania', timezone: 'Australia/Hobart',
-    stream: 'https://streaming.edgeradio.org.au/radio/8000/stream',
-    website: 'https://www.edgeradio.org.au', chartUrl: '',
-    bio: "Hobart's only youth community station since 2003. Volunteer-run from the University of Tasmania, Edge Radio plays 50% Australian music — nearly half of that Tasmanian — and provides a platform for emerging local artists and youth voices.",
-    chartData: []
-  },
-  ACT: {
-    name: 'Radio National', fullName: 'ABC Radio National', freq: 'RN 846AM', city: 'Canberra', state: 'Australian Capital Territory', timezone: 'Australia/Sydney',
-    stream: 'https://live-radio01.mediahubaustralia.com/2RNW/mp3/',
-    website: 'https://www.abc.net.au/radionational', chartUrl: '',
-    bio: "Radio National! For when community radio isn't quite cutting it. What could be more communal than Ian McNamara?",
-    chartData: []
-  }
+  QLD: [
+    {
+      id: '4zzz', name: '4ZZZ', fullName: 'Four Triple Zed', freq: '102.1FM', city: 'Brisbane', state: 'Queensland', timezone: 'Australia/Brisbane',
+      stream: 'https://iheart.4zzz.org.au/4zzz',
+      website: 'https://www.4zzz.org.au', chartUrl: 'https://4zzz.org.au/program/the-chart-show',
+      bio: "Brisbane's realest radio since 1975. Independent, volunteer-powered, no-playlist broadcasting covering rock, hip-hop, indie, dub, punk, electronica and everything in between.",
+      chartData: [
+        { pos:1,  track:'Shadows & Light',   artist:'Tired Lion' },
+        { pos:2,  track:'Retrograde',        artist:'Dope Lemon' },
+        { pos:3,  track:'Midnight Frequency',artist:'Methyl Ethel' },
+        { pos:4,  track:'Glass Ceiling',     artist:'Slowly Slowly' },
+        { pos:5,  track:'Desert Highway',    artist:'Hatchie' },
+        { pos:6,  track:'Colour Blind',      artist:'Confidence Man' },
+        { pos:7,  track:'Nerve Endings',     artist:'Spacey Jane' },
+        { pos:8,  track:'Undertow',          artist:'Camp Cope' },
+        { pos:9,  track:'Gold Teeth',        artist:'G Flip' },
+        { pos:10, track:'Infinite Scroll',   artist:'Middle Kids' },
+      ]
+    },
+    {
+      id: 'tenfm', name: 'Ten FM', fullName: 'Ten FM 89.7 / 98.7', freq: '89.7FM', city: 'Tenterfield', state: 'Queensland', timezone: 'Australia/Brisbane',
+      stream: 'https://stream.tcom.net.au/2ten',
+      website: 'https://tenfm.org.au', chartUrl: '',
+      bio: "Started in 1983 from a caravan on 107.5MHz in Tenterfield, just below the NSW/QLD border. Now one of the largest broadcast footprints of any community station in Australia. Presenters range from 14 to 70. Feels great.",
+      chartData: []
+    },
+    {
+      id: 'blackstar', name: 'Black Star', fullName: 'Black Star Radio Network', freq: 'Online', city: 'Cairns', state: 'Queensland', timezone: 'Australia/Brisbane',
+      stream: 'https://s1.voscast.com:11435/BSTAR',
+      website: 'https://blackstarradio.com.au', chartUrl: '',
+      bio: "Owned by Queensland's remote Indigenous stations, managed by QRAM — Queensland Remote Aboriginal Media — from Cairns. Connecting 30+ First Nations communities across Cape York, the Gulf Country and Far North Queensland through 17 stations. Straight from Country, for Country.",
+      chartData: []
+    }
+  ],
+  NSW: [
+    {
+      id: 'fbi', name: 'FBI Radio', fullName: 'FBI 94.5FM', freq: '94.5FM', city: 'Sydney', state: 'New South Wales', timezone: 'Australia/Sydney',
+      stream: 'https://streamer.fbiradio.com/stream',
+      website: 'https://www.fbi.radio', chartUrl: 'https://www.fbi.radio/charts',
+      bio: "Sydney's home for independent music since 2003. Listener-supported and volunteer-driven, FBI champions local artists and brings you music you won't hear anywhere else.",
+      chartData: [
+        { pos:1,  track:'Lose Control',       artist:'Flume ft. Vera Blue' },
+        { pos:2,  track:'Sorry',              artist:'Mallrat' },
+        { pos:3,  track:'Saturn',             artist:'Aldous Harding' },
+        { pos:4,  track:'Pacific',            artist:'Harvey Sutherland' },
+        { pos:5,  track:'Back to Black',      artist:'Julia Stone' },
+        { pos:6,  track:'Glue',               artist:'Bicep' },
+        { pos:7,  track:'Holy Mountain',      artist:'King Gizzard' },
+        { pos:8,  track:'Running',            artist:'Ruel' },
+        { pos:9,  track:'Velvet',             artist:'What So Not' },
+        { pos:10, track:'Sweet Disposition',  artist:'The Temper Trap' },
+      ]
+    },
+    {
+      id: 'bayfm', name: 'Bay FM', fullName: 'Bay FM 99.9 Byron Bay', freq: '99.9FM', city: 'Byron Bay', state: 'New South Wales', timezone: 'Australia/Sydney',
+      stream: 'https://23153.live.streamtheworld.com/2BAY_FM999.mp3',
+      streamFallback: 'https://playerservices.streamtheworld.com/api/livestream-redirect/2BAY_FM999.mp3',
+      website: 'https://www.bayfm.org', chartUrl: '',
+      bio: "Broadcasting on Arakwal Country in Bundjalung Nation since 1991. Volunteer-run, award-winning, and as they put it: 'Independent community responsive radio, informing and entertaining, locally and globally.' Garage to jazz, blues to Americana — you never know what you're going to get.",
+      chartData: []
+    },
+    {
+      id: '2ser', name: '2SER', fullName: '2SER 107.3FM', freq: '107.3FM', city: 'Sydney', state: 'New South Wales', timezone: 'Australia/Sydney',
+      stream: 'https://livestream.2ser.com/streamrelay',
+      website: 'https://www.2ser.com', chartUrl: '',
+      bio: "Co-owned by Macquarie University and UTS since 1979, volunteer-run in spirit. Politics, culture, social justice and underground music that doesn't make it anywhere else in Sydney. Week's listening: Not Punk Enough, Slow Life Sound System, Crossing The Streams. One of Australia's longest-running community stations.",
+      chartData: []
+    },
+    {
+      id: '2rrr', name: '2RRR', fullName: '2RRR 88.5FM Ryde', freq: '88.5FM', city: 'Ryde', state: 'New South Wales', timezone: 'Australia/Sydney',
+      stream: 'https://28863.live.streamtheworld.com/2RRRAAC.aac?dist=2rrrwebsite',
+      streamFallback: 'https://playerservices.streamtheworld.com/api/livestream-redirect/2rrrAAC.aac?dist=2rrrwebsite',
+      website: 'https://www.2rrr.org.au', chartUrl: '',
+      bio: "Broadcasting from the historic Henley Cottage in Ryde since 1985. Heavy metal on Monday nights, Irish trad on Tuesdays, Hungarian news on Thursdays, Aboriginal music on weekends. As a founding member put it: 'hippies, Christians, atheists, gays, seniors, headbangers — all on air, all lived happily side by side.'",
+      chartData: []
+    }
+  ],
+  VIC: [
+    {
+      id: 'tripler', name: 'Triple R', fullName: '3RRR 102.7FM', freq: '102.7FM', city: 'Melbourne', state: 'Victoria', timezone: 'Australia/Melbourne',
+      stream: 'https://ondemand.rrr.org.au/getstream?id=web1',
+      website: 'https://www.rrr.org.au', chartUrl: 'https://www.rrr.org.au/explore/soundscape',
+      bio: "Melbourne's independent community broadcaster since 1976. Triple R is subscriber-supported and plays the music commercial radio ignores — adventurous, eclectic, and fiercely local.",
+      chartData: [
+        { pos:1,  track:'The Neon Remains',   artist:'Courtney Barnett' },
+        { pos:2,  track:'New Gold',           artist:'Gorillaz ft. Tame Impala' },
+        { pos:3,  track:'Crystallised',       artist:'The XX' },
+        { pos:4,  track:'Atlas Hands',        artist:'Benjamin Francis Leftwich' },
+        { pos:5,  track:'Red Eyes',           artist:'The National' },
+        { pos:6,  track:'Sprawl II',          artist:'Arcade Fire' },
+        { pos:7,  track:'Strange Overtones',  artist:'David Byrne & Brian Eno' },
+        { pos:8,  track:'Sun King',           artist:'Nick Cave & The Bad Seeds' },
+        { pos:9,  track:'Peach Fuzz',         artist:'Pond' },
+        { pos:10, track:'Vines',              artist:'Amyl and the Sniffers' },
+      ]
+    },
+    {
+      id: 'threecr', name: '3CR', fullName: '3CR Community Radio 855AM', freq: '855AM', city: 'Melbourne', state: 'Victoria', timezone: 'Australia/Melbourne',
+      stream: 'https://28863.live.streamtheworld.com/3CRAAC.aac',
+      streamFallback: 'https://audio.3cr.org.au/3cr-high.mp3',
+      website: 'https://www.3cr.org.au', chartUrl: '',
+      bio: "Established in 1976 to be 'a voice for those denied access to the mass media.' From Smith Street Fitzroy, 130 programs, 400+ volunteers, 13 languages. When there's a strike, a rally or a march in Melbourne, this is where people tune in.",
+      chartData: []
+    },
+    {
+      id: 'pbsfm', name: 'PBS FM', fullName: 'PBS 106.7FM Melbourne', freq: '106.7FM', city: 'Melbourne', state: 'Victoria', timezone: 'Australia/Melbourne',
+      stream: 'https://14533.live.streamtheworld.com/3PBS_FMAACHIGH.aac?dist=3pbswebsite',
+      streamFallback: 'https://playerservices.streamtheworld.com/api/livestream-redirect/3PBS_FMAACHIGH.aac?dist=3pbswebsite',
+      website: 'https://www.pbsfm.org.au', chartUrl: '',
+      bio: "Started in a lounge room in 1976 by a group 'dissatisfied with the Pops & Classical approach of current broadcasters.' First broadcast from a St Kilda pub in 1979. Now 80+ specialist programs from Collingwood — soul, jazz, noise, dub. Cooperatively owned, member-funded, Music Victoria Hall of Fame 2019.",
+      chartData: []
+    }
+  ],
+  WA: [
+    {
+      id: 'rtrfm', name: 'RTRFM', fullName: 'RTR FM 92.1', freq: '92.1FM', city: 'Perth', state: 'Western Australia', timezone: 'Australia/Perth',
+      stream: 'https://live.rtrfm.com.au/stream1',
+      website: 'https://rtrfm.com.au', chartUrl: 'https://rtrfm.com.au/featured-music/',
+      bio: "Perth's community radio heartbeat since 1977. RTRFM is 100% volunteer-run and listener-funded, dedicated to showcasing independent music and Western Australian artists.",
+      chartData: [
+        { pos:1,  track:'The Wheel',               artist:'Stella Donnelly' },
+        { pos:2,  track:'Nightlife',                artist:'Tame Impala' },
+        { pos:3,  track:'Silver Tongue',            artist:'Oh Mercy' },
+        { pos:4,  track:'Porcelain',                artist:'Moby' },
+        { pos:5,  track:'Drive',                    artist:'Flume' },
+        { pos:6,  track:'Concrete Jungle',          artist:'Tired Lion' },
+        { pos:7,  track:'Golden Plains',            artist:'Broderick Smith' },
+        { pos:8,  track:'Paradise',                 artist:'Hiatus Kaiyote' },
+        { pos:9,  track:'Inner Voyage',             artist:'Tash Sultana' },
+        { pos:10, track:'Salt',                     artist:'Ecca Vandal' },
+      ]
+    },
+    {
+      id: 'noongar', name: 'Noongar Radio', fullName: 'Noongar Radio 100.9FM', freq: '100.9FM', city: 'Perth', state: 'Western Australia', timezone: 'Australia/Perth',
+      stream: 'https://firstnationsmedia.stream/8028/stream',
+      website: 'https://www.noongarradio.com', chartUrl: '',
+      bio: "Boorloo's only First Nations station, broadcasting on Whadjuk Boodja since 2008. As they put it: 'more than just another radio station — Indigenous media contributes to building self esteem and capacity within and outside the Noongar community.' Music, language and culture on 100.9FM. Stay deadly.",
+      chartData: []
+    },
+    {
+      id: '6dby', name: '6DBY Larrkardi', fullName: '6DBY Larrkardi Radio 97.9FM', freq: '97.9FM', city: 'Derby', state: 'Western Australia', timezone: 'Australia/Perth',
+      stream: 'https://firstnationsmedia.stream/8042/stream',
+      website: 'https://www.6dby.com.au', chartUrl: '',
+      bio: "Derby Media Aboriginal Corporation has broadcast to Derby and nearby communities including Mowanjum since 2003. A survey found 95% of the local population tune in during the week. First Nations Media award-winner for Best Indigenous News and Current Affairs. Derby's loudspeaker.",
+      chartData: []
+    }
+  ],
+  SA: [
+    {
+      id: 'threed', name: 'Three D Radio', fullName: 'Three D Radio 93.7FM', freq: '93.7FM', city: 'Adelaide', state: 'South Australia', timezone: 'Australia/Adelaide',
+      stream: 'https://sounds.threedradio.com/stream',
+      website: 'https://threedradio.com', chartUrl: 'https://threedradio.com/chart-category/top-20-1/',
+      bio: '100% volunteer-run from Adelaide since 1975. Three D Radio champions independent and local music, recognising the Kaurna people and their connection to the land it broadcasts from.',
+      chartData: [
+        { pos:1,  track:'Teenager',        artist:'Teenage Joans' },
+        { pos:2,  track:'Cruel Summer',    artist:'Banoffee' },
+        { pos:3,  track:'Burn It Down',    artist:'Papa vs Pretty' },
+        { pos:4,  track:'Violet',          artist:'Grenadiers' },
+        { pos:5,  track:'Electric Slide',  artist:'Confidence Man' },
+        { pos:6,  track:'Strange Days',    artist:'Darren Hanlon' },
+        { pos:7,  track:'Under Pressure',  artist:'San Cisco' },
+        { pos:8,  track:'Amber Light',     artist:'Passenger' },
+        { pos:9,  track:'I Go Running',    artist:'Missy Higgins' },
+        { pos:10, track:'Modern Age',      artist:'The Strokes' },
+      ]
+    },
+    {
+      id: 'radioadelaide', name: 'Radio Adelaide', fullName: 'Radio Adelaide 101.5FM', freq: '101.5FM', city: 'Adelaide', state: 'South Australia', timezone: 'Australia/Adelaide',
+      stream: 'https://14533.live.streamtheworld.com/RADIO_ADEAAC.aac?dist=5uvwebsite',
+      website: 'https://www.radioadelaide.org.au', chartUrl: '',
+      bio: "Australia's first community station, born in 1972 as 5UV from a $100,000 anonymous donation to the University of Adelaide. 'Rich and real': 120+ hours of original local content weekly, 500+ volunteers, First Nations programming and multilingual voices.",
+      chartData: []
+    }
+  ],
+  NT_TOP: [
+    {
+      name: 'TEABBA Radio', fullName: 'TEABBA 88.0FM', freq: '88.0FM', city: 'Darwin', state: 'Northern Territory', timezone: 'Australia/Darwin',
+      stream: 'https://firstnationsmedia.stream/8014/stream',
+      website: 'https://www.teabba.com.au/radio', chartUrl: '',
+      bio: "The Top End Aboriginal Bush Broadcasting Association broadcasts 24/7 into 29 remote Indigenous communities across the Top End. Local shows in language — community announcements, weather, school shout-outs and music from the bush.",
+      chartData: []
+    }
+  ],
+  NT_BOT: [
+    {
+      name: 'CAAMA Radio', fullName: 'CAAMA 8KIN FM', freq: '8KIN FM', city: 'Alice Springs', state: 'Northern Territory', timezone: 'Australia/Darwin',
+      stream: 'https://streamer.radio.co/sa67d9a81d/listen',
+      website: 'https://caama.com.au', chartUrl: '',
+      bio: "The voice of Central Australia since 1985. CAAMA broadcasts in Aboriginal languages and English from Alice Springs, championing First Nations music, culture and stories from the heart of the continent.",
+      chartData: []
+    },
+    {
+      name: '8CCC Radio', fullName: '8CCC Community Radio 102.1FM', freq: '102.1FM', city: 'Alice Springs', state: 'Northern Territory', timezone: 'Australia/Darwin',
+      stream: 'https://23153.live.streamtheworld.com/8CCC.mp3',
+      website: 'https://www.8ccc.com.au', chartUrl: '',
+      bio: "Many Voices, One Frequency — broadcasting on 102.1FM from Mparntwe/Alice Springs and Tennant Creek since 1981. One third local music, one third Australian. An outback radio station in the truest sense: live event coverage, language services and Centralian/Barkly music you won't find anywhere else.",
+      chartData: []
+    }
+  ],
+  TAS: [
+    {
+      name: 'Edge Radio', fullName: 'Edge Radio 99.3FM', freq: '99.3FM', city: 'Hobart', state: 'Tasmania', timezone: 'Australia/Hobart',
+      stream: 'https://streaming.edgeradio.org.au/radio/8000/stream',
+      website: 'https://www.edgeradio.org.au', chartUrl: '',
+      bio: "Hobart's only youth community station since 2003. Volunteer-run from the University of Tasmania, playing 50% Australian music — nearly half of that Tasmanian. A platform for emerging local artists and youth voices.",
+      chartData: []
+    },
+    {
+      name: 'City Park Radio', fullName: 'City Park Radio 103.7FM', freq: '103.7FM', city: 'Launceston', state: 'Tasmania', timezone: 'Australia/Hobart',
+      stream: 'https://23163.live.streamtheworld.com/7LTNAAC.aac',
+      streamFallback: 'https://playerservices.streamtheworld.com/api/livestream-redirect/7LTNAAC.aac',
+      website: 'https://cityparkradio.com', chartUrl: '',
+      bio: "Broadcasting from a 100-year-old cottage in Launceston's City Park since 1986. Run entirely by volunteers, programming in over ten languages, covering Northern Tasmania that Edge doesn't reach. As one volunteer put it: 'you are basically listening to your neighbour speak.'",
+      chartData: []
+    }
+  ],
+  ACT: [
+    {
+      name: 'Radio National', fullName: 'ABC Radio National', freq: 'RN 846AM', city: 'Canberra', state: 'Australian Capital Territory', timezone: 'Australia/Sydney',
+      stream: 'https://live-radio01.mediahubaustralia.com/2RNW/mp3/',
+      website: 'https://www.abc.net.au/radionational', chartUrl: '',
+      bio: "Radio National! For when community radio isn't quite cutting it. What could be more communal than Ian McNamara?",
+      chartData: []
+    },
+    {
+      name: '2XX FM', fullName: '2XX 98.3FM', freq: '98.3FM', city: 'Canberra', state: 'Australian Capital Territory', timezone: 'Australia/Sydney',
+      stream: 'https://28803.live.streamtheworld.com/2XX.mp3?dist=2XXwebsite',
+      website: 'https://www.2xxfm.org.au', chartUrl: '',
+      bio: "Canberra's oldest community station, first broadcast in July 1976 and celebrating 50 years in 2026. Metal and hardcore, Latino, electronica, folk, LGBTIQ+ shows, Indigenous content, multicultural programs — 200+ volunteers, 135+ hours of original content weekly. The many unique voices of Canberra.",
+      chartData: []
+    }
+  ]
 };
 
 // ─── WORLD STATIONS (paginated 9 per page) ─────────────────────────────────
 const WORLD_STATIONS_PAGES = [
-  // ── PAGE 1 ──────────────────────────────────────────────────────────────
   [
     {
       id: 'alhara',
@@ -2029,7 +2154,7 @@ const WORLD_STATIONS_PAGES = [
       timezone: 'Asia/Hebron',
       stream: 'http://stream.radiojar.com/78cxy6wkxtzuv',
       website: 'https://radioalhara.net',
-      bio: 'Born in March 2020 as a quarantine radio out of Bethlehem, Ramallah and Amman, Radio Alhara became a vital meeting point for Arab artists and listeners worldwide. Broadcasting eclectic music, cultural dialogue and sounds from across the Middle East and North Africa — a neighbourhood on the airwaves.',
+      bio: 'Born in March 2020 as a quarantine radio out of Bethlehem, Ramallah and Amman. Broadcasting eclectic music, cultural dialogue and sounds from across the Middle East and North Africa — a neighbourhood on the airwaves.',
       chartData: []
     },
     {
@@ -2043,7 +2168,7 @@ const WORLD_STATIONS_PAGES = [
       timezone: 'Asia/Tokyo',
       stream: 'https://s3.radio.co/sc8d895604/listen',
       website: 'https://www.ashiya.radio',
-      bio: 'Broadcasting from a quiet coastal city between Osaka and Kobe, AshiyaRadio plays jazz, bossa nova and piano at the pace of a Sunday afternoon by the sea. Intimate, unhurried and deeply Japanese in its attention to atmosphere. The radio equivalent of finding a perfect cafe and never wanting to leave.',
+      bio: 'Broadcasting from a quiet coastal city between Osaka and Kobe. Jazz, bossa nova and piano at the pace of a Sunday afternoon by the sea. The radio equivalent of finding a perfect cafe and never wanting to leave.',
       chartData: []
     },
     {
@@ -2057,7 +2182,7 @@ const WORLD_STATIONS_PAGES = [
       timezone: 'Asia/Ho_Chi_Minh',
       stream: 'https://ha-noi-community-radio.radiocult.fm/stream',
       website: 'https://www.hanoicommunityradio.com',
-      bio: 'Hà Nội Community Radio is a platform for residents and artists of Vietnam and Southeast Asia. With resident shows spanning disco, house, folk-electronic fusion and experimental sounds, HCR connects Hanoi\'s creative underground to the world through monthly DJ live streams from local bars and iconic landscapes.',
+      bio: "A platform for residents and artists of Vietnam and Southeast Asia. Disco, house, folk-electronic fusion and experimental sounds — connecting Hanoi's creative underground to the world through monthly DJ live streams.",
       chartData: []
     },
     {
@@ -2072,7 +2197,7 @@ const WORLD_STATIONS_PAGES = [
       stream: 'https://radio.aporee.org:8443/aporee',
       streamFallback: 'http://radio.aporee.org:8000/aporee_high',
       website: 'https://radio.aporee.org',
-      bio: 'A global soundmap and radio project — field recordings, acoustic ecology and sonic art contributed by thousands of listeners from every corner of the planet. Radio Aporee streams a continuous journey through the world\'s soundscapes: rain on rooftops in Tokyo, market noise in Lagos, silence in Arctic tundra.',
+      bio: "A global soundmap — field recordings, acoustic ecology and sonic art from thousands of contributors. A continuous journey through the world's soundscapes: rain on rooftops in Tokyo, market noise in Lagos, silence in Arctic tundra.",
       chartData: []
     },
     {
@@ -2086,7 +2211,7 @@ const WORLD_STATIONS_PAGES = [
       timezone: 'America/New_York',
       stream: 'https://ice25.securenetsystems.net/WPKN',
       website: 'https://wpkn.org',
-      bio: 'Founded in 1963, WPKN is a 10,000-watt freeform community station broadcasting from Bridgeport, Connecticut. Volunteer-run with no format and no advertising, it was called "the greatest radio station in the world" by The New Yorker. No playlist. No rules. Pure freeform.',
+      bio: 'Founded in 1963. Volunteer-run with no format and no advertising, called "the greatest radio station in the world" by The New Yorker. No playlist. No rules. Pure freeform.',
       chartData: []
     },
     {
@@ -2100,54 +2225,69 @@ const WORLD_STATIONS_PAGES = [
       timezone: 'Europe/Brussels',
       stream: 'https://streams.movemedia.eu/centraal',
       website: 'https://www.radiocentraal.be',
-      bio: 'Antwerp\'s beloved pirate-turned-legal community radio, broadcasting since 1980. Radio Centraal is run entirely by volunteers and plays an eclectic mix of world music, jazz, experimental sounds and local culture — the true voice of the city\'s multicultural Borgerhout neighbourhood.',
+      bio: "Antwerp's beloved pirate-turned-legal community radio since 1980. Run entirely by volunteers — world music, jazz, experimental sounds and local culture from the multicultural Borgerhout neighbourhood.",
       chartData: []
     },
     {
-      id: 'refuge',
-      name: 'Refuge Worldwide',
-      fullName: 'Refuge Worldwide Berlin',
-      city: 'Berlin',
-      country: 'Germany',
-      flag: '[DE]',
+      id: 'pass',
+      name: 'Pan African Space Station',
+      fullName: 'Pan African Space Station PASS',
+      city: 'Cape Town',
+      country: 'South Africa',
+      flag: '[ZA]',
       freq: 'Online',
-      timezone: 'Europe/Berlin',
-      stream: 'https://streaming.radio.co/s3699c5e49/listen',
-      website: 'https://refugeworldwide.com',
-      bio: 'Community radio and event space from Neukölln, Berlin. Founded in solidarity with grassroots organisations, Refuge Worldwide broadcasts 24/7 with a focus on platforming diverse voices, running free educational workshops and hosting shows from across the electronic, jazz, hip-hop and experimental spectrum.',
+      timezone: 'Africa/Johannesburg',
+      stream: 'https://pass.out.airtime.pro/pass_a',
+      streamFallback: 'https://radio.garden/api/ara/content/listen/JzJ2TvIg/channel.mp3',
+      website: 'https://panafricanspacestation.org.za',
+      bio: 'An ongoing experiment in African sound and space — part radio station, part performance, part archive. Broadcasting experimental, electronic and traditional African music with an ear to the future and a deep root in the continent.',
       chartData: []
     },
     {
-      id: 'cafedelmar',
-      name: 'Café Del Mar',
-      fullName: 'Café Del Mar Radio Ibiza',
-      city: 'Ibiza',
-      country: 'Spain',
-      flag: '[ES]',
+      id: 'rebetiko',
+      name: 'Rebetiko Sealabs',
+      fullName: 'Rebetiko Sealabs Radio',
+      city: 'Athens',
+      country: 'Greece',
+      flag: '[GR]',
       freq: 'Online',
-      timezone: 'Europe/Madrid',
-      stream: 'https://streamer.radio.co/sb748f24ad/listen',
-      website: 'https://cafedelmar.com/radio',
-      bio: 'The Ibiza institution since 1980. Every evening the world gathered on its terrace to watch the sun melt into the Mediterranean — and the music they played became the blueprint for an entire genre. Café del Mar Radio broadcasts that sunset feeling, 24 hours a day, anywhere on Earth.',
+      timezone: 'Europe/Athens',
+      stream: 'https://rebetiko.sealabs.net/radio',
+      website: 'https://rebetiko.sealabs.net',
+      bio: 'Rebetiko — the blues of the Greek underworld. Bouzouki, hasapiko, minor keys and cigarette smoke. Sealabs streams the classic recordings of Tsitsanis, Vamvakaris and Papaioannou: music born in the margins and never left.',
       chartData: []
     },
     {
-      id: 'annapurna',
-      name: 'Radio Annapurna',
-      fullName: 'Radio Annapurna Nepal 94.0',
-      city: 'Kathmandu',
-      country: 'Nepal',
-      flag: '[NP]',
-      freq: '94.0 FM',
-      timezone: 'Asia/Kathmandu',
-      stream: 'https://shoutcast.prixa.live/annapurna',
-      website: 'https://www.radioannapurnanepal.com',
-      bio: 'Radio Annapurna Nepal broadcasts from Kathmandu as part of the Annapurna Media Network — Nepal\'s leading media group. On air since 2015, it carries news, culture and music from the heart of the Himalayas, blending professional journalism with the rhythms of Nepali life.',
+      id: 'ddr',
+      name: 'Dublin Digital Radio',
+      fullName: 'Dublin Digital Radio ddr.',
+      city: 'Dublin',
+      country: 'Ireland',
+      flag: '[IE]',
+      freq: 'Online',
+      timezone: 'Europe/Dublin',
+      stream: 'https://dublin-digital-radio.radiocult.fm/stream',
+      streamFallback: 'https://dublin-digital-radio.radiocult.fm/stream?nocache=0.92lc33cy5zr',
+      website: 'https://listen.dublindigitalradio.com',
+      bio: 'Award-winning community station broadcasting from Dublin since 2016. Wholly funded by members, run democratically by volunteers — underground music, bold storytelling and the voices shaping a more adventurous cultural future in Ireland.',
       chartData: []
     },
   ],
-  // ── PAGE 2 ──────────────────────────────────────────────────────────────
   [
+    {
+      id: 'eightball',
+      name: '8 Ball Radio',
+      fullName: '8 Ball Radio',
+      city: 'Online',
+      country: 'France',
+      flag: '[FR]',
+      freq: 'Online',
+      timezone: 'Europe/Paris',
+      stream: 'https://eightball.out.airtime.pro/eightball_a',
+      website: 'https://8ballradio.eu',
+      bio: 'Paris-based independent web radio broadcasting underground electronic music — house, techno, jungle, experimental and everything in between. No ads, no algorithm, just DJs who care.',
+      chartData: []
+    },
     {
       id: 'yumifm',
       name: 'Yumi FM',
@@ -2159,7 +2299,7 @@ const WORLD_STATIONS_PAGES = [
       timezone: 'Pacific/Port_Moresby',
       stream: 'https://playerservices.streamtheworld.com/api/livestream-redirect/YUMIFM.mp3',
       website: 'https://www.yumifm.net',
-      bio: 'PNG\'s number one Tok Pisin station since 1997. Broadcasting from Port Moresby in the language of the people, Yumi FM is the pulse of Papua New Guinea — local music, community news, sports, and the voices of a nation across its extraordinary islands and highlands.',
+      bio: "PNG's number one Tok Pisin station since 1997. The pulse of Papua New Guinea — local music, community news, sports and the voices of a nation across its extraordinary islands and highlands.",
       chartData: []
     },
     {
@@ -2173,7 +2313,7 @@ const WORLD_STATIONS_PAGES = [
       timezone: 'America/Chicago',
       stream: 'http://stream.radio.macinmind.com:8000/listen',
       website: 'https://radio.macinmind.com',
-      bio: 'Old-time radio streams scheduled each hour from Antioch, Illinois — preferring high-quality recordings and today\'s date in history when available. Jack Benny, Orson Welles, The Shadow, Fibber McGee and more, broadcast as they were meant to be heard: one episode at a time into the dark.',
+      bio: "Scheduled old-time radio from Antioch, Illinois — preferring high-quality recordings and today's date in history. Jack Benny, Orson Welles, The Shadow, broadcast as they were meant to be heard: one episode at a time into the dark.",
       chartData: []
     },
     {
@@ -2188,7 +2328,7 @@ const WORLD_STATIONS_PAGES = [
       stream: 'https://stream.vintageobscura.net/stream.mp3',
       streamFallback: 'http://stream.vintageobscura.net/stream.mp3',
       website: 'https://vintageobscura.net',
-      bio: 'Every track played on Vintage Obscura is at least 25 years old, has fewer than 30,000 views on YouTube, and is objectively obscure. Curated by nearly 100,000 digital crate-diggers on Reddit\'s /r/vintageobscura, it is the dustiest — and most rewarding — place on the internet.',
+      bio: "Every track is at least 25 years old and has fewer than 30,000 YouTube views. Curated by nearly 100,000 digital crate-diggers on Reddit's /r/vintageobscura. The dustiest — and most rewarding — place on the internet.",
       chartData: []
     },
     {
@@ -2202,21 +2342,21 @@ const WORLD_STATIONS_PAGES = [
       timezone: 'Europe/Kyiv',
       stream: 'https://20ft-radio.radiocult.fm/stream',
       website: 'https://20ftradio.net',
-      bio: 'Broadcasting from a 20-foot shipping container in a factory garden on Kyrylivska Street, Kyiv. Since 2016, 20ft has championed Ukrainian and international underground music — electronic, jazz, experimental and beyond — continuing to broadcast through adversity as a defiant cultural beacon.',
+      bio: 'Broadcasting from a 20-foot shipping container in a factory garden on Kyrylivska Street since 2016. Electronic, jazz, experimental and beyond — continuing to broadcast through adversity as a defiant cultural beacon.',
       chartData: []
     },
     {
-      id: 'ddr',
-      name: 'Dublin Digital Radio',
-      fullName: 'Dublin Digital Radio ddr.',
-      city: 'Dublin',
-      country: 'Ireland',
-      flag: '[IE]',
+      id: 'refuge',
+      name: 'Refuge Worldwide',
+      fullName: 'Refuge Worldwide Berlin',
+      city: 'Berlin',
+      country: 'Germany',
+      flag: '[DE]',
       freq: 'Online',
-      timezone: 'Europe/Dublin',
-      stream: 'https://dublin-digital-radio.radiocult.fm/stream',
-      website: 'https://listen.dublindigitalradio.com',
-      bio: 'Award-winning community station broadcasting from Dublin since 2016. Wholly funded by its members, ddr. is run democratically by a growing community of volunteers and broadcasters, championing underground music, bold storytelling and the voices shaping a more adventurous cultural future in Ireland.',
+      timezone: 'Europe/Berlin',
+      stream: 'https://streaming.radio.co/s3699c5e49/listen',
+      website: 'https://refugeworldwide.com',
+      bio: 'Community radio and event space from Neukölln, Berlin. Founded in solidarity with grassroots organisations, broadcasting 24/7 with a focus on diverse voices, free educational workshops and shows spanning electronic, jazz, hip-hop and experimental.',
       chartData: []
     },
     {
@@ -2231,7 +2371,7 @@ const WORLD_STATIONS_PAGES = [
       stream: 'https://stream.nightride.fm/nightride.mp3',
       streamFallback: 'https://stream.nightride.fm/chillsynth.mp3',
       website: 'https://nightride.fm',
-      bio: 'Independent synthwave and retrowave internet radio, broadcasting at 320kbps from somewhere in the neon-soaked digital dark. Nightride FM plays the music that exists in the space between 1986 and a future that never happened — darksynth, outrun, chillwave and everything in between. Drive fast, windows down.',
+      bio: 'Independent synthwave and retrowave internet radio at 320kbps. Music that exists in the space between 1986 and a future that never happened — darksynth, outrun, chillwave. Drive fast, windows down.',
       chartData: []
     },
     {
@@ -2246,7 +2386,7 @@ const WORLD_STATIONS_PAGES = [
       stream: 'https://novazz.ice.infomaniak.ch/novazz-128.mp3',
       streamFallback: 'https://nova-sm.ice.infomaniak.ch/nova-sm-128.mp3',
       website: 'https://nova.fr',
-      bio: 'Paris eclectic radio since 1981. Radio Nova plays reggae, jazz, hip-hop, world music, electro and rap — not as genres but as a single uninterrupted state of mind. Le Grand Mix. Founded by Jean-François Bizot, Nova has spent 40 years being allergic to whatever is fashionable and right about everything that isn\'t.',
+      bio: 'Paris eclectic radio since 1981. Reggae, jazz, hip-hop, world music, electro and rap — not as genres but as a single uninterrupted state of mind. Le Grand Mix. Allergic to whatever is fashionable, right about everything that isn\'t.',
       chartData: []
     },
     {
@@ -2261,21 +2401,7 @@ const WORLD_STATIONS_PAGES = [
       stream: 'http://live-mp3-128.kexp.org/kexp128.mp3',
       streamFallback: 'http://live-aacplus-64.kexp.org/kexp64.aac',
       website: 'https://kexp.org',
-      bio: 'Seattle nonprofit broadcasting since 1972. KEXP is one of the most influential independent music stations in the world — not for playing hits but for championing artists before anyone else did. Nirvana, Fleet Foxes, Death Cab for Cutie all passed through these studios first. Where the music matters.',
-      chartData: []
-    },
-    {
-      id: 'nolife',
-      name: 'No Life Radio',
-      fullName: 'NoLife Radio Video Game OSTs',
-      city: 'Online',
-      country: 'France',
-      flag: '[FR]',
-      freq: 'Online',
-      timezone: 'Europe/Paris',
-      stream: 'http://radio.nolife-radio.com/',
-      website: 'https://nolife-radio.com',
-      bio: 'An independent web radio dedicated to lovers of video game music from the early days until now. Running since 2008 on a hand-curated playlist selected by a small team of game music obsessives — 8-bit classics, RPG soundtracks, anime arrangements, and everything in between. Advertising-free forever.',
+      bio: 'Seattle nonprofit since 1972. One of the most influential independent music stations in the world — Nirvana, Fleet Foxes, Death Cab all passed through these studios first. Where the music matters.',
       chartData: []
     },
   ]
@@ -2314,14 +2440,30 @@ function init() {
     wf.appendChild(bar);
   }
 
+  const _lastTap = {};
+  function handleStateTap(code) {
+    const now = Date.now();
+    if (now - (_lastTap[code] || 0) < 400) {
+      selectState(code);
+      startAudio();
+    } else {
+      selectState(code);
+    }
+    _lastTap[code] = now;
+  }
   ['WA','SA','QLD','NSW','VIC','TAS','ACT'].forEach(code => {
     const el = document.getElementById(code);
-    if (el) el.addEventListener('click', () => selectState(code));
+    if (el) {
+      el.style.touchAction = 'manipulation';
+      el.addEventListener('click', () => handleStateTap(code));
+    }
   });
   const ntTop = document.getElementById('NT_TOP');
   const ntBot = document.getElementById('NT_BOT');
-  if (ntTop) ntTop.addEventListener('click', () => selectState('NT_TOP'));
-  if (ntBot) ntBot.addEventListener('click', () => selectState('NT_BOT'));
+  if (ntTop) { ntTop.style.touchAction = 'manipulation'; ntTop.addEventListener('click', () => handleStateTap('NT_TOP')); }
+  const actHitbox = document.getElementById('ACT-hitbox');
+  if (actHitbox) { actHitbox.style.touchAction = 'manipulation'; actHitbox.addEventListener('click', () => handleStateTap('ACT')); }
+  if (ntBot) { ntBot.style.touchAction = 'manipulation'; ntBot.addEventListener('click', () => handleStateTap('NT_BOT')); }
 
   document.getElementById('panelCloseBtn').addEventListener('click', closePanel);
 
@@ -2378,11 +2520,16 @@ function init() {
 }
 
 // ─── MAP INTERACTION ──────────────────────────────────────────────────────────
-function selectState(code) {
-  const station = STATIONS[code];
-  const uc      = UNDER_CONSTRUCTION[code];
+function selectState(code, stationIdx) {
+  const stationArr = STATIONS[code];
+  const uc         = UNDER_CONSTRUCTION[code];
 
-  if (!station && !uc) return;
+  if (!stationArr && !uc) return;
+
+  const defaultIdx = (stationIdx !== undefined) ? stationIdx : getStateDefault(code);
+  const station = stationArr ? (stationArr[defaultIdx] || stationArr[0]) : null;
+  window._currentStateCode = code;
+  window._currentStationIdx = stationArr ? (stationArr.indexOf(station)) : 0;
 
   if (currentState) {
     document.getElementById(currentState)?.classList.remove('selected');
@@ -2409,13 +2556,126 @@ function selectState(code) {
   updateMiniPlayer();
 }
 
+function renderStationTabs(code) {
+  // Remove any existing tabs row
+  const existing = document.getElementById('stationTabsRow');
+  if (existing) existing.remove();
+  if (!code) return;
+  const arr = STATIONS[code];
+  if (!arr || arr.length <= 1) return;
+
+  const defaultIdx = getStateDefault(code);
+  const currentIdx = (window._currentStationIdx !== undefined) ? window._currentStationIdx : 0;
+
+  const tabsRow = document.createElement('div');
+  tabsRow.id = 'stationTabsRow';
+  tabsRow.style.cssText = [
+    'display:flex',
+    'border-bottom:1px solid var(--border)',
+    'overflow-x:auto',
+    'scrollbar-width:none',
+    'flex-shrink:0',
+    'background:var(--panel)',
+    'min-height:28px',
+  ].join(';');
+
+  arr.forEach((st, i) => {
+    const tab = document.createElement('div');
+    const isActive = i === currentIdx;
+    const isDefault = i === defaultIdx;
+    tab.style.cssText = [
+      'flex:1',
+      'min-width:55px',
+      'padding:5px 6px',
+      'font-size:0.55rem',
+      'letter-spacing:1px',
+      'text-align:center',
+      'cursor:pointer',
+      'border-right:1px solid var(--border)',
+      'position:relative',
+      'transition:color 0.15s,background 0.15s',
+      'font-family:"Share Tech Mono",monospace',
+      'white-space:nowrap',
+      'overflow:hidden',
+      'text-overflow:ellipsis',
+      'color:' + (isActive ? 'var(--green)' : 'var(--muted)'),
+      'background:' + (isActive ? 'rgba(var(--glow-color,0,255,65),0.05)' : 'transparent'),
+    ].join(';');
+    tab.textContent = st.name + (isDefault ? ' ★' : '');
+    if (isActive) {
+      const underline = document.createElement('div');
+      underline.style.cssText = 'position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--green);';
+      tab.appendChild(underline);
+    }
+    if (i === arr.length - 1) tab.style.borderRight = 'none';
+    tab.addEventListener('mouseenter', function() { if (!this.classList.contains('active-tab')) this.style.color = 'var(--green-dim)'; });
+    tab.addEventListener('mouseleave', function() { if (!this.classList.contains('active-tab')) this.style.color = i === currentIdx ? 'var(--green)' : 'var(--muted)'; });
+    tab.addEventListener('click', () => selectState(code, i));
+    tabsRow.appendChild(tab);
+  });
+
+  // Insert after panel-header, before player-section
+  try {
+    const playerSection = document.getElementById('normalPanelView').querySelector('.player-section');
+    if (playerSection) {
+      playerSection.insertAdjacentElement('beforebegin', tabsRow);
+    } else {
+      const panelHdr = document.getElementById('normalPanelView').querySelector('.panel-header');
+      if (panelHdr) panelHdr.insertAdjacentElement('afterend', tabsRow);
+    }
+  } catch(e) {
+    console.error('[Tabs] Failed to insert tabs row:', e);
+  }
+}
+
+function renderStarBtn(code, stationIdx) {
+  const existing = document.getElementById('starDefaultBtn');
+  if (existing) existing.remove();
+  if (!code) return;
+  const arr = STATIONS[code];
+  if (!arr) return;
+  const defaultIdx = getStateDefault(code);
+  const isDefault = stationIdx === defaultIdx;
+
+  // Wrap freq line in a flex row if not already
+  const freqEl = document.getElementById('panelFreq');
+  freqEl.style.display = 'flex';
+  freqEl.style.alignItems = 'center';
+  freqEl.style.justifyContent = 'space-between';
+
+  const star = document.createElement('button');
+  star.id = 'starDefaultBtn';
+  star.title = isDefault ? 'Default station' : 'Set as default';
+  star.textContent = isDefault ? '★' : '☆';
+  star.style.cssText = [
+    'background:none',
+    'border:none',
+    'cursor:pointer',
+    'font-size:1rem',
+    'color:' + (isDefault ? 'var(--green)' : 'var(--muted)'),
+    'padding:0 0 0 8px',
+    'line-height:1',
+    'transition:color 0.15s',
+    'font-family:"Share Tech Mono",monospace',
+    'flex-shrink:0',
+  ].join(';');
+  star.addEventListener('click', () => {
+    setStateDefault(code, stationIdx);
+    renderStarBtn(code, stationIdx);
+    renderStationTabs(code);
+  });
+  freqEl.appendChild(star);
+}
+
 function showStationPanel(station) {
   document.getElementById('normalPanelView').style.display = 'block';
   document.getElementById('ucPanelView').style.display     = 'none';
 
   document.getElementById('panelStateTag').textContent    = '// ' + (station.state || station.country || '').toUpperCase();
   document.getElementById('panelStationName').textContent = station.name;
-  document.getElementById('panelFreq').textContent        = station.freq + ' · ' + (station.city || '');
+  const freqEl = document.getElementById('panelFreq');
+  freqEl.textContent = station.freq + ' · ' + (station.city || '');
+  freqEl.style.display = '';
 
   if (window._localTimerInterval) clearInterval(window._localTimerInterval);
   const timeEl = document.getElementById('panelLocalTime');
@@ -2433,6 +2693,19 @@ function showStationPanel(station) {
   document.getElementById('stationLink').textContent      = 'VISIT ' + station.name.toUpperCase() + ' ↗';
   document.getElementById('activeFreq').textContent       = station.freq;
 
+  const _code = window._currentStateCode;
+  const _idx  = window._currentStationIdx || 0;
+  if (_code && STATIONS[_code]) {
+    console.log('[Tabs] Rendering tabs for', _code, '— stations:', STATIONS[_code].length, '— idx:', _idx);
+    renderStationTabs(_code);
+    renderStarBtn(_code, _idx);
+  } else {
+    const existing = document.getElementById('stationTabsRow');
+    if (existing) existing.remove();
+    const existingStar = document.getElementById('starDefaultBtn');
+    if (existingStar) existingStar.remove();
+  }
+
   if (!isPlaying) {
     document.getElementById('playBtn').textContent      = '▶';
     document.getElementById('playBtn').className        = 'play-btn';
@@ -2440,7 +2713,7 @@ function showStationPanel(station) {
     document.getElementById('playerStatus').className   = 'player-status';
     stopWaveAnimation();
   } else if (window._lastPlayedStation === station) {
-    document.getElementById('playBtn').textContent      = '■';
+    document.getElementById('playBtn').textContent      = '⏸';
     document.getElementById('playBtn').className        = 'play-btn playing';
     document.getElementById('playerStatus').textContent = '● LIVE';
     document.getElementById('playerStatus').className   = 'player-status live';
@@ -2472,6 +2745,8 @@ function closePanel() {
   if (window._localTimerInterval) clearInterval(window._localTimerInterval);
   if (window._worldAsciiTimer) { clearInterval(window._worldAsciiTimer); window._worldAsciiTimer = null; }
   if (window._worldZoomRaf) { cancelAnimationFrame(window._worldZoomRaf); window._worldZoomRaf = null; }
+  if (window._chartTimeout) { clearTimeout(window._chartTimeout); window._chartTimeout = null; }
+  window._chartRenderToken = (window._chartRenderToken || 0) + 1;
   document.getElementById('panelLocalTime').innerHTML = '';
   document.getElementById('worldView').classList.remove('panel-open');
   const panel = document.getElementById('sidePanel');
@@ -2492,6 +2767,48 @@ function closePanel() {
   updateMiniPlayer();
 }
 
+function reopenCurrentStation() {
+  const st = window._lastPlayedStation;
+  if (!st) return;
+  if (window._currentWorldStation && window._currentWorldStation === st) {
+    if (currentView !== 'world') toggleWorldView();
+    selectWorldStation(st);
+  } else {
+    const code = Object.keys(STATIONS).find(k => {
+      const arr = STATIONS[k];
+      return Array.isArray(arr) && arr.some(s => s === st);
+    });
+    if (code) {
+      if (currentView === 'world') toggleWorldView();
+      const idx = STATIONS[code].indexOf(st);
+      selectState(code, idx);
+    }
+  }
+}
+
+function setVolume(val) {
+  const audio = document.getElementById('audioPlayer');
+  const numVal = parseInt(val);
+  // iOS ignores audio.volume — hide slider there
+  if (audio) {
+    try { audio.volume = numVal / 100; } catch(e) {}
+  }
+  document.getElementById('volVal').textContent = numVal + '%';
+  try { localStorage.setItem('rrVol', numVal); } catch(e) {}
+}
+
+function initVolume() {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIOS) { const vc = document.getElementById('volControl'); if(vc) vc.style.display='none'; return; }
+  try {
+    const saved = localStorage.getItem('rrVol');
+    if (saved !== null) {
+      document.getElementById('volSlider').value = saved;
+      setVolume(saved);
+    }
+  } catch(e) {}
+}
+
 function updateMiniPlayer() {
   const mini = document.getElementById('miniPlayer');
   const miniPlay = document.getElementById('miniPlayBtn');
@@ -2500,7 +2817,7 @@ function updateMiniPlayer() {
     const st = window._lastPlayedStation;
     mini.style.display = 'flex';
     document.getElementById('miniPlayerLabel').textContent = st.name + (st.freq ? ' ' + st.freq : '');
-    if (miniPlay) miniPlay.textContent = isPlaying ? '■' : '▶';
+    if (miniPlay) miniPlay.textContent = isPlaying ? '⏸' : '▶';
     if (isPlaying) {
       document.querySelectorAll('.mini-wave-bar').forEach(b => b.classList.add('active'));
     } else {
@@ -2510,16 +2827,11 @@ function updateMiniPlayer() {
     mini.style.display = 'none';
     if (miniPlay) miniPlay.textContent = '▶';
   }
+  updatePipBtn();
 }
 
 // ─── CHARTS ───────────────────────────────────────────────────────────────────
-function loadCharts(station) {
-  const container = document.getElementById('chartContainer');
-
-  if (!station.chartData || station.chartData.length === 0) {
-    document.getElementById('chartRefresh').textContent = 'WORLD BROADCAST';
-
-    const asciiArts = {
+const STATION_ASCII_ART = {
       'alhara':     ['@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%#*++=++*%@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#+--=+*#####*=-=#@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#+-=*%@@@@@@@@@@@@#--%@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*:=#@@@@@@@@@@@@@@@@@@*:%@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@+:+%@@@@@@@@@@@@@@@@@@@@@#:@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@+:+@@@@@@######%@@@@@@@@@@@@==@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@*:+@@@@@@@@..----::#@@@@@@@@@@#.@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@%-=%@@@@@@@@@.-@@@@@::@@@@@+%@@@@.@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@*:*@@@@@@@@@@@.-@@@@@::@@@@@=:@@@@:%@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@=-@@@@@@@@@@@@@.:++++::%@@@@@@-%@@@.%@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@%:+@@@@@@@@@@@@@@.:****=:%@@@@@%:@@@@.@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@%.*@@@@@@@@@@@@@@@.-@@@@@.=@@%#=.*@@@#:@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@#.%@@@@@@@@@@@@@@@@.-@@@@@::@@@*+#@@@@==@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@#.%@@@@@@@@@@@@@@@@@-=@@@@@=-@@@@@@@@@@.%@@@@@@@@@@@@','@@@@@@@@@@@@@@@@%.%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@+-@@@@@@@@@@@@@','@@@@@@@@@@@@@@@%:#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%.%@@@@@@@@@@@@@','@@@@@@@@@@@@@@@-+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@-+@@@@@@@@@@@@@@','@@@@@@@@@@@@@@+-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*:@@@@@@@@@@@@@@@','@@@@@@@@@@@@@%.%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#.%@@@@@@@@@@@@@@@','@@@@@@@@@@@@@=+@@@@@@@%@@@@@@@@@@@@@@@@@@@@@@@@@@@@%.#@@@@@@@@@@@@@@@@','@@@@@@@@@@@@%.@@@@@@@:.+@@@@@@@%=@@@@@@@@@@@@@@@@@%.#@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@+=@@@@@@#.*.%@@@@@@++%@@@@@@@@@@@@@@@%.#@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@:#@@@@@@.=@.=@@@@@@##@@@@@@@@@@@@@@@#.#@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@.@@@@@@*.@@*.#@@@@@=+@@@@@@@@@@@@@@*:%@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@%.@@@@@@.:+++.-@@@@@*:@@@@@@@@@@@@@==@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@%.@@@@@+.=====.#@@@@%.@@@@@@@@@@@#:+@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@.@@@@%.+@@@@@::@@@@%.@@@@@@@@@%=-%@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@:#@@@=.@@@@@@*.*@@@@#@@@@@@@@+:*@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@+-@@@@@@@@@@@@@@@@@@@@@@@@@*:+%@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@:*@@@@@@@@@@@@@@@@@@@@@%+:=%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@%:*@@@@@@@@@@@@@@@@@@#=:*%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@%--#@@@@@@@@@@@@%*=-=#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@#--+*#####*+=--+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@%*+===++#%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'],
       'ashiya':     ['                     1212               1','                    12   3            123','                   12    3            3 3','                  13     3           11 3','                  3      3           3 2','                 31      3           311','                12       3          213','                3        3          33        2','               31     111311 113    31        1            231','              13 12111  12 133     32        2    3   3  13 32  21','             1311       10 31      3  123   13   23  33123221111','           1231         3 11     123 11 3  223  21311 31 11','         12  3          3 1321121  321  331  221     31','        21  3           3    213  131              113','       3   21          11   3 3   21              11 3','      3   12           2   3 3                   11 31','     3    3            3   11                    2  3','     1   3             3                        3  21','    3   3              3                 1      2 12','    3112               1     1        1  1      312','     1','','','    22222211   132     132            2222222   1111231   11111111','      11 131   11      12311133       1111111     133 12   1111232','      32 11     1  12   33  22             33  11113311    111133','     23       111231    23               1331     231        1331','    11        111        31             111      111        111'],
       'refuge':     ['                           ##**+*+*++*+**##','                       #**+** *# *  * #* **+**#','                     ***##   *   #  #   *   ##***','                  #+* ##    #   *    #   ##   ## **#','                 +*  ##    #    #    #    #    ## #*+','               **  #*#####*     #    #     *#####*#  **','              +#   *     #*++##*######*##++*#     #   #*#','            #*    #      *+=++ *      * +==+*      #    **','           #+    *      ##+=== *      * +=+=##      *    **','          #*    *       *#=+=+##      ##+==+**       *    **','         #+##   #      # #+=== #        =+==# #       #   #+#','         +    #*#####  #  +=++ #        +=++  #  #####*#    *#','        *#    #      ##*###++###### # ###*+*##*##      #     +','       #*     *       ##      ##       *       #       *     *#','       +      #       *       #        #       *       #      +','       *     #        *       * ###    *       *        #     *#','      + #++=+##=+*    #       *++ ==   *       #        #      +','      +  *=+=  *+=+   #       =++  +   +       #        #      +','      +  *==+  *===   ###*   *+=+     ##   #   # *###** # *##  +#','     #+  *+==  ++=*  ** *=+# *=++  *+=+ #+==  ** #=++#* + #+=* +#','     #*  *=+=*+=+    ++  =+# *+=*  #=+=  =+=  +=  *==  ++  ++* *#','     #*  *=+=#=+=*  #=+* +*  *==*   ==+  ==+  +=+  ++  ==+ ++  *#','     #+  *=+= #==+*  ==++    *+=+   =+=  +=+  #+=+ *#  ++=+#   +#','      +  *+==  *=+=# *+==+** *=++   +=+*#==+  +*###    #+==++* +','      =  #***#  ***## #****  #+*##  #*** ***##+=+=+=+*  ##***  +','      +      *        #       *        +     #+==+===+  *      +','      #*     *#       #       *        *     *+    #+#  *     *#','       +      +       *       *        *      #*###    *#     +','       **     **      ########*########*#######*      #*     **','        +    #**+# # # *      #        #      #  # ##***#    +','        #+##   *##     #       #              *     # *   ##+#','         #*    # #*    #                      #    ## #    **','          **    * #*    *      #      #      #    #  *    **','           **    #  **  #      *      #      *  ##  *    #*','            **    #  #**##     *      *     * ##   #    **','             #*#   #    *+*####*######*#####+#    *    +#','               +*  #*#####+*+****#  ##******#####*#  **','                #**# #     #   #*#**#*#   #     #  *+#','                  #** ##   ##   *    #   ##   ## *+#','                     ***##   #   #  ##  ##  ##***#','                       #**++#### #  #  * #++*+#','                           ##**+++**+++***#'],
@@ -2537,6 +2849,24 @@ function loadCharts(station) {
       'abn':     ['......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','......................................................................','.........................................:::::::::::::::::............','...........-=--=----------------::-::--------=-------:--::............','..........-=++++++++++===========---------========----====-::.........','..........=+++++*++++++++++*++***++===---===========-==+++=-=.........','..........=+# +=======++++++=====-=+++====+++++++++++++  *+=+.........','..........-= -.....................-+++=+++**+**+++++++:+++++.........','..........-=#:.....................:+++++*#+-:.:=++++++.:++++.........','..........-=*:.....................:+++*-.........=++++.:+++*.........','..........-=*:.....................:+=+............-=++..=++*.........','..........-=*:.....................:+=:.............===..==+#.........','..........-=*+:--===========-==--::-++...............+*++=++#.........','..........--**::--=-=====+++====-::---......++.......=+**==+*.........','..........-= #:===++++++++++++++=-:=+-......:=.......=* #+*+ .........','..........--++--=====----====---::::=+...............=+**==+ .........','..........=+  ::-------========-::.-=-..............-+   *#* .........','..........=+ =.....................:==-............:==+--+*+ .........','..........== :.....................:+==-..........:===+.:+++ .........','..........== :.....................:+++==-......:-==++*.:++=  ........','..........==*+.....................-===+++=----====+*+*:-*+=   .......','..........===++--------------:::::==+     *++====+#      *++   .......','..........++++============-=======+*       #+===+         ++#=........','..........+++++++=++++++=========++        #+===+        *++ .........','.........:====-====--=-----------=+*#   **+--:::-*   #**+===#.........','..........:-=+++++===++++++++++++++*#**+++++++=++**#*++*++* =.........','.............                                             =:..........','...........:                                               -:.........','...........:=++++*+*****************+++++++++++*******### #:::........','.................:::........:::.......................................','.........................................................::...........'],
       'vintageobscura':     ['','','','','','                                                   →↑↑→→↑↑→→↑↑→→↑→→↑↑→→↑→↑→→↑→','','                                            ····←←······','                                       ·←↑←←←↑←·········←←←←··','                                   ··←←←·←   ←←   ··  ·   · ··←←·','                                 ·←··    ·←··←←··←←←··← ··   ·  ·←←','                               ·↑←·   ·····           ···←· ←·←···←←·','                             ·↑←· ···←·                   ·←←↑     ·←↑·','                            ←←·····←·                        ·←····  ·←←','                           ←←·   ←·                            ·←·     ↑←','                          ·↑   ·↑                         ·     ·←···←←·↑·','                         ·←····←    ···· ··          ·       ··   ←←·    ↑','                         ·←   ←·   ·   ········    ←←····←··      ·←·····↑←','                         ←←··←←    ·←←←·←←←·· ··   ↑·←·←·  ←··     ←···· ·↑','                     →   ↑·  ·←      ······    ·   ↑    ··         ←·     ↑','                         ↑←←←←←·               ·   ↑               ←· ·   ↑','                         ←·   ←·                   ←              ·←·  ···↑','                         ←← ···←             ·←←· ·←··            ↑· ·   ←←','                          ↑←····←               ··               ←·   · ·←·','                          ·←   ·←←           ···←··←←···       ·←· · ·  ←←','                           ←←    ·←·           ·····          ·←··     ·←·','                            ←←··   ·←←·         ····        ←←····←   ·←','                             ·←·  ··←←·←··              ··←··      · ←←','                               ←←·· ·    ←·←·←←····←←··←·      ·   ←←·','                                ·←··   ··  ·  ···  ·←  ·←      ··←←·','                                   ←←··  ··     ·  ·←   ··   ··←·','                                     ···←····   ·  ←←  · ·←←←·','                                          ····←←←·←←←←←←··','','                      →↑→→↑→→↑→→↑→→↑→→↑→→→↑→→↑↑→↑','','','','',''],
       'nolife':     ['                         @###++#      +++###@','                       ++......+      +......++#@','                       .++++++.+      +.+++++....+#@','                       .++++++.+      +.+++++++++...+#','                       .++++++.+      +.++++++++++++..+#','            #+@        .++++++.+      +..+++++++++++++..+#','           #...#       .++++++.+      #+++...+++++++++++..+','         @+.+++.+      .++++++.+           ##+..++++++++++.+@','        #..+++++.+#    .++++++.+              #+...++++++++..#','       #..+++++++..#   .++++++.+                 #+.++++++++..#','      #.+++++++++++.+@ .++++++.+                   #..++++++++.#','     #..++++++++++++..#.++++++.+                    @+.+++++++..#','    #.+++++++++++++++...++++++.+                      #..+++++++.#','   @..++++++...++++++++.++++++.+                       #..++++++..@','   +.++++++..#+.++++++++++++++.+                        #..++++++.+','  #.+++++++.#  #..++++++++++++.+                         #.+++++++.#','  +.++++++.+    #+.+++++++++++.+                          +.++++++.+',' #.++++++.+      @+..+++++++++.+                           +.++++++.#',' ..++++++.#        #..++++++++.+                           #.++++++..','@.++++++..          @+.+++++++.+                            ..++++++.@','#.++++++.#            #..+++++.+                            #.++++++.#','+.++++++.@             #+.++++.+      @######################.++++++.+','+.+++++..                +.+++.+      +.......................++++++.+','.++++++..                 #..+.+      +.+++++++++++++++++++++++++++++.','.++++++.+                  @+.+#      #+.++++++++++++++++++++++++++++.','.++++++.+                    #          +..++++++++++++++++++++++++++.','.++++++..                                #..+++++++++++++++++++++++++.','+.+++++..                                  +.+++++++++...............+','+.++++++.@                                  #..++++++++..############@','#.++++++.#                       #++#        #+.++++++++..#','@.++++++..                     @++++++@        +..+++++++..+',' ..++++++.#                   #+....+++#        #..++++++++..#',' #.++++++.+                  #+..   .+++#        @+.++++++++..#','  +.++++++.+               #+++.    ...+++#        #..++++++++.+@','  #.+++++++.#             #+++..       ..++#        #..++++++++..#','   +.++++++..#          @#+++..         ...+#@        +..+++++++..#','   @..++++++..         #++++..           ..+++#        #..++++++..@','    #.+++++.+@       @#+.++.            ..+++.+#@       @+.+++++.#','     #..+..#        ##+++++....         .+++++++##        #..+..#','      #..+#        ##++++++++..    .    .++++++++##        #+..#','       #+        ###.+++++++++.         .++++++++.###        +#','                ##+.+++++++++++.     .  .+++++++++.+##','              @+#+.++++++++++++.        ..+++++++++.+#+@','             #+#+.+++++++++++++..        .++++++++++.+#+#','            +##.+++++++++++++++..      ...++++++++++++.##+','          #+#+.+++++++++++++++++....   .+++++++++++++++.+#+#','         #+@+.++++++++++++++++++++..   .++++++++++++++++.+@+#','       @+##..+++++++++++++++++++++..   .+++++++++++++++++..##+@','      #+##..++++++++++++++++++++++ .. ..++++++++++++++++++..##+#','     ++@+.++++++++++++++++++++++++  +..+++++++++++++++++++++.+@++'],
+      'radioadelaide': ['......................................................................','......:-=++++++++**#####*++++:........................................','=###############################*+=...................................','.*###################################*+=:.............................','..+#######################################*+:.........................','............-=+++#############################+=......................','..................######*==############*#########*+...................','..................######+*=.=*######*+.=.+##########+.................','..................########--+...:..-..################:...............','..................###########.=##--##+#################=..............','..................+#####################################+.............','.....................:++*################################*............','...........................=###############################...........','...........................+################################:.........','.......................:+*###################################:........','...................:+*########################################:.......','...................############################################:......','...................=############################################......','....................*############################################.....','.....................#############################################....','.....................-############################################*...','......................+############################################*..','.......................#############################################-.','........................############################################*.','........................-###########################################=.','.........................*#########################################+..','..........................++++++++++++++++++++++++++++++++++++++++-...'],
+      'threecr': ['000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','0000000000000000000000000000000000000000000000      00000000','0000000000000000000000000000000000000000    0000110   000000','000000000000000000000000000000000000 00000000000001   000000','0000000000000000000000000000      00 00000000 00001   000000','000000000000000000000  000000000  00 0000      0001   000000','00000000000000000000 00000000001  00 000   000 0001   000000','0000000000  0000  00 000000000    00 000   000 0001   000000','00000  000000001  00 0000      00000 000   000  001   000000','0000 00000000001  00 0000  000000000 0000  00  0001   000000','0000 0000    001  00 0000  000000000 00000000000000   000000','0000         001  00 0000  000000000 0000000000000   0000000','000000000000 001  00 0000  000000000 000000000000  000000000','000000000000 0000 00 00000 000000000 0000   00000  000000000','00000000000000000 00 0000  000000000 0000  0 00000  00000000','0000 000000000000 00 0000  000000000 0000  00 0001   0000000','0000 000000000000 00 00000  00000000 0000  00  0000  0000000','0000          000 00 00010  00000000 0000  000  0000  000000','000000000000  000  0 00010  00000000 0000  0000 0000   00000','000000000000 0000  0 00000    000  0 0001   0000 0000   0000','0000000000000000   0 000000000000  0  0000  0000  000   0000','00000 00000000000  0 000000000000  0        00000     000000','0000  0000000000   00              0000000000000000000000000','0000             00000   00000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000','000000000000000000000000000000000000000000000000000000000000'],
+      'pbsfm': ['@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#+.....       .....+@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@+..                          ..#@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@+.                                   .+#@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@#+.                                          +@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@+.               #@@##+.                         .#@@@@@@@@@@@@@','@@@@@@@@@@@@@@+                  #@@@@@@@@+.                       .#@@@@@@@@@@@','@@@@@@@@@@@@+                    +@@@@@@@@@@#                        .@@@@@@@@@@','@@@@@@@@@@#                      +@@@@@@@@@@@@.                        #@@@@@@@@','@@@@@@@@@+                       .@@@@@@@@@@@@@.                        +@@@@@@@','@@@@@@@@.     #@@###+..           @@@@@@@@@@@@@#         ..+#####++      #@@@@@@','@@@@@@@.      .@@@@@@@@@#+.       @@@@@@@@@@@@@@      +@@@@@@@@@@@@       #@@@@@','@@@@@@.       .@@@@@@@@@@@@#.     @@@@@@@@@@@@@@.   .@@@@@@@@@@@@@@        @@@@@','@@@@@.         @@@@@@@@@@@@@@+    @@@@@@@@@@@@@@   .@@@@@@@@@@@@@@@        +@@@@','@@@@#          @@@@@@@@@@@@@@@+   @@@@@@@@@@@@@@   @@@@@@@@@####@@+         @@@@','@@@@.          #@@@@@@@@@@@@@@@   @@@@@@@@@@@@@.   @@@@@@@@.     .          @@@@','@@@#           +@@@@@@@@@@@@@@@+  #@@@@@@@@@@@.    #@@@@@@@                 +@@@','@@@            +@@@@@@@@@@@@@@@+  +@@@@@@@@@#       #@@@@@@+                .@@@','@@@            .@@@@@@@@@@@@@@@.  .@@@@@@@+.         #@@@@@@+               .@@@','@@#             @@@@@@@@@@@@@@@    @@@@.              .@@@@@@@.             +@@@','@@+             @@@@@@@@@@@@@@.    @@@@..               +@@@@@@+            @@@@','@@+             @@@@@@@@@@@@@.     @@@@@@@#.              +@@@@@#           @@@@','@@+             +@@@@@@@@@@#.      @@@@@@@@@@+              #@@@@.         +@@@@','@@#             .@@@@@@@@@+        @@@@@@@@@@@@.             @@@@@         @@@@@','@@@              @@@@@@#.          @@@@@@@@@@@@@             +@@@@        +@@@@@','@@@.             @@@@.             @@@@@@@@@@@@@             .@@@@       .@@@@@@','@@@@             @@@               #@@@@@@@@@@@@.            +@@@@      .@@@@@@@','@@@@+            +@@.              +@@@@@@@@@@@@             @@@@.      @@@@@@@@','@@@@@.           .@@#              +@@@@@@@@@@@@    .      .@@@@.     .@@@@@@@@@','@@@@@@.          .@@@              +@@@@@@@@@@@+   #@@@@@@@@@@+      +@@@@@@@@@@','@@@@@@@.         .@@@              +@@@@@@@@@@@      ...+++..      .#@@@@@@@@@@@','@@@@@@@@+         @@@.             .@@@@@@@@@#                    +@@@@@@@@@@@@@','@@@@@@@@@#.       @@@#              @@@@@@@@+                   +@@@@@@@@@@@@@@@','@@@@@@@@@@@+                        @@@@@@+                   +@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@+                      @@#+.                  .#@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@#.                                       .#@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@#+.                               .+#@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@#+..                    ...#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#+++....++##@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@','@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'],
+      'noongar': ['3333333333333333333333333333333333333333333333333333333333333333333333','3333333333333333333333333333333333333333333333333333333333333333333333','3333333333333333333333333333333333333333333333333333333333333333333333','3333333333333333333333333333333333333330033333333333333333333333333333','3333333333333333333333330%*#&33333333##++@*333333333333333333333333333','333333333333333333333333%+..+=033333-@....+-3333333)+@@:%0333333333333','333333333333333333333333-....+#33333&+....+"333333.@....#$333333333333','333333333333333333333333*.....=33333@+....+)333330:......*333333333333','333333333333333333333333&#....-33333=.....#033333%+....+%3333333333333','333333333333333333333333$#....-33333-++...:333330%@+.++%33333333333333','333333333333333333333333 #..+.*3333\'+...+.-33330-+.++# 33333333***%333','3333333333333333333333333@#...#3333+......=3333+.....+#3333333%#..+*33','3333333333333333333333333#....+*333:.....+#333/@.....=0333330#+...#033','3333333333333333333333333@+....+333#+..++#\'333&.+...-033330@:+.++##333','33333333333333333333333330*.:++:333#+..+:-3330-@:++@$33330:+...+#33333','333333333333333333333333333=+...#33=....#/333:....:33333@#.....=033333','333333333333333333333333333*+...=33\'#..+#333-#...+#333$:+....#*3333333','3333333333333333333333333330*+++*033.++-03333++++=033%#...#+%333333333','333333333333333333333333333.%-#++#-@#+++#-%033,&-033)+...#@03333333333','333333333333333333333333330:...............+##+#@**0#+.++,333333333333','3330#:@@.=@333333333333333-+...+@+.#::@+..........+##*%*33333333333333','333:.......#@33333333333333++:+,3,%*33!#...+#.......+=/333333333333333','333@........+#0333333333333323333333333=+.+\':.........=333333333333333','333@@+.......+.*033333333333333333333333#+$3*+........#333333333333333','33330@-#+......+#:#*333333333333333333333333*+........@333333333333333','33333333)%+@@:+....+%0*-333333333333333333330*........:333333333333333','33333333333330@=#...=##%3333&%#!0333333333333*#......+#333333333333333','3333333333333333.+@+@..#++++....+@)33333333333+......+0333333333333333','33333333333333333333-.............#.+33333333%#......03333333333333333','33333333333333333333&#............++%333330%=+.....+%33333333333333333','333333333333333333333)#...........+++-* @##........+033333333333333333','3333333333333333333333#+..........#..++++.........@.333333333333333333','33333333333333333333330##.......+.+.#:@...........\'3333333333333333333','3333333333333333333333330%=:@@:+##*#%**#+.....+@*033333333333333333333','33333333333333333333333333333333333333330#%#%&333333333333333333333333','3333333333333333333333333333333333333333333333333333333333333333333333','3333333333333333333333333333333333333333333333333333333333333333333333','3333333333333333333333333333333333333333333333333333333333333333333333'],
+      'bayfm': ['                                                                      ','                                                                      ','..............:....::...............:...:.:............:..:..........:','..::...................:#**######**##%###*##=....:..:.....:...........','........:.........:*#%%*=-=-==-=====-=-=----*#%**................::...','.:.....::.....::*##*=====+##**+=-=----===-====-=+##*:....::.......::..','....:...:.:..+##===*##%@%@@#%%#@---------=--==----==*#*.:...:.......:.','....:.::...*%+=*#%@@%%#+=-=*%%@ =-=----==-------*%+-==+%#.:..:.:..:...','......:..#@**@@@@#==-=--==#%% %=+==*#===#@@====# @-=----=@#:........::','....::.=@%@@@%*---=-=-=+*%@ @*%@@%%@@+-*@@=-==#@ =------:-+%*:..:::.::','.:..:.*#=**-*@#::--+*##% %#=*@ *=%@@=:+@ --:-## +-+#--:::=+:%#..::....',':....*#::::#% =::::=*#@@%::+% =-%@@=--% *:-=#%%#*% @-.::-#*-:*%....:..','....##:...+%% ::.....-*%%%=% +#%@%%=#%%%@+%%%%%@%%=::..-#%*:::+%......',':..#%::.::*@% ::.::.:=#@% =*#% @#%%@##:##%%%@ %-:::..:-#%%+:..:+%...:.',':.-@..:...=%%@*...-+#@@@@*..:-:.:.:....:#@@%@@%:.:.:.-#%%@:..:..#=.:..','.. ..:....:+%%%*#%%%@@@*..::.-:-=+***%%@ %#@%@@:...:-#%%#@..::.:.%:.:.','.+*:........:*#@@%##=.==*##%%%%%%@@@##%%@% %%%@-...:#%%%%%.....:.=-.:.',': ..............:++#%%%%%%@%@%##*..::.+@%%%#%%@+..=%%%%%@*.....:..@.::','. ...:.......::=++***%@%%%#::............#%%%%%@.-@%#%%%%=.:......@..:','.@.......::...:.....%@%%@.:..:.:........#%%%@@%%+%%%#@%@%:.:...::.%...','.@...:.:..:.::..:..-%%%%%+##**-:..:....=%%%%%%%%%@%%#%@%@:.....:.:#...','. ...............::#%%%%%#=:..:...:....%@%%:=%%@%%%.:%%%@....:.:.:%.::','. .:....=*#.:.....:%@@%.......:.......*%%#..:%%@%%:..%%%%::#:...:.%...','.+-.:.:#    #=:...*%%#...::..:::.....-%%*:..:#%%*.:.:*%@*.% ....:.-...','.. #%%         #%*@% #*=*#*:.....::..#*......-%=..:::=%@=:@ *::..*...:','..+              %%         %%##****#%#**+***#%#**+*+*%%      @##:....','::.#          @%@#@%%@@@@@@%@@%@%@@@%@@@%%@%@@@@@@@@@@%@ %@     %...:.','....@     @%%@%%%@%%%%%%@%%%%%%%%%%%%%%%%%%%%%%#%%%%%%#@@@@#%@%%..:...','.:.:.#  %##**#*%%##*#*#*******#######**#******#*****#*%@#*#**%%::.:...','......*%#++=+=++*++=+=**###*++=*#%##*+===#**##*+=+==+***++=+%#.......:','..:....+%*===-===-==-=%*+=+%%=%*=-+*%+-=##+==*#*==-====--=+@*...:.....','....:.:..#%=-------==-%+--=*%-#*----%:==##===-##=------=-%#......:...:','...........#%=::::-::--==::*%:-++-:-%:=*:=+-:=%-::::::-##..::...:.....','..:..........***-.::--::.:=*.--:-:.*::.=.:::.++.::.:+**........:......','................+*#--=:-:--:-=-=:-=:-=-::=-:-=---**+:......::.....:.:.','.:....:.:.:...:....+**#*---=-===--=-==-===--*%**+.............:.......','....:.:........:..:.....##**%%%##**#%#%%#+##:::.....:....:..:.....:...','...::.:..........:.....:....:..:.:..........:....:...............:::.:','                                                                      ','                                                                      '],
+      'tenfm': ['              .......#+#@++#++#+#++######@@@##......                  ','         .+++++++#+++#+#...... .             .....##+++#++...         ','     .++##+++###....                                  ....#++++..     ',' ....@+++@...  ... .....#+++++++++++++++++++##......        ..#++#.   ',' ++++@...    .+. +++++++++++++++++++++++++.+++++++++++#...      .#+#. ','.#+++.   ..#+++ .++++++++++++.+++++++++++...+++++++..++++++#.     .#+#','++++   .#+++++.  .+++...  ++. .+...++++++ +++++  +. .+.  ++++#.    .##','+++#   ++++++.  .+++. .+  ++   .   .++++. ++++.  ..   .  ++++++.   .+#','..     +++++++  ++++  +. +++   ..  .++++.   .+   +. .++. .+++++.  #+++','+##     .++++.  .++.  ....++  .++. .++++. .+++..+++.++++..+++#.  .++++','.##+.     ..#.   .++.. ..+++..++++.+++++. .+++++++++++++++#.    @+++# ','  ##+#.      ....#+++++++++++++++++++++++.++++++++++#...    .+++#+++# ','    .+++#...          ........##########.........     .. #++#+++#     ','      ..+++++##....                           ....##.++++++++#...     ','          ...##++++++###.............####+#++#+++#++#++++....         ','                  ...................................                 ',' '],
+      'blackstar': ['                                                                      ','                                                                      ','                           ################                           ','                    ##############################                    ','               # #################################### #               ','              ##################+#+++###################              ','           #############++++++++++.+++++.+++++##############          ','         ############++++..+.+++.+##+++..+.+++.+++###########         ','      @###########++..++..+.++.+.####+.+.++.++++.++++###########      ','      #########+...+.+++......+++####+++..++.+++++.++++#########      ','    #########++++++++.++.+.+.++++#####.+.+...++..+.....++#########    ','   #########++.+++.++++.+++.+++.######+..++++++...++....++########+   ','   ########.+.+++.+..+++++.++.++#######++++++..++..+.+..+++########   ',' ########+++++..+++++++...+.+++########+++++++++++.++.+.++.+######### ','########++.++++++.+...+.+++...##########+.++++.++....+.....+.########@','########++.++++#++++#++++.+..+##########+++++++++++++++++#++..########','#######++.++##############################################+++++#######','#######++..++++########################################+++++.+.#######','#######+.+.++++++++#################################+++++...++++######','######+.+++++...+++++#############################++++++.+.+++.+######','#######.+.++.+....+++.+++#####################+++..++++++++.+..#######','#######+.++..+.+.+++++.+++##################++.++++++++.++.+.+.#######','#######.++..+++.++...+.++####################+.++++++.++++++..+#######','#######+.++++.+.++.+..+++#####################+.+++..++.+++...########','########+.+.+.+.+++++..+#######################.++...++++++.++########',' ########+..++++++.++.+#########+++.++#########++++++..+++.++######## ','  ########+..+++..+++.########+.+.++...#+#######++.+....++++########@ ','   ########++.+..+.++#######++....+.+++..++######++.+.+++.+########   ','   #########+++++...#####++..+++..+.+.+...++#####++..++.++########@   ','    @#########+.++.+####.++++..+..++.+..+++...+###+.++.+#########     ','      ##########++++++.++.....++++.++..++..+..++++++.+##########      ','        ###########+++.++.+..++++.++.+.++..+++..+++###########        ','         #############+++++.++++++.+++++.++..+++############          ','           @#############+++++++..+.+.++++#+###############           ','             @ ######################################## #             ','                  ##################################                  ','                      ##########################                      ','                          @@   #######+   #@                          ','                                                                      ','                                                                      '],
+      '4zzz': ['..............................=%%%%%%%#***++++++=*....................','............................#@@%%%%%%%%%%%%%%%%@%@....................','..........................+%@%-----------------+@@....................','.........................*@@-------------------+@@....................','.......................+%@+--------------------+@@....................','.....................:%@%----------------------+@@....................','....................+@@------------------------+@@....................','..................#@@=-------------------------+@@....................','................%@@%-----*#=-------------------+@%....................','..............=@@@-----=*..@@@%----------------+@=....................','.............#@@=------#@@@@@@%*%*%------------=@*....................','...........#@@*---------%@%-:::::::%@=----------@%....................','.........+%@%--%@@*%#+---*:::::::::::%@%--------@%....................','.......--@%=---.......=*@@:::::::::::::+%+------@#....................','......*@@+----#..*...=.@%.::::%:-::::::::%#-----@=#...................','....#@@*------+@@@@%%*@@*+-:.#@.%::::::::::@=---@*@@@@@@@%%%%%@@@.....','...%.@----------=@%%%+@#%%=:#=@.%:::::::::::@------------------%@.....','...@.@-----------*#..@#=---=#*:=-::%::::::::@#-----------------+@.....','...@.@------------++....@--=:::::::@%::::::%:@-----------------+@:....','...%.@------------@%-+@.:#%@::-@::*@@:::::::=:@----------------+@:....','...#.@------------@=.:@.#%-:**@%:::::::::::::=*+---------------+@-....','...#.@------------%%.=@@%=-----:::::::::::::*@:@#--------------#@+....','...+.@+++++**####%%%.%%@%@@@@%%+::::::::::::=%=.@%@%%%%%%%%%%%%%%=....','....%%%###**++=-::....@:.....*@+::::::::::::%=..%#=...................','......................@+.:.=.-@%:::::::::::@@....%....................','...........:=.........+.#.=.%@%:::::::::::@-%%.%*%-...................','......::-%=::#:-...........%@@@@%-::::-%#@@@*=%#@=#.+%+::+%#:::=++....','.:@%::::::::::::%:%+......+...@@@@::+@:@%+%%@@@@@@%::::::::::::-*%@...','.@-=%+:::::::::::::+*:*%++*...@@%%@@@%:=-@=--=@%::::::::::::*+%--@=...','.@----%#*:::::-::::::+#........#+%=..+#*..@%*@:%=*::::::#%@#----#+....','.@------=%*%%@*::::::@%%#%%@@%@............%::=:::+###%#-------#%.....','.#==-------@--=%@#::::%:::::::*=%%-#@%@@@@%*:::#@%:::=--------=@=.....','...@------#@-----#@:%%#::#*##*:#@::*%#%@%=@%%*=-#%@@%@%%@+----@%@%@...','...@----@@@@--*+---@=-=@@-----=@@=--+@@%:@----#%%%%@%%:+%-----=---+*..','...@----@##%--@#---@@@@@@--=@=-+@----@@+#@---=@@%-+%@:#@----------*@%.','.@@@----@%:-------%@@--@@--=#=-+@----@%@%@-----=@@%=%:@--------=#*%...','...%#==-@@@+------@@@--@@------#@----%::@@----@*@@%@:%*----=%+%.......','.......#%@@*--@@---@@--@@---%@@@@----%%%@@----=*=#@@@@*%%##...........','...........%@#@@@--*@--#@---@@@@@=------*@+----=#@@%..................','................*%%%%*%@@%%%@@@@@#=====#@@@@%#%%=.....................','......................................................................'],
+      'fbi': ['                                                                      ',' .  .   . .   .  ... . . . . .  .  . .   .....  . .... ...  .  . ...  ','       ...   .  . .....  . .  . .   . ... ... ..... .... .. . ..  ... ','.....  ..  .   .+#@@###++.....    .  ...#@@@@..####..  .  ... . .#@@#.','... . ..  ...++.+#+####@#@#++.. ......+#@#+++  ##@#. .    ..     ####.','. . . .  .  ###+.  .  .+#@@###.  . . .+@##.....#@@#... .. ... .. .....',' . .  ...++###++.++++..  .+##@@+.     +@@####  #@#@#@###@####+.. +##+.','  . ..  +@##+. .+##@@##+....+####. .  +@###+#  #@#@#++#++####@#. ####.','.  ..+++.++..++..+#+##@@#+. ..@@#+. ..###+.   .##@#    .  ..##@. +@#+ ','  ..+#@#+...##@#.   ..###@+   +###+   #@@+ .. .#@##    ... .###..#### ','.+##@#...+###+..+++. ..####   .#@## . ###+.  ..#@@# ..   ...##@. +### ','.#@##  .+#@#+ ..#@#.. .#@## . .#@@+...+@@+.   .#@@#...... ..###..#@##.','  ..###+...+#@#+. . . .##@#  .+###+. .+#@+    .##@#.   .  ..#@@..###+ ','.   .###+ ..+@#+.....#@#@#....#@##.. .+@@+.  . +###+.......+@##..#@## ','     . ..#@#....+###@#@#+  ..+#@#+ ...##@+ ..   +####@@#######.  +#@+ ',' ..  ...+###+...+####++   ..##@@+  .  +++.    ....+++++++++++.. .++++.','.. . ..   .+###+..   ...++##@##.   .     .+.... +....+.........+.. .+ ','    .... ....#++.+.++####@###+.  .  .  ..+..#..#.#. .+++..#+.+.##..##.','.    . .... . ..+@@@#@@@@#+..  .    ..  ..++#.#++#.  ..++.++..+#++#.#.','. .  .... .. ....##+++.. .. ...  ....  ..++++ ...+.+..++. .....+ ++.+ ','  .. .... .... .     .  . . .  . .     .    ... .. .  ..  .    .. . ..',' '],
+      '2ser': ['                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                     +----            ','          +-*/////**-                            +-*////////*-        ','        -/////////////*+                        *//////////////-      ','       *////////////////+                      /////////////////-     ','      ///////////////////                     ///////////////////     ','      ///////////////////+    +///==///*      ///////////////////+    ','      ///////////////////* /=Ãƒâ€”/*+    +//Ãƒâ€”Ãƒâ€”ÃƒÂ·/ +///////////////////     ','      -///////////////////ÃƒÂ·/-            +*Ãƒâ€”Ã¢Ë†â€˜Ãƒâ€”=/////////////////-     ','       -///////////////////-                =Ãƒâ€”Ã¢Ë†â€˜ÃƒÂ·///////////////-      ','        +-//////////////////*+            -///ÃƒÂ·Ãƒâ€”Ãƒâ€”///////////*-        ','           +---***/////////////*--+++---*//////=Ãƒâ€”ÃƒÂ·//*-----+           ','                    *=/////////////////*////////Ãƒâ€”Ã¢Ë†â€˜Ã¢Ë†â€˜ÃƒÂ·--                ','                  +//=Ãƒâ€”ÃƒÂ·//////*=+ -///ÃƒÂ·* +/////Ãƒâ€”Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†â€˜Ãƒâ€”///+              ','                  Ãƒâ€”Ãƒâ€”//Ã¢Ë†â€˜Ã¢Ë†â€˜Ãƒâ€”////=     */     -///Ãƒâ€”Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†â€˜ÃƒÂ·/ÃƒÂ·Ã¢Ë†â€˜Ã¢Ë†â€˜-             ','                  Ã¢Ë†â€˜Ãƒâ€”=/Ãƒâ€”Ã¢Ë†â€˜Ã¢Ë†â€˜ÃƒÂ·///Ãƒâ€”     *=   + -//ÃƒÂ·Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†â€˜//Ãƒâ€”Ã¢Ë†â€˜Ã¢Ë†â€˜Ãƒâ€”             ','                  Ãƒâ€”Ã¢Ë†â€˜=/ÃƒÂ·Ã¢Ë†â€˜Ã¢Ë†â€˜ÃƒÂ·///=  / +//Ã¢Ë†â€˜ = +///Ãƒâ€”Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†â€˜ÃƒÂ·/=Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†â€˜=             ','                  /Ã¢Ë†â€˜ÃƒÂ·/=Ãƒâ€”Ã¢Ë†â€˜ÃƒÂ·/////*-*////**/=///ÃƒÂ·Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†â€˜=/ÃƒÂ·Ã¢Ë†â€˜Ã¢Ë†â€˜Ãƒâ€”              ','                   -=//Ãƒâ€”Ãƒâ€”=///////////////ÃƒÂ·=//=Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†â€˜Ãƒâ€”//Ãƒâ€”Ãƒâ€”/               ','                     +-*=//////=ÃƒÂ·ÃƒÂ·=///ÃƒÂ·ÃƒÂ·ÃƒÂ·/////=Ãƒâ€”Ãƒâ€”*-+                  ','                      -//////////ÃƒÂ·Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†â€˜Ãƒâ€”=//////////*+                   ','                 +--*///////////**-----*////////////*-----+           ','          +-*////////////////*-           -//////////////////*+       ','        +*//////////////////+               -//////////////////*+     ','       +///////////////////                  -///////////////////     ','       ///////////////////+                   ///////////////////*    ','      -///////////////////                    *///////////////////    ','      +///////////////////                     //////////////////-    ','       */////////////////-                     -////////////////*     ','        *///////////////-                       -//////////////-      ','         +-///////////-                           -*////////*-        ','            +-------                                  +--+            ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      '],
+      '2rrr': ['HAEDAACAACAAEDBDAFCAABDAAGCFEAADAGABHAAFDAGABBADCCAAFBFAFDAADBEGEBGAEE','AAACAFABABDFCAABAGHAGHACCEACBFHAECEGEFABGAAEHDAAAEGACBGHAGCAFECCAFAADG','EAGGAECDDAFGAACAAGBFAEABBGEAFFAECDDACCFHAFCAAAABACECEEHGEGFFDDFFDGAABE','BCHAFDGGCABBABAFBCDADFDAECAHEAAAEAGFFCCCAHAEBFEAEFGABDFAGEADBAACABAEDH','FGDADFAHHEGDFGAAACADDBDCAABAAAAAAGDCFGAECFHCEAGAAAGEAEAACABHAEDCCCADCA','GCAAAHDAHBAHAADDCBACFAEABEAECAAABAAAABGCDADGADBAFBEAEDCFAFACAAGEHCBFEC','CAABADAAFEHBECDHAFFGDDFEBBDGAGACECFAAEECGADEGABAABHDDHABCAABFEDFADAFDA','DDAEAAAEHDGHAFFBGEAAFGFBAAHBGAECAGECDCGFAHGAHDAAAECABFCACAAAAAGGAABAEA','CAACGACAEHABCACHCBDACFDBBDHEFBHBDBDAHGACFFDCCADBCAAFADBCAGABBAHBGBFAAC','DGFECAAAABABAGBAAFAAABDAFCADAGHDFBGAFGEHGAHAFDDAADGDEGAHAAAGFAABGAAAEC','CBCEBFBAADBABAADFFBFAADGEFCBDACFAACEBEDGABAHFAGAAAAAGBEGEGEAAAACBAAGDA','FADAFAFEFHBBABFFAAFABEEDDAFBAHDABFCFADGAABGAEBAGBBAHGAFBAAHFFCCDFAFCBE','ADCBEAEAGCFGEEDCBHFAGHFDDAGAACGEHEAAHBADBAFADAABCDCDFFAADCFGAFDEGAABBH','ABGEEGCABGGGBCCCAABAAEFBCCBBADACABAAAAFBEHGDAAACGAABAADCGAAABFFBBDAHEA','GDFACAABHGGCGAB  A   AAGCA D  EA     CEAFEAAAAABGBCDEAAAADEACCEEGDDAEE','GCEADACEEADBAGFDAAAAAAAAAAAAAAEEAEAAAAADACAABADAAAEABEBDAFAHAAFHAAADAB','ACEAAABEAEEFAGBEADAAFAEAABBBABBDFCBAC ADCBE   BAAC  AEDAAADDAAHGAAAGEA','EDAGEGBAAAAFACHG    GBCA   AAA    EC     DAE    CAA    CCAFFAAEBAAAEEA','BADABEFAEAAEBGDD    EABA    BA    ACCA    AD    CAFC    ACGEFAFCAEEAAE','FGADFFBGAAACFABE    CHCA    EA    AFAC    GA    CEGF    AAAECADAAAEFGG','EGCDGABDABACGFAF    AB   BAABA         BAADF    AE   AEAADACBBDABAAAAD','BECECFEABABEFCEA    DA     EAB    A     EBDB    HA    AAFBCABEADDCAFCA','FEAGAAACEDAFCAEA    BAE     DA    DEB    EHE    EAC    AFDAEDAEAAHAEAF','CEEDAAEBAACABADD    EFCA          EGAAA    B    ADACA   DAAAFACAFFCEFA','AAAACBGEDADEEBEAEEDABAAAABAAAAACAEAEBAEEFBBAAAEAAAGBEADAAAAHBGGGAGFACE','DACFCDEBCAEDADBAFABGAAADAECDBBFFAGAAECCDBFEBAGAAGACFAGAAFAAABBBDGDDBDG','AEAADDACAAEDEAD A AE CAA  AABG GADBDA  ECCCAA AG ACA E  B AFEDAAFAHHAD','ACHGEDFADBACDHEABGDCEAAABBCAEAAECGBBAABABDCAADEDDAFAAFAADABEGGDDADBAAD','EECHAADACADDABDHCACFCGGDAGGEBAGABGHAGBHAGFFBADBDBFDEEBEEAACGCAABFHGBEE','ACBEADAABAFFEGAAFAGCAHGEAGAAAGFCFAAEAAAACAAACFDFEABGFAEACFCADAHAFAGEEA','DAACAHAACGAAAAGGBCAGCAABDFABAHBAGAAGADAFHEGAFFAAGAAFAGGAFAAADCAEEHBAFA','AAAAFDGGEEAACEFHACCACDAABEAGACBABDDAECAAEACAFDABAAACAAABGEAECAAFCBDABC','AAAACGGEGFHEDDHABCAADHEFEFDHAAGDGCBFAFDCAAHAACCAAFFGGADBABADFBDEAAEAEA','DFDADAGBHGADBADGCBDEGECGAAAAAAAAGADEHBGCBBDAAEFCAHEADCBAAAACHCBHBAABEF','ECCCDEBACBBGBEAAACFGAFGAADFBACBEDCCAFAFADDACFDAACFCCHAGDGHDGEAAEEBDFCF','DAAAGGDAAFAABCBEAGADEAFABAABAFDGAGHEAHCEHEFAAHECBBAAAHBCBDFGCAECGEACBF','AABDDGEBFEABGAFAAAFACBAFGFBAADGAAEEAHAGDAGEADFAEGAEGGADAFDAFDGFDCADAAA','ACCDCDACACFHCAEDDFACAAEAFHAGAGABEBEAGBGBAADFGAABHAGHAAAGDGAEACHAEDGEAB','HEDAFEFDGGEBDGAAAAHEGBGHAGECGAAAAGBBDEADEAAADAADCABGBAACDGAAADEADAAAAC','HAEAGGGAGGBAFAFFFBBEBGBADCAGCFFBGAFEEABAAHADFGAGCAGEFBEAFGABHEAGAABEED'],
+      'tripler': ['GLILONIMHLMQPNKPKNIONMIPOGOOPIMPOOIOKHJPMKOJJOMPOMPJHMKOIIJQMIHIIKPLHO','MJPHOLOHJINNPOHNJMLMOMONJOIOIPOONOKMPNPHJPMQLMIPLPIPPJKJOKMLGLILNIPIIL','GPGJNLKKPJJHJLMPJKMMOIKIJOHNMGMHPHOIIIJOKPLKPIMKQHIMIGINJHOLLLJIKJLIPO','PHINMINMOIPLLJPIPHLQKLHIOOHMOLHKGPLMPHKJNKNOIQJNJMMHHGMHHNKOKMPNHJOKJI','IMHOJPIOMONMGKHQLHHGKNLMHHNLLKMKHPKGQIKMINKIINMNOKPONNKJNOHQLPQJQMMPLI','LNLMMILLKIJKKQIIMIJHJMNILKOKOGOLINNPPLKPLPJLHGJHOHIQPNHKNMIKOLHKGLOLHH','JQINONGINKNOGPMOOQJHPMKGJHNLHOMPKLHKMIONLOJGJMGHINKHKKMHJHJHHOQPKMOKOI','LMPOLHLLKOQMMKQLMPMMOKQKLGNNKHOJGHNJIIHONHJOQKIPPLGIQJKMIKJJJJPGHNJNLQ','HHGHPNMINOIGJHNLIJONNLNJJIJHMNLMNGOKJPHMINHKKQOHMMJONNKKLPHOIMJOJMNIIN','MGPJGLOLOHPMLJOIKIPIHKNKONONMQHNJJPJMHHJKKJIJKLLMKKOMOIPNMLKOOPLHPJPIM','NLKHIJKPPKONNOJIMNNPGILHIMNPOOKKOIMMJNOPHLIIKQMMQLJINHNJJHIINNPOMPLMPQ','MOKPINJKMMKPJOILHMJMONMIHHIMNJHOIOKPMOKJILNLIKNLHMOHLGLJJJONIJHKPKPMJM','OLINIJNJPLNOIHQOKNPHOLJJKJOKIPKNIGPGLHJHHMHLIKKLIJPONNKGLLOKLNIQJLNPKJ','QLQGPLJHNKKMMINJPJHOJNPMLIGLPLHHPLOLIOMPIOHLHHPIONPLLLLHHLNGNONNGNGOKK','OKQJKADEDBAAAGGFBAGAFFCAAAALIJJMEACACEFCFBAELLKOECDFFADCAAGEKOHPKLMLOO','PHMLN         M              AGLA             FN              AOPJOPOG','NNGLK   AAAA  MAAC M          EHLDGD           F                QOLHOP','IIJPK    E    NAAAAFDLKCA      E     JKGDA     A      IKLCG     MIMMJJ','LLKMO         NAHADMALOOO      L ABA MJJMP     A      KHNHH     MJMPKI','MHPMP         N EAAE AAC      IMKAF  ABAB     AI      DAAA     HPLJOOK','OKHJO         OADFAE         GLJADLH          PL              AHLHINOK','PLLJI  A      M FJAA ADB      PHCDBF BFAE      I      AAA      AJJLHGK','NJPIQ  A    A N EHBAHKIML      HHDBD JHPLN     E      LINNF     HJHIJL','OLIKN       D JAGGCEAHMJKA     IJAFB GOLJP     A      LPMLN     KHLJLL','MMPIH  A      J     BLMPPM     GC    HKGIJA           HIQMJ     IILQOJ','HNGMJBECADBGCBNHBFBANMNLHKDADDBBAFDBAKGLNLOEEAFGIGACGDNLMNOAAAAAFKLKNI','JLINLMHLHGLMJNNMHLNHNIQHMOJNPNJKIILPMHNMNNHKNLIJPHKPGKHNJJQOJOPHGLOIIJ','NMHMKGLJJKIOJMKOJOIJJGILJGNOQNQNLLNOIHKGIPLLJJIJOIIGJLOLJKKLJMPMMIGJNK','OKOIOLOQIPNOOIPGLOMJPJMIHQMKJIHLHPHIIPIHONLPLKMPMIPIJJHKMPHNJJMNKPOQKM','QPOHMPKKOJHNLNMGHIOHIONIKMJMPKNNJMPNKNJLNJIPQOJIKOLOLLPHPHILJQNNIJIKIH','HMLHLLMLGJJQJLHPOHMPGLHJMOJHMMKILPLJILIGHNKMJQJJMHMNOJILIINIHHJOKKJHKI','NNLNLONKHMMNQGGLKPGLKKKNOINPIPOKPKIIPOJHMOKIQMLOJJKPPGPONLMLMHLIMGGIKI','QJOIOIMOHKPPOIHIHGHQKPMQNQPHJHJMJJLPIHPHQMLIJKJPKMPHMOMMOKKQHMKONIPNPI','OKGHJIOINMKNLPNKKJPQIKPHGGMHILOGLJKKPHHMHHLLPJHQONKHPPNNKNPLIKMMJJJJHM','LPKMLILOLJNHQOIKKNHJLKHMLKJMIJMOPMNQOLKJKMGIHJPKGMMKLHJJKHLHINJMQMKJMK','KHKJIMQJLLJHNHINKMMPHIHPNMIJOJOKKHHLPJNPPOOLMMPKHPLGPGMJIIJIJHMMMKJNKK','KOMNJLGLHONKJMPNKPIMNHGQLKKPNHPJOMNLILLHONIPLOMHKJPKILGKIKOOPPJOHKOIHP','OJNNPIPILQGIPNNNMKINKKMHNOQOOMIPMIMQKJPMPHHMNNGJGKLHLJJMJINPHNIMJJHHIO','HJNJNKNONOOKJLJQLNOGHLQIQPNOIKMKLMKOMILHLNMPINHJNIIIOQPMPIOOJJKJHKHJHJ','OKNNPNGNINLQOHIOQPQPNIOJLOOPPOJOJOHLKKHIGIKILGKKNNKHHQHNQLIMHJNNJLKJHH'],
+      'rtrfm': ['                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','      .+                                                              ','       @.                            ........                         ','       +@.           +@@@@@@@@@@@+ .@@@@@@@@@@@. @@@@@@@@@@@#.        ','        ++     +     +@@@#....@@@@+ ...+@@@#...  @@@@....+@@@@        ','        +..   ..     +@@@@##@@@@@@+    .@@@+     @@@@@#@@@@@@#        ','        + #   +      +@@@@++@@@@#      .@@@+     @@@@++#@@@@.         ','       #@. # ++      +@@@#  .@@@@.     .@@@+     @@@@   #@@@#         ','       @@+ ++@.      .@@@+   .####.    .@@@.     #@@#    +####        ','       @+@ .@@+.                                                      ','.......+.##.@@  ....................................................+ ','         +@#@@                                                        ','         .@@.@                                                        ','          @# @.                                                       ','          @+ @.                                                       ','         +@  .                                                        ','         #.                                                           ','        .+                                                            ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      ','                                                                      '],
+      '6dby': ['                                                                      ','                                                                      ','                  -/==/   //*       //                                ','                  /* ÃƒÂ·= =  =/*+    /*/      =*                        ','               /    ++ÃƒÂ·=Ãƒâ€”*  /ÃƒÂ·-*++/ /-      /*ÃƒÂ·  Ã¢Ë†â€˜                    ','               /Ãƒâ€”/*-= ÃƒÂ· -/=   ÃƒÂ·    ÃƒÂ·    =    Ãƒâ€”+/ÃƒÂ·Ãƒâ€”     Ã¢Ë†â€˜         +    ','               +  /// -=Ãƒâ€”  ///+=  ÃƒÂ·    =Ã¢Ë†â€˜   -**Ãƒâ€”-+  -/Ã¢Ë†Â«=        =Ã¢Ë†â€˜    ','            -  Ã¢Ë†Â«ÃƒÂ·    /=-*     Ãƒâ€”=  ÃƒÂ·   =-Ã¢Ë†â€˜/Ãƒâ€”*ÃƒÂ· = Ã¢Ë†â€˜   + Ãƒâ€”-=/   -//**    ','            Ãƒâ€”- Ã¢Ë†â€˜ Ãƒâ€”  +  ÃƒÂ·=-==     -*   Ãƒâ€” */+=-=  ÃƒÂ·   +  // *ÃƒÂ·*+=*/ÃƒÂ·Ãƒâ€”   ','  ÃƒÂ·ÃƒÂ·ÃƒÂ·=ÃƒÂ·/*   ÃƒÂ·// ÃƒÂ·-  ÃƒÂ·ÃƒÂ·  Ã¢Ë†Â«+=ÃƒÂ·Ãƒâ€”Ã¢Ë†â€˜=  +Ã¢Ë†Â«Ã¢Ë†â€˜Ãƒâ€”Ãƒâ€”Ã¢Ë†Â« Ã¢Ë†Â«Ãƒâ€”=ÃƒÂ·/+Ã¢Ë†â€˜  +      -    +++*/*/  ','  /=-  =-=*-/* =-  + Ã¢Ë†Â«ÃƒÂ·=Ã¢Ë†â€˜Ã¢Ë†Â«Ã¢Ë†Â«Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€š+ Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«+Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†Â«Ã¢Ë†Â«  ÃƒÂ·+    +*  ÃƒÂ·    ÃƒÂ·   Ã¢Ë†â€˜ ',' *+/Ãƒâ€”=-/      Ãƒâ€”  -ÃƒÂ·ÃƒÂ·Ã¢Ë†Â«Ã¢Ë†â€šÃ¢Ë†â€š=Ãƒâ€”Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€š  Ãƒâ€”Ã¢Ë†Â«Ãƒâ€” Ãƒâ€”Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€š+ =/Ãƒâ€”ÃƒÂ·ÃƒÂ·-*-  /-    /=/=/ ',' Ãƒâ€”  Ãƒâ€”-*//=   Ãƒâ€” ÃƒÂ·Ãƒâ€”Ã¢Ë†â€˜Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€š Ãƒâ€”Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†Â«Ãƒâ€”Ã¢Ë†â€¡Ã¢Ë†â€¡=    +Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«- /*--+  /ÃƒÂ·**            ','  //      /  Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡=  ÃƒÂ·Ã¢Ë†â€šÃ¢Ë†Â«  Ã¢Ë†â€˜Ã¢Ë†â€¡Ãƒâ€”    *Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€˜-  -ÃƒÂ·Ã¢Ë†â€˜Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ãƒâ€”=            ','          Ãƒâ€”  /Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡ÃƒÂ·  *Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜Ãƒâ€”Ã¢Ë†â€¡Ã¢Ë†â€¡ÃƒÂ·           Ã¢Ë†â€˜Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ãƒâ€”=          ','          Ã¢Ë†â€˜/   /Ãƒâ€”Ã¢Ë†Â«Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†Â«-  *Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€š+          ÃƒÂ·Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜Ãƒâ€”         ','        *Ã¢Ë†â€˜Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€šÃƒÂ·-           -Ãƒâ€”Ã¢Ë†â€˜Ã¢Ë†Â«Ã¢Ë†â€˜ÃƒÂ·            Ã¢Ë†â€˜Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ãƒâ€”-       ','       *Ã¢Ë†â€˜Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃƒâ€”                    Ãƒâ€”Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ã¢Ë†â€˜-      ','      +Ã¢Ë†â€˜Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡=                   *Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ã¢Ë†â€˜+     ','      Ã¢Ë†â€˜Ã¢Ë†â€˜Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡/                    Ã¢Ë†â€˜Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡ÃƒÂ·Ã¢Ë†â€˜     ','     /Ã¢Ë†â€˜Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ãƒâ€”Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€š  ÃƒÂ·Ãƒâ€”  Ã¢Ë†â€˜Ã¢Ë†Â«Ã¢Ë†Â«Ãƒâ€”+ ÃƒÂ·Ã¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†Â«= Ã¢Ë†â€˜+*+Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡ÃƒÂ·+    ','     Ãƒâ€”=Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€š=-Ã¢Ë†Â«ÃƒÂ·Ã¢Ë†Â«ÃƒÂ· Ã¢Ë†Â«Ã¢Ë†Â«Ã¢Ë†â€˜Ã¢Ë†â€šÃ¢Ë†Â« =Ã¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†â€˜Ã¢Ë†â€š-*Ã¢Ë†Â«+Ã¢Ë†Â« Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜Ã¢Ë†â€˜    ','     Ã¢Ë†â€˜Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜ Ã¢Ë†Â«Ã¢Ë†â€˜ =* Ã¢Ë†Â«Ã¢Ë†Â« Ãƒâ€”Ã¢Ë†â€š+/Ã¢Ë†â€šÃ¢Ë†Â« Ã¢Ë†â€šÃ¢Ë†â€˜ Ã¢Ë†Â«==*+Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡/Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†Â«    ','     Ã¢Ë†â€˜Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡/ Ã¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†Â«ÃƒÂ·  Ã¢Ë†Â«Ã¢Ë†Â« =Ã¢Ë†â€š-*Ã¢Ë†â€šÃ¢Ë†â€šÃƒâ€”Ã¢Ë†â€šÃƒÂ· +Ã¢Ë†Â«Ã¢Ë†â€˜- Ã¢Ë†â€˜Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡/Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†Â«    ','     Ã¢Ë†â€˜Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡/ Ã¢Ë†â€šÃƒâ€”*Ã¢Ë†â€šÃƒÂ· Ã¢Ë†Â«Ã¢Ë†Â« /Ã¢Ë†â€š**Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€˜Ã¢Ë†â€šÃ¢Ë†â€˜  Ã¢Ë†â€˜Ã¢Ë†Â«  Ãƒâ€”Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡-Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†Â«    ','     Ã¢Ë†â€˜ÃƒÂ·Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜ Ã¢Ë†Â«Ã¢Ë†â€˜ Ã¢Ë†Â«Ã¢Ë†Â« Ã¢Ë†Â«Ã¢Ë†Â« =Ã¢Ë†â€š**Ã¢Ë†â€šÃ¢Ë†â€š Ã¢Ë†â€šÃ¢Ë†Â«  Ã¢Ë†Â«Ã¢Ë†â€˜  Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃƒÂ·Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ãƒâ€”Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ã¢Ë†Â«    ','     ÃƒÂ·ÃƒÂ·Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ãƒâ€”Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃƒÂ·/Ã¢Ë†Â«=Ã¢Ë†â€˜Ã¢Ë†Â« Ã¢Ë†â€˜Ã¢Ë†Â« Ãƒâ€”Ã¢Ë†â€š+*Ã¢Ë†â€šÃ¢Ë†Â«+Ã¢Ë†â€šÃ¢Ë†â€˜ +Ã¢Ë†Â«  Ãƒâ€”Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡ÃƒÂ·/    ','      Ã¢Ë†Â«Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃƒâ€”+Ãƒâ€”Ã¢Ë†Â«Ã¢Ë†Â« Ãƒâ€”Ã¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†â€šÃ¢Ë†Â« /Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†â€š/ Ã¢Ë†â€˜* Ã¢Ë†â€˜Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜Ã¢Ë†â€˜     ','      *=Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃƒâ€”+  /Ã¢Ë†Â«Ã¢Ë†Â«Ãƒâ€”  =Ã¢Ë†â€šÃ¢Ë†Â«Ãƒâ€”/  +Ãƒâ€”Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜/     ','       ÃƒÂ·Ãƒâ€”Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†Â«Ãƒâ€”ÃƒÂ·         =Ãƒâ€”Ã¢Ë†Â«Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ãƒâ€”=      ','        ÃƒÂ·ÃƒÂ·Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜ÃƒÂ·       ','         =ÃƒÂ·Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€˜/        ','          -ÃƒÂ·Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†Â«Ã¢Ë†Â«Ã¢Ë†Â«Ã¢Ë†Â«Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€˜Ãƒâ€”          ','            /Ãƒâ€”Ã¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ãƒâ€”/           ','              /Ãƒâ€”Ã¢Ë†Â«Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€˜Ãƒâ€”/             ','                -ÃƒÂ·=Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€šÃ¢Ë†â€šÃƒÂ·ÃƒÂ·                ','                   -==Ã¢Ë†Â«Ã¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†â€¡Ã¢Ë†Â«Ã¢Ë†â€šÃ¢Ë†Â«==-                  ','                       -/=ÃƒÂ·Ã¢Ë†â€˜Ã¢Ë†Â«Ã¢Ë†Â«Ã¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†â€šÃ¢Ë†Â«Ã¢Ë†â€˜Ã¢Ë†â€˜ÃƒÂ·=/-                      ','                               -*//=//*+                              ','                                                                      '],
+      'threed': ['          ,"                                                          ','        ltUU).         _!                                             ','         ]zUUY}      f*%%0          `                                 ','          .{YUUv>     U&%%8Y      zM80.                               ','            `|UUUt"    ^O%%%Mf    ?a%%8z                              ','              !rYUY)\'    !d%%%o(    fM%%#j                            ','                +cUYY}     (#%%%b,    Y&%%o+                          ','                  }YYYc_     c&%%%Q     Q%%%q^                        ','                   .(YUYu!     O%%%o     Id%%%j                       ','                     ;jUUY[     ,O\\        1br                        ','                       <t+    .)UZZZZZC/`                             ','                          vO#8%8*bqwwd*&%8WZz.                        ','                       /b88hC}\'         .]Ub8%au                      ','                     XM%oz                   nb%8C                    ','                   I#%a?                       Id%M_                  ','                  t%8x                           x88r                 ','              fOOw%8l                             ;W%mZZ\\             ','           co%%%%%8!                               i8%%%%%ov          ','         `#%%%%%%%z Zqwqm Zmmqk  cOOOdXjbOOOuzqd*0O C%%%%%%%*.        ','         M%%%%%%%&  0ppb% ddbh8      tMk*UYY1#}/& % ,%%%%%%%%W        ','         8%%%%%%%d  |\\\\\\I \\\\\\\\~.L    ,1?<    ?\'^{ (  %%%%%%%%%        ','         *%%%%%%%m                                   8%%%%%%%*        ','          o%%%%%%O                                   &%%%%%%h         ','           |d8%%%Q                                   M%%%8d\\          ','              _xY}                                   xXx+             ','                                                                      ','                                                                      ','                                                 ',''],
+      'pass':          [],
+      'rebetiko':      [],
+      'eightball':     [],
       'annapurna':     ['.','...                                                                 .#','.....                                                             .+++','.......                                                          ..+++','.........                                                     ......++','.........++.                                                ....... .+','.........++#++..                                          .......... .','.........+++++##++.                                  .++ ............','....... +++++++++++#...                           .+###+..............','........++++++++++++#####+..                ..++###++++++.............',' ..... +++++++++++++##########+............. #+++++++++++ ...........','   .. +++++++++++++.#######++++............. ++++++++++++. ........','      .+++++++++++++########+++ ............ .++++++++++++ ......','        ..++++++++ #########+++ ............  ++++++++++++  ...','           ...++++.##########++ ............  ++++###+++++.','               ...+##########+. ............  .++++++++++++','                   ..++++####+   ...........   ++++++++..','                         ..+++   ...........   ++++..','                                 ...            .'],
       'NT_TOP':     ['..................................................................................','................................-*................................................','.............-+*.:=-=**=..:=*+***=..................................-:............','............+#=##+#####*.....-...*+##=...-........................................','...........=*###*####*:..........:*###*+=..:-.....................................','..................-=..............*#########*+*:............:--....:..............','......................=.........-**##############***#=...-***=-=.-*#*.............','..................:-###*####**#*########################*######*..-*#*#*..........','...............:#==*############################################**###*=...........','...............:**=###################################################*-............','............+*######################################################*:............','............*###################################################*+=*:.............','............:*################################################*...................','.........*+*##################################################=...................','.........*####################################################*+-*:.:+.-..........','........+######################################################:...*##+...........','......-*######################################################*....+#*-:..........','...:.*######################################################*.....................','......-=+##################################################*......................','........***###############################################:.......................','.........-=+###################################################*.....................','.=+.==--##################################################*.......................','=##############################################################*:................','.=################################################################-.=:.:..........','=##################################################################**-:.=:........','=#####################################################################**+:.......','=#########################################################################*+-....','=#############################################################################*..','=##############################################################################:.','=################################*+-:.....:-**#################################:.','=##############################=...............+###############################:.','=############################*:.................:##############################:.','=############################-...................=#############################:.','=############################....................-*############################:.','=#############*=:.....-*#####....................-#####+:.....:+###############:.','=###########*:...........+###=...................=##*-...........-*############:.','=#########*-...............*#*...................*#*...............=###########:.','=########*..................*#+.................*#+.................-*#########:.','=#######*:...................*#*...............*#+...................-#########:.','=#######=....................:##*:...........:###:....................+########:.','=#######-.....................*#%#*-.......-*#%#*.....................=########:.','=#######=.....................+#@@%##*++**##%@@#+.....................*########:.','=########-....................*#@@@@@@@@@@@@@@@#*....................=#########:.','=#########+..................-#@@@@@@@@@@@@@@@@%#-..................*##########:.','=###########*-..............+#@@@@@@@@@@@@@@@@@@@#=..............=*############:.','=###############*+-:::::-+##%@@@@@@@@@@@@@@@@@@@@@%#*+-:::::-+*################:.','=########*+=---=+*#####%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%#####*+----=+*#########:.','=#####*.............:+*#%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%#*=.............:*######:.','=####:.................:*#@@@@@@@@@@@@@@@@@@@@@@@@@@%#*..................-#####:.','=###:....................+#@@@@@@@@@@@@@@@@@@@@@@@@@#:....................=####:.','=##*......................*%@@@@@@@@@@@@@@@@@@@@@@@#=.....................:####:.','=##*......................*#@@@@@@@@@@@@@@@@@@@@@@@#=.....................:####:.','=###.....................:#%@@@@@@@@@@@@@@@@@@@@@@@#*.....................-####:.','=###=....................*#@@@@@@@@@@@@@@@@@@@@@@@@@#+....................+####:.','=####:.................:*#%%####%%@@@@@@@@@@@%%####%%#*:.................:#####:.','=####*:...............*##**=.....=*#@@@@@@%#*-....:=*###+...............:######:.','=#####*-...........-*##=...........:*#@@@#*:..........:+##*:...........=#######:.','=########+-:..:-+*##*=..............:##@#*...............=###*+::..:-*#########:.','=##################+.................-##*-.................*###################:.','=#################=...................*#*...................+##################:.','=################+....................+#+....................*#################:.','=################:....................+#+....................=#################:.','=################:....................*#*....................+#################:.','=################*...................:##*:..................:*#################:.','=#################*:.................*###+.................:*##################:.','=###################+:.............:*#####*..............:*####################:.','=#####################*+:.........+########*=.........-*#######################:.','=###########################***################****############################:.','=##############################################################################:.','=##############################################################################:.','=##############################################################################:.','=##############################################################################:.'],
       'TAS':     ['#*###*#####*******+++***###+++=+++++*****+++##%%%@%#####**+*+=***-::-***=::::.-+**+=-:    ','%####%#######*+=++**++++***#**++==+++***+******###%#*=-++=====:-=    :.:.....:=+*#+::.  .:','#%%##%%%%#**#*++=++***++########*#**++**##***+++++==-==++=+::=:.       :--:   :=:.:.    :-','%%%%########*+++++****+=*%###%%##%###***##%*:::::*++=======-:..    .   ::::---++:.       .','@@%%#%%#%%##++=+++*##*+++#@@%#####**##*##*::%::*-::--===**+-:::..:-=:::::=++=---:..       ','%@@@%%%%@%##*+=++++*%@@@@@@%%%##**+**#++-:*::::::*:::-=++++===:=+***+::..-+#+-::::::..   .','##%%##%@@%***++***#%%%@@%%%%%#**###***#=:+::::::::::*::-=++++=::-+++#*-:::-=+--::::... :::=','%####%%%%%%##***%%@%%%@@%%%%%#**###*+:=+::::::::::::=+::=++=-::-**-=+--:::--::...  .  :::.','%#*#%%@%%##**##**##%%%@@%%%@%#**+*+:-#::::::::::::::::=-::--::.:++=+==-==::..    .::......','%%#%%%%%###*****#####%@%%%%%%%%#*::*::::::::::::::::::::#:::-::-=+*+---....      .::::::::','+##%@@%%###*****#*++*#%#%%#%%%#-:%::::::::::::::::::::::::#::::::=+=-::::. ...:.....:::.::','+*#%%%%%%##*+*###*+++#@%#**##+:+-:::::::::::::::::::::::::::*::-----:::--:   .. ...  ..:::','@%%%#%#####*#**%%#++++%%#**=:=+::::::::::::::::::::::::::::::-=::-=+==-++-::--.....  .::::','+%%%%%%#*##*#####*++++##+*:-*::::::::::::::::::::::::::::::::::*-::=++#%*=-=*-..:...... .:','%#%%%###******##%#*+**+*::#::::::::::::::::::::::::::::::::::::::+:::+=--===+:  ..  .   .:','##%##%#**#######%%*+++::*::::::::::::::::::::::::::::::::::::::::::#:::..::.:. ..      ..:','%@@@%%###**%#%#***+-::@::::::::::::::::::::::::::::::::::::::::::::::*::      .        ...','#%%%%%%%%##%#%#*++-:+=::::::::::::::::::::::::::::::::::::::::::::::=+:   ...:          ','#%####**##%#%%%#=:++:::::::::::::::::::::::::::::::::::::::::::::::::=::...:.       .:.:','##%######%%%##*:-*::::::::::::::::::::::::::::::::::::::::::::::::::::::::...  .   .:::','%##%#*#%%%%%*::#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  .....:::.','@@%%%%%@@@@-:*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::.......:'],
@@ -2544,109 +2874,146 @@ function loadCharts(station) {
       'ACT':     ['                                                                                 .............................................................   ','  ..---::::::::::::::-:::::-:::::::::::::::::::::::::-:::----:.   ','  ..:............::::::::::::::::::::::::::::::::::::::::::.::.   '],
     };
 
-    let frame = 0;
-    const labels = ['// SIGNAL LOCKED', '// TRANSMITTING', '// WORLDWIDE', '// ON AIR'];
 
-    // Merge any overrides from ascii-art.json (loaded async at startup)
-    if (window._asciiOverrides) {
-      Object.assign(asciiArts, window._asciiOverrides);
+function _showArtInContainer(container, art) {
+  container.innerHTML = '<div class="world-ascii-section"><pre class="world-ascii-art" id="worldAsciiArt"></pre><div class="world-ascii-label" id="worldAsciiLabel"></div></div>';
+  const artEl   = document.getElementById('worldAsciiArt');
+  const labelEl = document.getElementById('worldAsciiLabel');
+  let baseLines = art;
+  let frame = 0;
+  const labels = ['// SIGNAL LOCKED', '// TRANSMITTING', '// WORLDWIDE', '// ON AIR'];
+  function updateAscii() {
+    if (!artEl || !labelEl) return;
+    artEl.textContent   = art.join('\n');
+    labelEl.textContent = labels[frame % labels.length];
+    baseLines = art;
+    frame++;
+  }
+  updateAscii();
+  if (window._worldAsciiTimer) clearInterval(window._worldAsciiTimer);
+  window._worldAsciiTimer = setInterval(updateAscii, 2200);
+  if (window._worldZoomRaf) cancelAnimationFrame(window._worldZoomRaf);
+  const GLITCH_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/\\|#@!%$&?';
+  const glitchMap = {};
+  const glitchRate = 0.08;
+  const glitchBurst = 2;
+  let zoomPhase = 0;
+  function tickZoom() {
+    window._worldZoomRaf = requestAnimationFrame(tickZoom);
+    const el = document.getElementById('worldAsciiArt');
+    if (!el) { cancelAnimationFrame(window._worldZoomRaf); return; }
+    if (CFG.asciiZoom !== 'off') {
+      zoomPhase = (zoomPhase + 0.003) % (Math.PI * 2);
+      const zT = (Math.sin(zoomPhase) + 1) / 2;
+      el.style.transform = `scale(${1 + zT * 0.08})`;
+      el.style.transformOrigin = 'center center';
+    } else {
+      el.style.transform = '';
     }
-    const art = asciiArts[station.id] || asciiArts[currentState] || [];
-
-    container.innerHTML = '<div class="world-ascii-section"><pre class="world-ascii-art" id="worldAsciiArt"></pre><div class="world-ascii-label" id="worldAsciiLabel"></div></div>';
-
-    const artEl   = document.getElementById('worldAsciiArt');
-    const labelEl = document.getElementById('worldAsciiLabel');
-
-    // Declare baseLines BEFORE updateAscii so it's in scope when called
-    let baseLines = art;
-
-    function updateAscii() {
-      if (!artEl) return;
-      artEl.textContent   = art.join('\n');
-      labelEl.textContent = labels[frame % labels.length];
-      baseLines = art;
-      frame++;
-    }
-    updateAscii();
-    if (window._worldAsciiTimer) clearInterval(window._worldAsciiTimer);
-    window._worldAsciiTimer = setInterval(updateAscii, 2200);
-
-    // Glitch + Slow zoom animation
-    if (window._worldZoomRaf) cancelAnimationFrame(window._worldZoomRaf);
-    const GLITCH_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/\\|#@!%$&?';
-    const glitchMap = {};
-    const glitchRate = 0.08;
-    const glitchBurst = 2;
-    let zoomPhase = 0;
-
-    function tickZoom() {
-      window._worldZoomRaf = requestAnimationFrame(tickZoom);
-      const artEl = document.getElementById('worldAsciiArt');
-      if (!artEl) { cancelAnimationFrame(window._worldZoomRaf); return; }
-
-      // Slow zoom
-      if (CFG.asciiZoom !== 'off') {
-        zoomPhase = (zoomPhase + 0.003) % (Math.PI * 2);
-        const zT = (Math.sin(zoomPhase) + 1) / 2;
-        const zF = 1 + zT * 0.08;
-        artEl.style.transform = `scale(${zF})`;
-        artEl.style.transformOrigin = 'center center';
-      } else {
-        artEl.style.transform = '';
+    const H = baseLines.length;
+    if (H === 0) return;
+    Object.keys(glitchMap).forEach(k => {
+      glitchMap[k].ttl -= 0.5;
+      if (glitchMap[k].ttl <= 0) delete glitchMap[k];
+    });
+    for (let b = 0; b < glitchBurst; b++) {
+      if (Math.random() < glitchRate) {
+        const r = Math.floor(Math.random() * H);
+        const line = baseLines[r] || '';
+        if (!line.trim()) continue;
+        const c = Math.floor(Math.random() * line.length);
+        if (line[c] === ' ') continue;
+        glitchMap[`${r},${c}`] = { char: GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)], ttl: 3 + Math.floor(Math.random() * 8) };
       }
-
-      // Glitch — operate on a copy of the lines
-      const H = baseLines.length;
-      if (H === 0) return;
-      const W = Math.max(...baseLines.map(l => l.length));
-
-      // Age out existing glitch cells
-      Object.keys(glitchMap).forEach(k => {
-        glitchMap[k].ttl -= 0.5;
-        if (glitchMap[k].ttl <= 0) delete glitchMap[k];
+    }
+    if (Object.keys(glitchMap).length > 0) {
+      const rows = baseLines.map(l => l.split(''));
+      Object.entries(glitchMap).forEach(([k, v]) => {
+        const [r, c] = k.split(',').map(Number);
+        if (rows[r] && rows[r][c] !== undefined) rows[r][c] = v.char;
       });
-
-      // Spawn new glitch cells
-      for (let b = 0; b < glitchBurst; b++) {
-        if (Math.random() < glitchRate) {
-          const r = Math.floor(Math.random() * H);
-          const line = baseLines[r] || '';
-          if (!line.trim()) continue; // skip blank lines
-          const c = Math.floor(Math.random() * line.length);
-          if (line[c] === ' ') continue; // don't glitch spaces
-          glitchMap[`${r},${c}`] = {
-            char: GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)],
-            ttl: 3 + Math.floor(Math.random() * 8)
-          };
-        }
-      }
-
-      // Apply glitch to display only if there are active cells
-      if (Object.keys(glitchMap).length > 0) {
-        const rows = baseLines.map(l => l.split(''));
-        Object.entries(glitchMap).forEach(([k, v]) => {
-          const [r, c] = k.split(',').map(Number);
-          if (rows[r] && rows[r][c] !== undefined) rows[r][c] = v.char;
-        });
-        artEl.textContent = rows.map(r => r.join('')).join('\n');
-      }
+      el.textContent = rows.map(r => r.join('')).join('\n');
     }
-    tickZoom();
+  }
+  tickZoom();
+}
+
+function loadCharts(station) {
+  const container = document.getElementById('chartContainer');
+  if (!container) return;
+  if (window._worldAsciiTimer) clearInterval(window._worldAsciiTimer);
+  if (window._worldZoomRaf)   cancelAnimationFrame(window._worldZoomRaf);
+
+  const currentState = window._currentStateCode;
+  const artBtn = document.getElementById('artToggleBtn');
+
+  const asciiArts = Object.assign({}, STATION_ASCII_ART);
+  if (window._asciiOverrides) Object.assign(asciiArts, window._asciiOverrides);
+  const art = asciiArts[station.id] || asciiArts[currentState] || [];
+
+  window._currentArt = art;
+  window._currentChartStation = station;
+
+  const hasCharts = !!(station.chartData && station.chartData.length);
+  const hasArt    = art.length > 0;
+
+  if (artBtn) {
+    artBtn.style.display = (hasArt && hasCharts) ? '' : 'none';
+    artBtn.textContent = window._artPreference ? 'CHART' : 'ART';
+  }
+  document.getElementById('chartRefresh').textContent = '';
+
+  if (hasArt && !hasCharts) {
+    _showArtInContainer(container, art);
+    return;
+  }
+
+  if (window._artPreference && hasArt) {
+    _showArtInContainer(container, art);
     return;
   }
 
   container.innerHTML = '<div class="chart-loading">LOADING CHART DATA</div>';
-
   const now = new Date();
   document.getElementById('chartRefresh').textContent =
     'UPDATED ' + now.toLocaleDateString('en-AU', { day: '2-digit', month: 'short' }).toUpperCase();
-
-  setTimeout(() => renderCharts(station), 800 + Math.random() * 400);
+  if (window._chartTimeout) clearTimeout(window._chartTimeout);
+  const token = (window._chartRenderToken = (window._chartRenderToken || 0) + 1);
+  window._chartTimeout = setTimeout(() => renderCharts(station, token), 800 + Math.random() * 400);
 }
 
-function renderCharts(station) {
+function toggleArtChart() {
+  const btn = document.getElementById('artToggleBtn');
   const container = document.getElementById('chartContainer');
+  if (!btn || !container) return;
+  if (btn.textContent === 'ART') {
+    window._artPreference = true;
+    if (window._worldAsciiTimer) clearInterval(window._worldAsciiTimer);
+    if (window._worldZoomRaf)   cancelAnimationFrame(window._worldZoomRaf);
+    _showArtInContainer(container, window._currentArt || []);
+    btn.textContent = 'CHART';
+    document.getElementById('chartRefresh').textContent = '';
+  } else {
+    window._artPreference = false;
+    if (window._worldAsciiTimer) clearInterval(window._worldAsciiTimer);
+    if (window._worldZoomRaf)   cancelAnimationFrame(window._worldZoomRaf);
+    const station = window._currentChartStation;
+    if (!station) return;
+    container.innerHTML = '<div class="chart-loading">LOADING CHART DATA</div>';
+    const now = new Date();
+    document.getElementById('chartRefresh').textContent =
+      'UPDATED ' + now.toLocaleDateString('en-AU', { day: '2-digit', month: 'short' }).toUpperCase();
+    if (window._chartTimeout) clearTimeout(window._chartTimeout);
+    const tok = (window._chartRenderToken = (window._chartRenderToken || 0) + 1);
+    window._chartTimeout = setTimeout(() => renderCharts(station, tok), 800 + Math.random() * 400);
+    btn.textContent = 'ART';
+  }
+}
+
+function renderCharts(station, token) {
+  const container = document.getElementById('chartContainer');
+  if (!container) return;
+  if (token !== undefined && token !== window._chartRenderToken) return;
   container.innerHTML = '';
 
   station.chartData.forEach((entry, i) => {
@@ -2676,8 +3043,59 @@ function renderCharts(station) {
 }
 
 // ─── AUDIO ────────────────────────────────────────────────────────────────────
+function _onPlaySuccess(station, statusLabel) {
+  const audio   = document.getElementById('audioPlayer');
+  const playBtn = document.getElementById('playBtn');
+  isPlaying = true;
+  window._lastPlayedStation = station;
+  playBtn.classList.remove('buffering');
+  playBtn.textContent = '⏸';
+  playBtn.classList.add('playing');
+  document.getElementById('playerStatus').textContent = statusLabel;
+  document.getElementById('playerStatus').className   = 'player-status live';
+  startWaveAnimation();
+  updateMiniPlayer();
+  audio._userStopped = false;
+  audio.onpause = () => {
+    if (audio._userStopped) return;
+    document.getElementById('playerStatus').textContent = 'RECONNECTING...';
+    document.getElementById('playerStatus').className   = 'player-status';
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+  };
+}
+
+function _onWakeUp() {
+  const audio   = document.getElementById('audioPlayer');
+  const station = window._lastPlayedStation;
+  if (!station || !isPlaying || audio._userStopped) return;
+  if (audio.paused) {
+    document.getElementById('playerStatus').textContent = 'RECONNECTING...';
+    audio.src = station.stream;
+    audio.load();
+    audio.play().then(() => {
+      document.getElementById('playerStatus').textContent = '● LIVE';
+      document.getElementById('playerStatus').className   = 'player-status live';
+      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+    }).catch(() => {
+      isPlaying = false;
+      document.getElementById('playBtn').textContent = '▶';
+      document.getElementById('playBtn').classList.remove('playing', 'buffering');
+      document.getElementById('playerStatus').textContent = 'TAP TO RESUME';
+      document.getElementById('playerStatus').className   = 'player-status';
+      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+    });
+  }
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') _onWakeUp(); });
+window.addEventListener('pageshow', (e) => { if (e.persisted) _onWakeUp(); });
+
 function togglePlay() {
-  const panelStation = currentState ? STATIONS[currentState] : window._currentWorldStation;
+  let panelStation = window._currentWorldStation;
+  if (currentState && STATIONS[currentState]) {
+    const arr = STATIONS[currentState];
+    const idx = window._currentStationIdx ?? 0;
+    panelStation = arr[idx] || arr[0];
+  }
   if (isPlaying) {
     if (!panelStation || window._lastPlayedStation === panelStation) {
       pauseAudio();
@@ -2709,7 +3127,12 @@ function pauseAudio() {
 }
 
 function startAudio() {
-  const stationByState = currentState ? STATIONS[currentState] : null;
+  let stationByState = null;
+  if (currentState && STATIONS[currentState]) {
+    const arr = STATIONS[currentState];
+    const idx = window._currentStationIdx ?? 0;
+    stationByState = arr[idx] || arr[0];
+  }
   const station = stationByState || window._currentWorldStation || window._lastPlayedStation;
   if (!station || !station.stream) { console.warn('[Audio] No station to play'); return; }
 
@@ -2726,21 +3149,12 @@ function startAudio() {
     audio.load();
   }
   audio.play().then(() => {
-    isPlaying = true;
-    window._lastPlayedStation = station;
-    playBtn.classList.remove('buffering');
-    playBtn.textContent = '■';
-    playBtn.classList.add('playing');
-    document.getElementById('playerStatus').textContent = '● LIVE';
-    document.getElementById('playerStatus').className   = 'player-status live';
-    startWaveAnimation();
-    updateMiniPlayer();
+    _onPlaySuccess(station, '● LIVE');
 
     if ('mediaSession' in navigator) {
-      const st = station;
       navigator.mediaSession.metadata = new MediaMetadata({
-        title:  st.fullName || st.name,
-        artist: (st.freq || '') + ' · ' + (st.city || ''),
+        title:  station.fullName || station.name,
+        artist: (station.freq || '') + ' · ' + (station.city || ''),
         album:  'Community Radio Radar',
         artwork: [
           { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
@@ -2762,60 +3176,13 @@ function startAudio() {
       navigator.mediaSession.setActionHandler('pause', () => { if (isPlaying) stopAudio(); });
       navigator.mediaSession.setActionHandler('stop',  () => { if (isPlaying) stopAudio(); });
     }
-
-    audio._userStopped = false;
-
-    audio.onpause = () => {
-      if (audio._userStopped) return;
-      document.getElementById('playerStatus').textContent = 'RECONNECTING...';
-      document.getElementById('playerStatus').className   = 'player-status';
-      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-    };
-
-    const onWakeUp = () => {
-      if (audio._userStopped || !isPlaying) return;
-      if (audio.paused) {
-        document.getElementById('playerStatus').textContent = 'RECONNECTING...';
-        audio.src = station.stream;
-        audio.load();
-        audio.play().then(() => {
-          document.getElementById('playerStatus').textContent = '● LIVE';
-          document.getElementById('playerStatus').className   = 'player-status live';
-          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
-        }).catch(() => {
-          isPlaying = false;
-          document.getElementById('playBtn').textContent = '▶';
-          document.getElementById('playBtn').classList.remove('playing', 'buffering');
-          document.getElementById('playerStatus').textContent = 'TAP TO RESUME';
-          document.getElementById('playerStatus').className   = 'player-status';
-          if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-        });
-      }
-    };
-
-    document.removeEventListener('visibilitychange', window._onVisibility);
-    window._onVisibility = () => { if (document.visibilityState === 'visible') onWakeUp(); };
-    document.addEventListener('visibilitychange', window._onVisibility);
-
-    window.removeEventListener('pageshow', window._onPageShow);
-    window._onPageShow = (e) => { if (e.persisted) onWakeUp(); };
-    window.addEventListener('pageshow', window._onPageShow);
-
   }).catch(() => {
     if (station.streamFallback && audio.src !== station.streamFallback) {
       document.getElementById('playerStatus').textContent = 'TRYING BACKUP...';
       audio.src = station.streamFallback;
       audio.load();
       audio.play().then(() => {
-        isPlaying = true;
-        window._lastPlayedStation = station;
-        playBtn.classList.remove('buffering');
-        playBtn.textContent = '■';
-        playBtn.classList.add('playing');
-        document.getElementById('playerStatus').textContent = '● LIVE (BACKUP)';
-        document.getElementById('playerStatus').className   = 'player-status live';
-        startWaveAnimation();
-        updateMiniPlayer();
+        _onPlaySuccess(station, '● LIVE (BACKUP)');
       }).catch(() => {
         playBtn.classList.remove('buffering');
         document.getElementById('playerStatus').textContent = 'NO SIGNAL';
@@ -2846,6 +3213,7 @@ function stopAudio() {
     navigator.mediaSession.playbackState = 'none';
     navigator.mediaSession.metadata = null;
   }
+  if (typeof _syncPip === 'function') _syncPip();
 }
 
 function startWaveAnimation() {
@@ -2959,13 +3327,16 @@ async function loadChartsFromAPI() {
       if (!chart || !chart.tracks || chart.tracks.length === 0) continue;
       if (!STATIONS[stateCode]) continue;
 
-      STATIONS[stateCode].chartData = chart.tracks.map(t => ({
-        pos:    t.rank,
-        track:  t.track,
-        artist: t.artist
-      }));
-      STATIONS[stateCode].chartSubtitle = chart.chart_subtitle || '';
-      STATIONS[stateCode].chartSourceUrl = chart.source_url || STATIONS[stateCode].chartUrl;
+      // Update all stations in the array
+      STATIONS[stateCode].forEach(st => {
+        st.chartData = chart.tracks.map(t => ({
+          pos:    t.rank,
+          track:  t.track,
+          artist: t.artist
+        }));
+        st.chartSubtitle = chart.chart_subtitle || '';
+        st.chartSourceUrl = chart.source_url || st.chartUrl;
+      });
     }
   } catch (e) {
     console.warn('Charts API not available, using placeholder data');
@@ -3043,6 +3414,7 @@ init();
 loadAMRAP();
 loadChartsFromAPI();
 loadAsciiArt();
+initVolume();
 </script><!-- Mobile Tab Bar -->
 <nav class="mobile-tabs" id="mobileTabs">
   <button class="mobile-tab active" id="tab-map" onclick="switchMobileTab('map')">
@@ -3098,6 +3470,10 @@ loadAsciiArt();
     <div class="setting-row">
       <span class="setting-label">ART ZOOM</span>
       <button class="setting-pill" onclick="cycleSetting('asciiZoom',['on','off'])" id="pill-asciiZoom">ON</button>
+    </div>
+    <div class="setting-row" id="widgetSizeRow">
+      <span class="setting-label">WIDGET SIZE</span>
+      <button class="setting-pill" onclick="cycleSetting('widgetSize',['small','medium','large'])" id="pill-widgetSize">MEDIUM</button>
     </div>
   </div>
   <div class="settings-footer">
@@ -3197,7 +3573,21 @@ function changeWorldPage(dir) {
   renderWorldGrid();
 }
 
+const _worldLastTap = {};
 function selectWorldStation(station) {
+  const now = Date.now();
+  const id = station.id;
+  if (now - (_worldLastTap[id] || 0) < 400) {
+    // Double-tap: select + autoplay
+    _doSelectWorldStation(station);
+    startAudio();
+  } else {
+    _doSelectWorldStation(station);
+  }
+  _worldLastTap[id] = now;
+}
+
+function _doSelectWorldStation(station) {
   if (currentState) {
     document.getElementById(currentState)?.classList.remove('selected');
     document.getElementById('label-' + currentState)?.classList.remove('selected-label');
@@ -3205,6 +3595,8 @@ function selectWorldStation(station) {
   }
   currentState = null;
   window._currentWorldStation = station;
+  window._currentStateCode    = null;
+  window._currentStationIdx   = 0;
 
   document.querySelectorAll('.world-card').forEach(c => c.classList.remove('selected'));
   const card = document.getElementById('world-card-' + station.id);
@@ -3339,6 +3731,306 @@ if (FLAIR_WAVE_CHARTS) {
   };
 }
 
+// ─── PICTURE-IN-PICTURE WIDGET ───────────────────────────────────────────────
+(function () {
+  const NOISE_POOL   = '·:. ·:·:.·: .:·:.';
+  const NOISE_LENS   = { small: 14, medium: 38, large: 54 };
+  const SIDE_CHARS   = { small: '▒', medium: '▓▒░', large: '▓▒░' };
+  const GLITCH_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/\\|#@!%$&?';
+  const PIP_DIMS     = { small: [240, 180], medium: [400, 280], large: [560, 390] };
+  // Bar heights at +30% vs original
+  const BAR_H        = { small: 34, medium: 39, large: 44 };
+
+  let _pipWin           = null;
+  let _animRaf          = null;
+  let _labelTimer       = null;
+  let _pipCurrentStId   = null;
+
+  const PIP_SUPPORTED = 'documentPictureInPicture' in window;
+
+  // ── helpers ────────────────────────────────────────────────────────────────
+  function _noiseLine(len) {
+    let s = '';
+    for (let i = 0; i < len; i++) s += NOISE_POOL[Math.floor(Math.random() * NOISE_POOL.length)];
+    return s;
+  }
+
+  function _stopAnim() {
+    if (_animRaf)    { cancelAnimationFrame(_animRaf); _animRaf = null; }
+    if (_labelTimer) { clearInterval(_labelTimer); _labelTimer = null; }
+  }
+
+  function _getArt(st) {
+    if (!st) return [];
+    const arts = Object.assign({}, STATION_ASCII_ART);
+    if (window._asciiOverrides) Object.assign(arts, window._asciiOverrides);
+    return arts[st.id] || arts[window._currentStateCode] || [];
+  }
+
+  // ── art animation (glitch + zoom, runs on main-page RAF, targets PiP DOM) ─
+  function _startArtAnim(pipDoc, art) {
+    _stopAnim();
+    const LABELS = ['// SIGNAL LOCKED', '// TRANSMITTING', '// WORLDWIDE', '// ON AIR'];
+    let baseLines = art.slice();
+    let glitchMap = {};
+    let zoomPhase = 0;
+    let labelIdx  = 0;
+
+    _labelTimer = setInterval(() => {
+      const el = pipDoc.getElementById('pwLabel');
+      if (el) el.textContent = LABELS[labelIdx++ % LABELS.length];
+    }, 2200);
+
+    function tick() {
+      _animRaf = requestAnimationFrame(tick);
+      const el = pipDoc.getElementById('pwArt');
+      if (!el) { _stopAnim(); return; }
+
+      // zoom
+      if (typeof CFG === 'undefined' || CFG.asciiZoom !== 'off') {
+        zoomPhase = (zoomPhase + 0.003) % (Math.PI * 2);
+        const zT = (Math.sin(zoomPhase) + 1) / 2;
+        el.style.transform = `scale(${1 + zT * 0.06})`;
+      }
+
+      // glitch
+      Object.keys(glitchMap).forEach(k => {
+        glitchMap[k].ttl -= 0.5;
+        if (glitchMap[k].ttl <= 0) delete glitchMap[k];
+      });
+      for (let b = 0; b < 2; b++) {
+        if (Math.random() < 0.08) {
+          const r = Math.floor(Math.random() * baseLines.length);
+          const line = baseLines[r] || '';
+          if (!line.trim()) continue;
+          const c = Math.floor(Math.random() * line.length);
+          if (line[c] === ' ') continue;
+          glitchMap[`${r},${c}`] = {
+            char: GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)],
+            ttl:  3 + Math.floor(Math.random() * 8)
+          };
+        }
+      }
+      if (Object.keys(glitchMap).length > 0) {
+        const rows = baseLines.map(l => l.split(''));
+        Object.entries(glitchMap).forEach(([k, v]) => {
+          const [r, c] = k.split(',').map(Number);
+          if (rows[r] && rows[r][c] !== undefined) rows[r][c] = v.char;
+        });
+        el.textContent = rows.map(row => row.join('')).join('\n');
+      }
+    }
+    tick();
+  }
+
+  // ── noise animation (fallback for stations without art) ────────────────────
+  function _startNoise(pipDoc, size) {
+    _stopAnim();
+    const len = NOISE_LENS[size] || 38;
+    const tick = () => {
+      for (let i = 0; i < 3; i++) {
+        const el = pipDoc.getElementById('pwLine' + i);
+        if (el) el.textContent = _noiseLine(len);
+      }
+    };
+    tick();
+    _labelTimer = setInterval(tick, 110);
+  }
+
+  // ── fit art font size to available space ───────────────────────────────────
+  function _fitArt(pipDoc, art, availW, availH) {
+    const pre = pipDoc.getElementById('pwArt');
+    if (!pre || !art.length) return;
+    const maxLen = Math.max(...art.map(l => l.length));
+    if (!maxLen) return;
+    const fsW = availW  / (maxLen * 0.601);
+    const fsH = availH  / (art.length * 1.25);
+    pre.style.fontSize   = Math.max(3, Math.min(fsW, fsH, 16)) + 'px';
+    pre.style.lineHeight = '1.25';
+    pre.textContent      = art.join('\n');
+  }
+
+  // ── styles ─────────────────────────────────────────────────────────────────
+  function _buildStyles(pipDoc, size) {
+    const cs    = getComputedStyle(document.documentElement);
+    const vars  = ['--green','--bg','--border','--accent','--hover-bg','--glow-color','--muted'];
+    const theme = vars.map(v => `${v}:${cs.getPropertyValue(v).trim()}`).join(';');
+    const fs    = size === 'small' ? '9px'  : size === 'large' ? '12px' : '11px';
+    const barH  = BAR_H[size] + 'px';
+    const btnFS = size === 'small' ? '12px' : size === 'large' ? '16px' : '14px';  // +30%
+    const btnP  = size === 'small' ? '0 9px'  : size === 'large' ? '0 18px' : '0 14px'; // +30%
+    const infoP = size === 'small' ? '0 7px'  : size === 'large' ? '0 12px' : '0 10px';
+    const nFS   = size === 'small' ? '9px'    : size === 'large' ? '11px'   : '10px';
+
+    const style = pipDoc.createElement('style');
+    style.textContent = `
+      *{box-sizing:border-box;margin:0;padding:0}
+      :root{${theme}}
+      body{background:var(--bg);overflow:hidden;font-family:'Share Tech Mono',monospace;color:var(--green);
+           display:flex;flex-direction:column;height:100vh;width:100vw;border:1px solid var(--border)}
+      /* art section */
+      .pw-art-wrap{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;
+                   padding:6px;position:relative;border-bottom:1px solid var(--border)}
+      #pwArt{white-space:pre;font-family:'Share Tech Mono',monospace;color:var(--green);
+             transform-origin:center center;display:block}
+      #pwLabel{position:absolute;bottom:4px;right:6px;font-size:8px;opacity:.35;letter-spacing:2px}
+      /* noise section (fallback) */
+      .pw-noise{display:flex;align-items:stretch;border-bottom:1px solid var(--border);flex:1}
+      .pw-side{display:flex;align-items:center;padding:5px 4px;opacity:.35;white-space:pre;font-size:${nFS};letter-spacing:0}
+      .pw-lines{flex:1;display:flex;flex-direction:column;justify-content:center;padding:4px 0;overflow:hidden}
+      .pw-line{white-space:pre;line-height:1.4;opacity:.65;font-size:${nFS}}
+      /* bar */
+      .pw-bar{display:flex;align-items:stretch;height:${barH};flex-shrink:0}
+      .pw-info{flex:1;display:flex;align-items:center;padding:${infoP};font-size:${fs};
+               letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .pw-controls{display:flex;align-items:stretch;border-left:1px solid var(--border);flex-shrink:0}
+      .pw-btn{background:none;border:none;border-left:1px solid var(--border);color:var(--green);
+              cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:${btnFS};
+              opacity:.75;padding:${btnP};transition:opacity .15s,background .15s;line-height:1}
+      .pw-btn:first-child{border-left:none}
+      .pw-btn:hover{opacity:1;background:var(--hover-bg)}
+    `;
+    pipDoc.head.appendChild(style);
+
+    const link = pipDoc.createElement('link');
+    link.rel  = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap';
+    pipDoc.head.appendChild(link);
+  }
+
+  // ── HTML ───────────────────────────────────────────────────────────────────
+  function _buildHTML(pipDoc, size, hasArt) {
+    const side = SIDE_CHARS[size] || '▓▒░';
+    const sideR = [...side].reverse().join('');
+    const st   = window._lastPlayedStation;
+    const info = st
+      ? (size === 'small' ? (st.freq || st.name || '---') : ((st.name || '') + (st.freq ? '  ' + st.freq : '')))
+      : '---.-FM';
+
+    const topSection = hasArt
+      ? `<div class="pw-art-wrap"><pre id="pwArt"></pre><span id="pwLabel">// SIGNAL LOCKED</span></div>`
+      : `<div class="pw-noise">
+           <span class="pw-side">${side}</span>
+           <div class="pw-lines">
+             <div class="pw-line" id="pwLine0"></div>
+             <div class="pw-line" id="pwLine1"></div>
+             <div class="pw-line" id="pwLine2"></div>
+           </div>
+           <span class="pw-side">${sideR}</span>
+         </div>`;
+
+    pipDoc.body.innerHTML = `
+      ${topSection}
+      <div class="pw-bar">
+        <div class="pw-info" id="pwInfo">${info}</div>
+        <div class="pw-controls">
+          <button class="pw-btn" id="pwPlay">${isPlaying ? '⏸' : '▶'}</button>
+          <button class="pw-btn" id="pwStop">■</button>
+        </div>
+      </div>`;
+
+    pipDoc.getElementById('pwPlay').addEventListener('click', () => { togglePlay(); _syncPip(); });
+    pipDoc.getElementById('pwStop').addEventListener('click', () => stopAudio());
+  }
+
+  // ── rebuild pip when station changes ──────────────────────────────────────
+  function _rebuildPipContent() {
+    if (!_pipWin || _pipWin.closed) return;
+    const pipDoc = _pipWin.document;
+    const st     = window._lastPlayedStation;
+    if (!st) return;
+    const size   = CFG.widgetSize || 'medium';
+    const [w, h] = PIP_DIMS[size];
+    const art    = _getArt(st);
+    const hasArt = art.length > 0;
+
+    _stopAnim();
+    _buildHTML(pipDoc, size, hasArt);
+
+    if (hasArt) {
+      setTimeout(() => {
+        _fitArt(pipDoc, art, w - 12, h - BAR_H[size] - 12);
+        _startArtAnim(pipDoc, art);
+      }, 50);
+    } else {
+      _startNoise(pipDoc, size);
+    }
+    _pipCurrentStId = st.id;
+  }
+
+  // ── sync info + play state (or full rebuild on station change) ─────────────
+  function _syncPip() {
+    if (!_pipWin || _pipWin.closed) return;
+    const st = window._lastPlayedStation;
+    if (st && st.id !== _pipCurrentStId) {
+      _rebuildPipContent();
+      return;
+    }
+    const pipDoc = _pipWin.document;
+    const size   = CFG.widgetSize || 'medium';
+    const info   = pipDoc.getElementById('pwInfo');
+    if (info && st) {
+      info.textContent = size === 'small'
+        ? (st.freq || st.name || '---')
+        : ((st.name || '') + (st.freq ? '  ' + st.freq : ''));
+    }
+    const play = pipDoc.getElementById('pwPlay');
+    if (play) play.textContent = isPlaying ? '⏸' : '▶';
+  }
+
+  // ── public ─────────────────────────────────────────────────────────────────
+  window.updatePipBtn = function () {
+    const btn = document.getElementById('miniPipBtn');
+    if (!btn) return;
+    if (!PIP_SUPPORTED) { btn.style.display = 'none'; return; }
+    btn.style.display = window._lastPlayedStation ? '' : 'none';
+    btn.classList.toggle('pip-active', !!(_pipWin && !_pipWin.closed));
+    _syncPip();
+  };
+
+  window.togglePiP = async function () {
+    if (!PIP_SUPPORTED) return;
+    if (_pipWin && !_pipWin.closed) { _pipWin.close(); return; }
+
+    const size = CFG.widgetSize || 'medium';
+    const [w, h] = PIP_DIMS[size];
+    const art    = _getArt(window._lastPlayedStation);
+    const hasArt = art.length > 0;
+
+    try {
+      _pipWin = await window.documentPictureInPicture.requestWindow({ width: w, height: h });
+    } catch (e) {
+      console.warn('[PiP]', e);
+      return;
+    }
+
+    _buildStyles(_pipWin.document, size);
+    _buildHTML(_pipWin.document, size, hasArt);
+
+    const st = window._lastPlayedStation;
+    _pipCurrentStId = st ? st.id : null;
+
+    if (hasArt) {
+      setTimeout(() => {
+        _fitArt(_pipWin.document, art, w - 12, h - BAR_H[size] - 12);
+        _startArtAnim(_pipWin.document, art);
+      }, 250);
+    } else {
+      _startNoise(_pipWin.document, size);
+    }
+
+    _pipWin.addEventListener('pagehide', () => {
+      _stopAnim();
+      _pipWin = null;
+      updatePipBtn();
+    });
+
+    updatePipBtn();
+  };
+
+  window._syncPip = _syncPip;
+})();
+
 // ── SETTINGS ──────────────────────────────────────────────────────────────
 const THEMES = {
   green:    { '--green': '#00ff41', '--green-dim': '#00c032', '--bg': '#030a04', '--panel': '#050f06', '--border': '#0a2e0c', '--text': '#00c032', '--muted': '#2a5c30', '--inactive': '#050f06', '--fg': '#4a8c52', '--accent': '#00ff41', '--hover-bg': 'rgba(0,255,65,0.08)', '--hover-border': '#00ff41', '--bio-text': '#4a8c52', '--glow-color': '0,255,65', '--green-dark': '#003810', '--active-fill': '#051a08' },
@@ -3351,7 +4043,7 @@ const THEMES = {
 const FONT_SIZES = { small: '12px', medium: '14px', large: '17px', xlarge: '20px' };
 const HEADER_H   = { small: '56px', medium: '60px', large: '66px', xlarge: '73px' };
 
-const CFG_DEFAULTS = { theme: 'green', fontSize: 'medium', scanLines: 'low', clockFormat: '24hr', contrast: 'normal', lastStation: 'remember', asciiZoom: 'on' };
+const CFG_DEFAULTS = { theme: 'green', fontSize: 'medium', scanLines: 'low', clockFormat: '24hr', contrast: 'normal', lastStation: 'remember', asciiZoom: 'on', widgetSize: 'medium' };
 let CFG = Object.assign({}, CFG_DEFAULTS, JSON.parse(localStorage.getItem('rrCfg') || '{}'));
 
 function saveConfig() { localStorage.setItem('rrCfg', JSON.stringify(CFG)); }
@@ -3390,6 +4082,9 @@ function applyConfig() {
   document.getElementById('pill-lastStation').textContent = CFG.lastStation.toUpperCase();
   const zoomPill = document.getElementById('pill-asciiZoom');
   if (zoomPill) zoomPill.textContent = (CFG.asciiZoom || 'on').toUpperCase();
+
+  const widgetSizePill = document.getElementById('pill-widgetSize');
+  if (widgetSizePill) widgetSizePill.textContent = (CFG.widgetSize || 'medium').toUpperCase();
 
   document.querySelectorAll('.theme-swatch').forEach(s => {
     s.classList.toggle('active', s.dataset.theme === CFG.theme);
