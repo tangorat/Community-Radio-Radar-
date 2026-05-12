@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#00ff41">
+  <meta name="theme-color" content="#030a04">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Radio Radar">
   <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icons/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <title>Community Radio Radar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -145,6 +146,20 @@
   }
   .mini-player-play:hover { opacity: 1; }
   .mini-player-stop:hover { opacity: 1; background: var(--hover-bg, rgba(0,255,65,0.22)); }
+  .mini-player-shuffle {
+    background: none;
+    border: none;
+    color: var(--green);
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 0 4px;
+    opacity: 0.65;
+    font-family: monospace;
+    transition: opacity 0.15s;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+  .mini-player-shuffle:hover { opacity: 1; }
 
   .mini-waveform {
     display: flex;
@@ -261,6 +276,7 @@
     letter-spacing: 5px;
     text-transform: uppercase;
   }
+  @media (max-width: 700px) { .map-title { display: none; } }
 
   svg#australia-map {
     height: auto;
@@ -973,6 +989,18 @@
       top: 12px;
       right: 12px;
     }
+    #starDefaultBtn {
+      position: absolute !important;
+      top: 56px !important;
+      right: 12px !important;
+      width: 36px !important;
+      height: 36px !important;
+      font-size: 2rem !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
   }
 
   .uc-chart-msg {
@@ -1608,8 +1636,8 @@
   }
   .mobile-tab.active { color: var(--accent); }
   .mobile-tab:active { background: rgba(0,255,65,0.06); }
-  .mobile-tab-icon { font-size: 1.1rem; line-height: 1; }
-  .mobile-tab-ascii { font-family: 'Share Tech Mono', monospace; font-size: 1.3rem; color: inherit; }
+  .mobile-tab-icon { font-size: 1.43rem; line-height: 1; }
+  .mobile-tab-ascii { font-family: 'Share Tech Mono', monospace; font-size: 1.69rem; color: inherit; }
 
   /* ─── AMRAP MOBILE SHEET ───────────────────────────────────────────────── */
   .amrap-mobile-sheet {
@@ -1693,6 +1721,46 @@
   .mini-player-pip:hover { opacity: 1; }
   .mini-player-pip.pip-active { opacity: 1; color: var(--accent); }
 
+  /* ─── TABLET (701px – 1024px) ──────────────────────────────────────────── */
+  @media (min-width: 701px) and (max-width: 1024px) {
+    body, #appContainer { overflow-x: hidden; }
+
+    /* hide desktop-only chrome */
+    #volControl    { display: none !important; }
+    #miniPipBtn    { display: none !important; }
+    #widgetSizeRow { display: none !important; }
+
+    /* panel-open: push only by the side-panel width, not AMRAP offset too */
+    .map-container.panel-open { margin-right: 400px !important; }
+    .world-view.panel-open    { margin-right: 400px !important; }
+  }
+
+  /* ─── TABLET LANDSCAPE ─────────────────────────────────────────────────── */
+  @media (min-width: 701px) and (max-width: 1024px) and (orientation: landscape) {
+    body, #appContainer { overflow: hidden; }
+    .map-container { overflow: hidden; }
+    svg#australia-map { max-height: calc(100vh - var(--header-h, 60px) - 40px); width: auto; }
+  }
+
+  /* ─── TABLET PORTRAIT ──────────────────────────────────────────────────── */
+  @media (min-width: 701px) and (max-width: 1024px) and (orientation: portrait) {
+    /* Side panel overlays map in portrait rather than pushing it */
+    .side-panel {
+      width: 92vw !important;
+      right: -92vw !important;
+      border-left: 1px solid var(--border) !important;
+    }
+    .side-panel.open { right: 0 !important; }
+
+    /* Map stays full width — panel floats on top */
+    .map-container.panel-open { margin-right: 0 !important; }
+    .world-view.panel-open    { margin-right: 0 !important; }
+
+    /* Map fills portrait height better */
+    .map-container { padding: 10px !important; }
+    svg#australia-map { max-height: 70vh; width: auto; }
+  }
+
 </style>
 <script>
 (function(){
@@ -1730,6 +1798,7 @@
         <span class="mini-player-label" id="miniPlayerLabel">PLAYING</span>
       </div>
       <button class="mini-player-play" id="miniPlayBtn" onclick="togglePlay()" title="Play/Pause">▶</button>
+      <button class="mini-player-shuffle" onclick="playRandomFavourite()" title="Shuffle favourites">⇌</button>
       <button class="mini-player-pip" id="miniPipBtn" onclick="togglePiP()" title="Pop out widget" style="display:none">⧉</button>
       <button class="mini-player-stop" onclick="stopAudio()">■</button>
     </div>
@@ -2807,6 +2876,30 @@ function initVolume() {
       setVolume(saved);
     }
   } catch(e) {}
+}
+
+function playRandomFavourite() {
+  // Collect all starred (default) stations across every state
+  const pool = [];
+  Object.keys(STATIONS).forEach(code => {
+    const arr = STATIONS[code];
+    if (!arr || !arr.length) return;
+    const idx = getStateDefault(code);
+    const station = arr[idx];
+    if (station) pool.push({ code, idx, station });
+  });
+  if (!pool.length) return;
+  // Avoid replaying the same station if there are multiple options
+  let candidates = pool;
+  if (pool.length > 1 && window._lastPlayedStation) {
+    candidates = pool.filter(e => e.station.id !== window._lastPlayedStation.id);
+    if (!candidates.length) candidates = pool;
+  }
+  const pick = candidates[Math.floor(Math.random() * candidates.length)];
+  if (!pick) return;
+  stopAudio();
+  selectState(pick.code, pick.idx);
+  startAudio();
 }
 
 function updateMiniPlayer() {
@@ -4035,7 +4128,7 @@ if (FLAIR_WAVE_CHARTS) {
 const THEMES = {
   green:    { '--green': '#00ff41', '--green-dim': '#00c032', '--bg': '#030a04', '--panel': '#050f06', '--border': '#0a2e0c', '--text': '#00c032', '--muted': '#2a5c30', '--inactive': '#050f06', '--fg': '#4a8c52', '--accent': '#00ff41', '--hover-bg': 'rgba(0,255,65,0.08)', '--hover-border': '#00ff41', '--bio-text': '#4a8c52', '--glow-color': '0,255,65', '--green-dark': '#003810', '--active-fill': '#051a08' },
   amber:    { '--green': '#ffb347', '--green-dim': '#cc8a00', '--bg': '#0a0800', '--panel': '#100e00', '--border': '#2e2000', '--text': '#cc8a00', '--muted': '#5c4a00', '--inactive': '#0a0800', '--fg': '#8c7000', '--accent': '#ffb347', '--hover-bg': 'rgba(255,179,71,0.08)', '--hover-border': '#ffb347', '--bio-text': '#8c7000', '--glow-color': '255,179,71', '--green-dark': '#1a0e00', '--active-fill': '#120a00' },
-  blue:     { '--green': '#44aaff', '--green-dim': '#0088ee', '--bg': '#00050f', '--panel': '#000a1a', '--border': '#001a3a', '--text': '#0088ee', '--muted': '#003a6e', '--inactive': '#00050f', '--fg': '#0055aa', '--accent': '#44aaff', '--hover-bg': 'rgba(68,170,255,0.08)', '--hover-border': '#44aaff', '--bio-text': '#0055aa', '--glow-color': '68,170,255', '--green-dark': '#000d1f', '--active-fill': '#000814' },
+  blue:     { '--green': '#44aaff', '--green-dim': '#2288dd', '--bg': '#00050f', '--panel': '#000a1a', '--border': '#002a5a', '--text': '#44aaff', '--muted': '#1a5a9e', '--inactive': '#00050f', '--fg': '#2277cc', '--accent': '#44aaff', '--hover-bg': 'rgba(68,170,255,0.1)', '--hover-border': '#44aaff', '--bio-text': '#2277cc', '--glow-color': '68,170,255', '--green-dark': '#000d1f', '--active-fill': '#000814' },
   white:    { '--green': '#cccccc', '--green-dim': '#999', '--bg': '#111', '--panel': '#1c1c1c', '--border': '#333', '--text': '#bbb', '--muted': '#666', '--inactive': '#111', '--fg': '#999', '--accent': '#ddd', '--hover-bg': 'rgba(200,200,200,0.1)', '--hover-border': '#ccc', '--bio-text': '#888', '--glow-color': '200,200,200', '--green-dark': '#1a1a1a', '--active-fill': '#222' },
   whiteplus:{ '--green': '#2a2a2a', '--green-dim': '#444', '--bg': '#f0ede8', '--panel': '#e8e5e0', '--border': '#ccc', '--text': '#333', '--muted': '#888', '--inactive': '#ddd', '--fg': '#555', '--accent': '#111', '--hover-bg': 'rgba(0,0,0,0.06)', '--hover-border': '#555', '--bio-text': '#555', '--glow-color': '42,42,42', '--green-dark': '#ddd8d0', '--active-fill': '#e8e4de' },
 };
@@ -4052,6 +4145,8 @@ function applyConfig() {
   const root = document.documentElement;
   const t = THEMES[CFG.theme] || THEMES.green;
   for (const [k, v] of Object.entries(t)) root.style.setProperty(k, v);
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) themeMeta.content = t['--bg'] || '#030a04';
   document.documentElement.style.fontSize = FONT_SIZES[CFG.fontSize] || '14px';
   const scanOpacity = { off: '0', low: '0.03', high: '0.08' };
   root.style.setProperty('--scan-opacity', scanOpacity[CFG.scanLines] || '0.03');
@@ -4116,6 +4211,18 @@ function toggleSettings() {
 })();
 
 applyConfig();
+
+// Collapse AMRAP by default on tablet
+if (window.innerWidth > 700 && window.innerWidth <= 1024) {
+  const _tp = document.getElementById('amrapPanel');
+  const _tt = document.getElementById('amrapToggle');
+  const _ta = document.getElementById('appContainer');
+  if (_tp && !_tp.classList.contains('collapsed')) {
+    _tp.classList.add('collapsed');
+    if (_tt) { _tt.classList.add('collapsed'); _tt.textContent = '▶ AMRAP CHART'; }
+    if (_ta) _ta.classList.add('amrap-hidden');
+  }
+}
 
 </script>
 
