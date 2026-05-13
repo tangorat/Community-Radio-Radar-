@@ -2318,7 +2318,7 @@ const STATIONS = {
   ],
   NT_TOP: [
     {
-      name: 'TEABBA Radio', fullName: 'TEABBA 88.0FM', freq: '88.0FM', city: 'Darwin', state: 'Northern Territory', timezone: 'Australia/Darwin',
+      id: 'teabba', name: 'TEABBA Radio', fullName: 'TEABBA 88.0FM', freq: '88.0FM', city: 'Darwin', state: 'Northern Territory', timezone: 'Australia/Darwin',
       stream: 'https://firstnationsmedia.stream/8014/stream',
       website: 'https://www.teabba.com.au/radio', chartUrl: '',
       bio: "The Top End Aboriginal Bush Broadcasting Association broadcasts 24/7 into 29 remote Indigenous communities across the Top End. Local shows in language — community announcements, weather, school shout-outs and music from the bush.",
@@ -2327,7 +2327,7 @@ const STATIONS = {
   ],
   NT_BOT: [
     {
-      name: 'CAAMA Radio', fullName: 'CAAMA 8KIN FM', freq: '8KIN FM', city: 'Alice Springs', state: 'Northern Territory', timezone: 'Australia/Darwin',
+      id: 'caama', name: 'CAAMA Radio', fullName: 'CAAMA 8KIN FM', freq: '8KIN FM', city: 'Alice Springs', state: 'Northern Territory', timezone: 'Australia/Darwin',
       stream: 'https://streamer.radio.co/sa67d9a81d/listen',
       website: 'https://caama.com.au', chartUrl: '',
       bio: "The voice of Central Australia since 1985. CAAMA broadcasts in Aboriginal languages and English from Alice Springs, championing First Nations music, culture and stories from the heart of the continent.",
@@ -2776,6 +2776,7 @@ function selectState(code, stationIdx) {
   currentState = code;
   window._currentWorldStation = null;
   _pushStationUrl(station ? station.id : null);
+  _haptic(6);
 
   document.getElementById(code)?.classList.add('selected');
   document.getElementById('label-' + code)?.classList.add('selected-label');
@@ -3084,9 +3085,13 @@ function updateMiniPlayer() {
     } else {
       document.querySelectorAll('.mini-wave-bar').forEach(b => b.classList.remove('active'));
     }
+    // Page title: show play state + station name
+    document.title = (isPlaying ? '▌▌ ' : '') + st.name + ' · Radio Radar';
   } else {
     mini.style.display = 'none';
     if (miniPlay) miniPlay.textContent = '▶';
+    // Restore default title when nothing playing
+    document.title = 'Community Radio Radar';
   }
   updatePipBtn();
 }
@@ -3328,6 +3333,21 @@ function _onPlaySuccess(station, statusLabel) {
     document.getElementById('playerStatus').className   = 'player-status';
     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
   };
+
+  _haptic(10);
+  // ── Media Session metadata (works for both primary + fallback streams) ──
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title:  station.fullName || station.name,
+      artist: [station.freq, station.city].filter(Boolean).join(' · '),
+      album:  'Community Radio Radar',
+      artwork: [
+        { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+      ]
+    });
+    navigator.mediaSession.playbackState = 'playing';
+  }
 }
 
 function _onWakeUp() {
@@ -3378,6 +3398,7 @@ function togglePlay() {
 }
 
 function pauseAudio() {
+  _haptic(4);
   const audio = document.getElementById('audioPlayer');
   audio._userStopped = true;
   audio.onpause = null;
@@ -3431,29 +3452,36 @@ function startAudio() {
     _onPlaySuccess(station, '● LIVE');
 
     if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title:  station.fullName || station.name,
-        artist: (station.freq || '') + ' · ' + (station.city || ''),
-        album:  'Community Radio Radar',
-        artwork: [
-          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-        ]
-      });
-      navigator.mediaSession.playbackState = 'playing';
+
       navigator.mediaSession.setActionHandler('play', () => {
-        if (!isPlaying) {
-          startAudio();
-        } else if (audio.paused) {
-          audio.src = station.stream;
-          audio.load();
-          audio.play().catch(() => {
-            document.getElementById('playerStatus').textContent = 'NO SIGNAL';
-          });
+        if (!isPlaying) startAudio();
+        else if (audio.paused) {
+          audio.src = station.stream; audio.load();
+          audio.play().catch(() => _setNoSignal(document.getElementById('playBtn')));
         }
       });
-      navigator.mediaSession.setActionHandler('pause', () => { if (isPlaying) stopAudio(); });
+      navigator.mediaSession.setActionHandler('pause', () => { if (isPlaying) pauseAudio(); });
       navigator.mediaSession.setActionHandler('stop',  () => { if (isPlaying) stopAudio(); });
+
+      // Next / previous — cycle through stations in the current state
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        if (!currentState || !STATIONS[currentState]) return;
+        const arr = STATIONS[currentState];
+        const idx = (window._currentStationIdx || 0);
+        const nextIdx = (idx + 1) % arr.length;
+        stopAudio();
+        selectState(currentState, nextIdx);
+        setTimeout(startAudio, 80);
+      });
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        if (!currentState || !STATIONS[currentState]) return;
+        const arr = STATIONS[currentState];
+        const idx = (window._currentStationIdx || 0);
+        const prevIdx = (idx - 1 + arr.length) % arr.length;
+        stopAudio();
+        selectState(currentState, prevIdx);
+        setTimeout(startAudio, 80);
+      });
     }
   }).catch(() => {
     if (station.streamFallback && audio.src !== station.streamFallback) {
@@ -3470,6 +3498,7 @@ function startAudio() {
 }
 
 function stopAudio() {
+  _haptic([4, 40, 4]);
   const audio = document.getElementById('audioPlayer');
   audio._userStopped = true;
   audio.onpause = null;
@@ -3738,6 +3767,7 @@ function toggleSleepPicker() {
 }
 
 function setSleepFromPicker(minutes) {
+  _haptic(8);
   _sleepMinutes = minutes;
   // Close picker
   const picker = document.getElementById('sleepPicker');
@@ -3783,6 +3813,11 @@ function _tickSleep() {
   const timeStr = m + ':' + String(s).padStart(2, '0');
   if (btn)   btn.textContent = timeStr;
   if (count) { count.style.display = ''; count.textContent = '☽ ' + timeStr; }
+}
+
+// ─── HAPTIC FEEDBACK ──────────────────────────────────────────────────────────
+function _haptic(pattern) {
+  try { if ('vibrate' in navigator) navigator.vibrate(pattern); } catch(e) {}
 }
 
 // ─── KEYBOARD NAVIGATION ──────────────────────────────────────────────────────
