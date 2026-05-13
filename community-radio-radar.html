@@ -524,19 +524,41 @@
   }
 
   .play-btn.buffering {
-    animation: bufferPulse 0.6s ease-in-out infinite;
+    animation: bufferPulse 1.2s ease-in-out infinite;
   }
 
   @keyframes bufferPulse {
-    0%   { background: var(--green-dark); box-shadow: 0 0 4px rgba(var(--glow-color,0,255,65),0.2); color: var(--green); }
-    50%  { background: var(--green-dim);  box-shadow: 0 0 24px rgba(var(--glow-color,0,255,65),0.7); color: var(--bg); }
-    100% { background: var(--green-dark); box-shadow: 0 0 4px rgba(var(--glow-color,0,255,65),0.2); color: var(--green); }
+    0%   { border-color: var(--green-dim); box-shadow: 0 0 4px rgba(var(--glow-color,0,255,65),0.15); }
+    50%  { border-color: var(--green);     box-shadow: 0 0 18px rgba(var(--glow-color,0,255,65),0.55); }
+    100% { border-color: var(--green-dim); box-shadow: 0 0 4px rgba(var(--glow-color,0,255,65),0.15); }
   }
 
-  .play-btn:hover, .play-btn.playing {
-    background: var(--green-dim);
-    color: var(--bg);
-    box-shadow: 0 0 20px rgba(var(--glow-color,0,255,65),0.4);
+  .play-btn:hover {
+    background: rgba(var(--glow-color,0,255,65),0.1);
+    box-shadow: 0 0 14px rgba(var(--glow-color,0,255,65),0.3);
+    border-color: var(--green);
+  }
+  .play-btn.playing {
+    border-color: var(--green);
+    box-shadow: 0 0 12px rgba(var(--glow-color,0,255,65),0.3);
+  }
+  .play-btn.signal-lost {
+    border-color: #a00;
+    color: #f44;
+    animation: signalLostPulse 2s ease-in-out infinite;
+  }
+  @keyframes signalLostPulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(255,40,40,0.2); }
+    50%       { box-shadow: 0 0 16px rgba(255,40,40,0.5); }
+  }
+  .player-status.signal-lost-status {
+    color: #f44;
+    letter-spacing: 3px;
+  }
+  .player-status.signal-lost-status::after {
+    content: ' // TAP ▶ TO RETRY';
+    font-size: 0.7em;
+    opacity: 0.7;
   }
 
   .waveform {
@@ -1787,6 +1809,111 @@
     svg#australia-map { max-height: 70vh; width: auto; }
   }
 
+  /* ─── SLEEP TIMER COUNTDOWN ──────────────────────────────────────── */
+  .mini-sleep-count {
+    font-size: 0.58rem;
+    letter-spacing: 1px;
+    color: var(--green-dim, #00c032);
+    opacity: 0.75;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* ─── SLEEP CLOCK BUTTON (station panel, mobile/tablet only) ─────── */
+  .player-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0;
+  }
+  .sleep-clock-btn {
+    display: none; /* hidden on desktop */
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .sleep-clock-btn:hover { color: var(--green); border-color: var(--green-dim); }
+  .sleep-clock-btn.active {
+    color: var(--green);
+    border-color: var(--green-dim);
+  }
+  @media (max-width: 1024px) {
+    .sleep-clock-btn { display: flex; align-items: center; gap: 4px; }
+  }
+
+  /* ─── SLEEP PICKER ROW ───────────────────────────────────────────── */
+  .sleep-picker {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 10px 0 4px;
+    border-top: 1px solid var(--border);
+    margin-top: 10px;
+  }
+  .sleep-pick-btn {
+    background: var(--hover-bg, rgba(0,255,65,0.06));
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: all 0.12s;
+    flex: 1;
+    text-align: center;
+  }
+  .sleep-pick-btn:hover { color: var(--green); border-color: var(--green-dim); background: rgba(0,255,65,0.1); }
+  .sleep-pick-btn.active { color: var(--green); border-color: var(--green); }
+
+  /* ─── SETTINGS ABOUT SECTION ─────────────────────────────────────── */
+  .settings-about {
+    padding: 18px 24px 20px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .settings-about-title {
+    font-size: 0.58rem;
+    letter-spacing: 4px;
+    color: var(--green);
+    margin-bottom: 10px;
+  }
+  .settings-about-text {
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 10px;
+  }
+  .settings-about-links {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .settings-about-links a {
+    font-size: 0.58rem;
+    letter-spacing: 2px;
+    color: var(--green-dim, #00c032);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .settings-about-links a:hover {
+    color: var(--green);
+    border-color: var(--green);
+  }
+
+
 </style>
 <script>
 (function(){
@@ -1823,7 +1950,7 @@
         </div>
         <span class="mini-player-label" id="miniPlayerLabel">PLAYING</span>
       </div>
-      <button class="mini-player-shuffle" onclick="playRandomFavourite()" title="Shuffle favourites">↻</button>
+      <span class="mini-sleep-count" id="miniSleepCount" style="display:none" title="Sleep timer"></span>
       <button class="mini-player-pip" id="miniPipBtn" onclick="togglePiP()" title="Pop out widget" style="display:none">⧉</button>
       <div class="mini-controls-group">
         <button class="mini-player-play" id="miniPlayBtn" onclick="togglePlay()" title="Play/Pause">▶</button>
@@ -1941,11 +2068,22 @@
       </div>
 
       <div class="player-section">
-        <div class="player-label">// LIVE BROADCAST &nbsp;<span id="panelLocalTime" style="font-size:0.55rem; color:var(--muted); letter-spacing:4px;"></span></div>
+        <div class="player-label-row">
+          <div class="player-label">// LIVE BROADCAST &nbsp;<span id="panelLocalTime" style="font-size:0.55rem; color:var(--muted); letter-spacing:4px;"></span></div>
+          <button class="sleep-clock-btn" id="sleepClockBtn" onclick="toggleSleepPicker()" title="Sleep timer">☽</button>
+        </div>
         <div class="player-controls">
           <button class="play-btn" id="playBtn">▶</button>
           <div class="waveform" id="waveform"></div>
           <div class="player-status" id="playerStatus">STANDBY</div>
+        </div>
+        <div class="sleep-picker" id="sleepPicker" style="display:none">
+          <button class="sleep-pick-btn" onclick="setSleepFromPicker(null)">OFF</button>
+          <button class="sleep-pick-btn" onclick="setSleepFromPicker(15)">15 MIN</button>
+          <button class="sleep-pick-btn" onclick="setSleepFromPicker(30)">30 MIN</button>
+          <button class="sleep-pick-btn" onclick="setSleepFromPicker(45)">45 MIN</button>
+          <button class="sleep-pick-btn" onclick="setSleepFromPicker(60)">60 MIN</button>
+          <button class="sleep-pick-btn" onclick="setSleepFromPicker(90)">90 MIN</button>
         </div>
       </div>
 
@@ -2637,6 +2775,7 @@ function selectState(code, stationIdx) {
 
   currentState = code;
   window._currentWorldStation = null;
+  _pushStationUrl(station ? station.id : null);
 
   document.getElementById(code)?.classList.add('selected');
   document.getElementById('label-' + code)?.classList.add('selected-label');
@@ -2811,7 +2950,7 @@ function showStationPanel(station) {
     document.getElementById('playerStatus').className   = 'player-status';
     stopWaveAnimation();
   } else if (window._lastPlayedStation === station) {
-    document.getElementById('playBtn').textContent      = '⏸';
+    document.getElementById('playBtn').textContent      = '▌▌';
     document.getElementById('playBtn').className        = 'play-btn playing';
     document.getElementById('playerStatus').textContent = '● LIVE';
     document.getElementById('playerStatus').className   = 'player-status live';
@@ -2939,7 +3078,7 @@ function updateMiniPlayer() {
     const st = window._lastPlayedStation;
     mini.style.display = 'flex';
     document.getElementById('miniPlayerLabel').textContent = st.name + (st.freq ? ' ' + st.freq : '');
-    if (miniPlay) miniPlay.textContent = isPlaying ? '⏸' : '▶';
+    if (miniPlay) miniPlay.textContent = isPlaying ? '▌▌' : '▶';
     if (isPlaying) {
       document.querySelectorAll('.mini-wave-bar').forEach(b => b.classList.add('active'));
     } else {
@@ -3176,7 +3315,7 @@ function _onPlaySuccess(station, statusLabel) {
   isPlaying = true;
   window._lastPlayedStation = station;
   playBtn.classList.remove('buffering');
-  playBtn.textContent = '⏸';
+  playBtn.textContent = '▌▌';
   playBtn.classList.add('playing');
   document.getElementById('playerStatus').textContent = statusLabel;
   document.getElementById('playerStatus').className   = 'player-status live';
@@ -3253,6 +3392,18 @@ function pauseAudio() {
   if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
 }
 
+function _setNoSignal(playBtn) {
+  const btn = playBtn || document.getElementById('playBtn');
+  btn.classList.remove('buffering');
+  btn.classList.add('signal-lost');
+  btn.textContent = '▶';
+  isPlaying = false;
+  document.getElementById('playerStatus').textContent = 'NO SIGNAL';
+  document.getElementById('playerStatus').className = 'player-status signal-lost-status';
+  stopWaveAnimation();
+  updateMiniPlayer();
+}
+
 function startAudio() {
   let stationByState = null;
   if (currentState && STATIONS[currentState]) {
@@ -3267,6 +3418,7 @@ function startAudio() {
   const playBtn = document.getElementById('playBtn');
 
   playBtn.classList.add('buffering');
+  playBtn.classList.remove('signal-lost');
   playBtn.textContent = '▶';
   document.getElementById('playerStatus').textContent = 'BUFFERING...';
 
@@ -3310,13 +3462,9 @@ function startAudio() {
       audio.load();
       audio.play().then(() => {
         _onPlaySuccess(station, '● LIVE (BACKUP)');
-      }).catch(() => {
-        playBtn.classList.remove('buffering');
-        document.getElementById('playerStatus').textContent = 'NO SIGNAL';
-      });
+      }).catch(() => { _setNoSignal(playBtn); });
     } else {
-      playBtn.classList.remove('buffering');
-      document.getElementById('playerStatus').textContent = 'NO SIGNAL';
+      _setNoSignal(playBtn);
     }
   });
 }
@@ -3536,12 +3684,192 @@ const _patchedRenderAMRAP = function(data) {
   if (sheet) sheet.dataset.populated = '';
 };
 
+// ─── DEEP LINKING ─────────────────────────────────────────────────────────────
+function _pushStationUrl(stationId) {
+  try {
+    const url = new URL(window.location.href);
+    if (stationId) url.searchParams.set('s', stationId);
+    else url.searchParams.delete('s');
+    history.replaceState(null, '', url.toString());
+  } catch(e) {}
+}
+
+function _resolveDeepLink() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const sid = params.get('s');
+    if (!sid) return;
+    // Search all STATIONS for matching id
+    for (const code of Object.keys(STATIONS)) {
+      const arr = STATIONS[code];
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i].id === sid) {
+          selectState(code, i);
+          return;
+        }
+      }
+    }
+    // Also check world stations array
+    if (Array.isArray(window.WORLD_STATIONS || null)) return;
+    const worldFlat = [].concat(...(Object.values(STATIONS).filter(v => !Array.isArray(v[0]))));
+    // fallback: nothing found — just ignore
+  } catch(e) {}
+}
+
+// ─── SLEEP TIMER ──────────────────────────────────────────────────────────────
+let _sleepMinutes  = null;
+let _sleepEnd      = null;
+let _sleepInterval = null;
+let _sleepPickerOpen = false;
+
+function toggleSleepPicker() {
+  const picker = document.getElementById('sleepPicker');
+  if (!picker) return;
+  _sleepPickerOpen = !_sleepPickerOpen;
+  picker.style.display = _sleepPickerOpen ? 'flex' : 'none';
+  // Highlight current selection
+  if (_sleepPickerOpen) {
+    picker.querySelectorAll('.sleep-pick-btn').forEach(btn => {
+      const v = btn.textContent.trim();
+      const match = v === 'OFF' ? !_sleepMinutes : parseInt(v) === _sleepMinutes;
+      btn.classList.toggle('active', match);
+    });
+  }
+}
+
+function setSleepFromPicker(minutes) {
+  _sleepMinutes = minutes;
+  // Close picker
+  const picker = document.getElementById('sleepPicker');
+  if (picker) picker.style.display = 'none';
+  _sleepPickerOpen = false;
+  _applySleep();
+}
+
+function _applySleep() {
+  clearInterval(_sleepInterval);
+  _sleepInterval = null;
+  const btn   = document.getElementById('sleepClockBtn');
+  const count = document.getElementById('miniSleepCount');
+  if (!_sleepMinutes) {
+    _sleepEnd = null;
+    if (btn)   { btn.textContent = '☽'; btn.classList.remove('active'); }
+    if (count) count.style.display = 'none';
+    return;
+  }
+  _sleepEnd = Date.now() + _sleepMinutes * 60000;
+  if (btn) btn.classList.add('active');
+  _sleepInterval = setInterval(_tickSleep, 1000);
+  _tickSleep();
+}
+
+function _tickSleep() {
+  const btn   = document.getElementById('sleepClockBtn');
+  const count = document.getElementById('miniSleepCount');
+  if (!_sleepEnd) { clearInterval(_sleepInterval); return; }
+  const rem = _sleepEnd - Date.now();
+  if (rem <= 0) {
+    clearInterval(_sleepInterval);
+    _sleepInterval = null;
+    _sleepMinutes  = null;
+    _sleepEnd      = null;
+    if (btn)   { btn.textContent = '☽'; btn.classList.remove('active'); }
+    if (count) count.style.display = 'none';
+    stopAudio();
+    return;
+  }
+  const m = Math.floor(rem / 60000);
+  const s = Math.floor((rem % 60000) / 1000);
+  const timeStr = m + ':' + String(s).padStart(2, '0');
+  if (btn)   btn.textContent = timeStr;
+  if (count) { count.style.display = ''; count.textContent = '☽ ' + timeStr; }
+}
+
+// ─── KEYBOARD NAVIGATION ──────────────────────────────────────────────────────
+(function() {
+  // Geographic west→east order for arrow key cycling
+  const STATE_ORDER = ['WA', 'NT', 'SA', 'QLD', 'NSW', 'ACT', 'VIC', 'TAS'];
+
+  document.addEventListener('keydown', function(e) {
+    // Never intercept when typing in an input/textarea
+    const tag = document.activeElement && document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+    // Only apply map shortcuts when on Australia view
+    const onAustralia = (currentView === 'australia');
+
+    switch (e.key) {
+      case 'ArrowRight':
+      case 'ArrowLeft': {
+        if (!onAustralia) return;
+        e.preventDefault();
+        const stateKeys = STATE_ORDER.filter(k => STATIONS[k]);
+
+        // If a state is open with multiple stations, walk tabs before advancing state
+        if (currentState && STATIONS[currentState] && STATIONS[currentState].length > 1) {
+          const arr    = STATIONS[currentState];
+          const curIdx = window._currentStationIdx || 0;
+          if (e.key === 'ArrowRight' && curIdx < arr.length - 1) {
+            stopAudio(); selectState(currentState, curIdx + 1); return;
+          }
+          if (e.key === 'ArrowLeft' && curIdx > 0) {
+            stopAudio(); selectState(currentState, curIdx - 1); return;
+          }
+          // Reached the edge — fall through to advance state
+        }
+
+        // Advance to next / previous state
+        const curPos  = stateKeys.indexOf(currentState);
+        const nextPos = e.key === 'ArrowRight'
+          ? (curPos + 1) % stateKeys.length
+          : (curPos - 1 + stateKeys.length) % stateKeys.length;
+        const nextState = stateKeys[nextPos >= 0 ? nextPos : 0];
+        if (nextState) selectState(nextState);
+        break;
+      }
+
+      case 'ArrowUp':
+      case 'ArrowDown': {
+        if (!onAustralia || !currentState) return;
+        const arr = STATIONS[currentState];
+        if (!arr || arr.length <= 1) return;
+        e.preventDefault();
+        const curIdx = window._currentStationIdx || 0;
+        const newIdx = e.key === 'ArrowDown'
+          ? (curIdx + 1) % arr.length
+          : (curIdx - 1 + arr.length) % arr.length;
+        stopAudio();
+        selectState(currentState, newIdx);
+        break;
+      }
+
+      case ' ': {
+        // Space = play/pause, only if a station is selected
+        if (!currentState && !window._currentWorldStation) return;
+        e.preventDefault();
+        togglePlay();
+        break;
+      }
+
+      case 'Escape': {
+        // Close station panel
+        if (document.getElementById('sidePanel')?.classList.contains('open')) {
+          e.preventDefault();
+          closePanel();
+        }
+        break;
+      }
+    }
+  });
+})();
+
 // ─── KICK OFF ─────────────────────────────────────────────────────────────────
 init();
 loadAMRAP();
 loadChartsFromAPI();
 loadAsciiArt();
 initVolume();
+setTimeout(_resolveDeepLink, 100); // after init paints
 </script><!-- Mobile Tab Bar -->
 <nav class="mobile-tabs" id="mobileTabs">
   <button class="mobile-tab active" id="tab-map" onclick="switchMobileTab('map')">
@@ -3609,9 +3937,23 @@ initVolume();
       ALL CHANGES SAVED
     </span>
   </div>
+  <div class="settings-about">
+    <div class="settings-about-title">◎ ABOUT</div>
+    <div class="settings-about-text">
+      Community Radio Radar<br>
+      Discover &amp; stream Australian community radio.<br>
+      Built for the listeners, by the listeners.
+    </div>
+    <div class="settings-about-links">
+      <a href="https://github.com/chaos/community-radio-radar" target="_blank" rel="noopener">GITHUB</a>
+      <a href="https://apraamcos.com.au" target="_blank" rel="noopener">APRA AMCOS</a>
+      <a href="mailto:hello@radioradar.au">CONTACT</a>
+    </div>
+  </div>
 </div>
 
 <div class="amrap-mobile-sheet" id="amrapMobileSheet"></div>
+
 
 <script>
 if ('serviceWorker' in navigator) {
@@ -4053,7 +4395,7 @@ if (FLAIR_WAVE_CHARTS) {
         <div class="pw-info" id="pwInfo">${info}</div>
         <div class="pw-controls">
           <button class="pw-btn pw-shuffle" id="pwShuffle" title="Shuffle favourites">↻</button>
-          <button class="pw-btn" id="pwPlay">${isPlaying ? '⏸' : '▶'}</button>
+          <button class="pw-btn" id="pwPlay">${isPlaying ? '▌▌' : '▶'}</button>
           <button class="pw-btn" id="pwStop">■</button>
         </div>
       </div>`;
@@ -4105,7 +4447,7 @@ if (FLAIR_WAVE_CHARTS) {
         : ((st.name || '') + (st.freq ? '  ' + st.freq : ''));
     }
     const play = pipDoc.getElementById('pwPlay');
-    if (play) play.textContent = isPlaying ? '⏸' : '▶';
+    if (play) play.textContent = isPlaying ? '▌▌' : '▶';
   }
 
   // ── public ─────────────────────────────────────────────────────────────────
