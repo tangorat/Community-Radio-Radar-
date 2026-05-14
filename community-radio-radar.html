@@ -10,6 +10,20 @@
   <link rel="icon" href="/icons/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <title>Community Radio Radar</title>
+
+  <!-- Open Graph / Social preview -->
+  <meta property="og:type"        content="website">
+  <meta property="og:site_name"   content="Community Radio Radar">
+  <meta property="og:title"       content="Community Radio Radar">
+  <meta property="og:description" content="Travel around the community radio landscape with ease! Pick your favourite stations and discover more.">
+  <meta property="og:image"       content="/og-image.png">
+  <meta property="og:image:width"  content="1200">
+  <meta property="og:image:height" content="1200">
+  <!-- Twitter / X -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Community Radio Radar">
+  <meta name="twitter:description" content="Travel around the community radio landscape with ease! Pick your favourite stations and discover more.">
+  <meta name="twitter:image"       content="/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oswald:wght@300;400;600&family=VT323&display=swap" rel="stylesheet">
 <style>
@@ -158,13 +172,21 @@
     color: var(--green);
     font-size: 0.75rem;
     cursor: pointer;
-    padding: 8px 12px;
+    padding: 8px 0;
+    width: 32px;
+    justify-content: center;
     opacity: 0.85;
     font-family: monospace;
     transition: opacity 0.15s;
     display: flex;
     align-items: center;
     line-height: 1;
+    flex-shrink: 0;
+  }
+  .mini-player-play.playing {
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    padding-left: 4px;
   }
   .mini-player-play:hover { opacity: 1; }
   .mini-player-stop:hover { opacity: 1; }
@@ -541,6 +563,10 @@
   .play-btn.playing {
     border-color: var(--green);
     box-shadow: 0 0 12px rgba(var(--glow-color,0,255,65),0.3);
+    font-size: 0.62rem;
+    letter-spacing: 2px;
+    line-height: 1;
+    padding-left: 4px;
   }
   .play-btn.signal-lost {
     border-color: #a00;
@@ -602,6 +628,7 @@
     color: var(--bio-text, var(--fg));
     flex-shrink: 0;
   }
+  body.bio-hidden .station-bio { display: none; }
 
   .bio-text {
     font-size: 0.72rem;
@@ -1820,6 +1847,22 @@
     font-family: 'Share Tech Mono', monospace;
   }
 
+  /* ─── SHARE + SLEEP BUTTONS (station panel) ─────────────────────── */
+  .share-station-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .share-station-btn:hover { color: var(--green); border-color: var(--green-dim); }
+  .share-station-btn.copied { color: var(--green); border-color: var(--green); }
+
   /* ─── SLEEP CLOCK BUTTON (station panel, mobile/tablet only) ─────── */
   .player-label-row {
     display: flex;
@@ -2070,7 +2113,8 @@
       <div class="player-section">
         <div class="player-label-row">
           <div class="player-label">// LIVE BROADCAST &nbsp;<span id="panelLocalTime" style="font-size:0.55rem; color:var(--muted); letter-spacing:4px;"></span></div>
-          <button class="sleep-clock-btn" id="sleepClockBtn" onclick="toggleSleepPicker()" title="Sleep timer">☽</button>
+          <button class="share-station-btn" id="shareStationBtn" onclick="shareStation()" title="Share station">↗</button>
+          <button class="sleep-clock-btn" id="sleepClockBtn" onclick="toggleSleepPicker()" title="Sleep timer">☾</button>
         </div>
         <div class="player-controls">
           <button class="play-btn" id="playBtn">▶</button>
@@ -2170,7 +2214,8 @@ const STATIONS = {
     },
     {
       id: 'blackstar', name: 'Black Star', fullName: 'Black Star Radio Network', freq: 'Online', city: 'Cairns', state: 'Queensland', timezone: 'Australia/Brisbane',
-      stream: 'https://s1.voscast.com:11435/BSTAR',
+      stream: 'https://s4.voscast.com:9189/BSTAR1',
+      streamFallback: 'https://s1.voscast.com:11435/BSTAR',
       website: 'https://blackstarradio.com.au', chartUrl: '',
       bio: "Owned by Queensland's remote Indigenous stations, managed by QRAM — Queensland Remote Aboriginal Media — from Cairns. Connecting 30+ First Nations communities across Cape York, the Gulf Country and Far North Queensland through 17 stations. Straight from Country, for Country.",
       chartData: []
@@ -2241,7 +2286,7 @@ const STATIONS = {
     {
       id: 'threecr', name: '3CR', fullName: '3CR Community Radio 855AM', freq: '855AM', city: 'Melbourne', state: 'Victoria', timezone: 'Australia/Melbourne',
       stream: 'https://28863.live.streamtheworld.com/3CRAAC.aac',
-      streamFallback: 'https://audio.3cr.org.au/3cr-high.mp3',
+      streamFallback: 'https://playerservices.streamtheworld.com/api/livestream-redirect/3CR.mp3',
       website: 'https://www.3cr.org.au', chartUrl: '',
       bio: "Established in 1976 to be 'a voice for those denied access to the mass media.' From Smith Street Fitzroy, 130 programs, 400+ volunteers, 13 languages. When there's a strike, a rally or a march in Melbourne, this is where people tune in.",
       chartData: []
@@ -2561,8 +2606,7 @@ const WORLD_STATIONS_PAGES = [
       flag: '[US]',
       freq: 'Online',
       timezone: 'America/New_York',
-      stream: 'https://stream.vintageobscura.net/stream.mp3',
-      streamFallback: 'http://stream.vintageobscura.net/stream.mp3',
+      stream: 'https://radio.vintageobscura.net/stream',
       website: 'https://vintageobscura.net',
       bio: "Every track is at least 25 years old and has fewer than 30,000 YouTube views. Curated by nearly 100,000 digital crate-diggers on Reddit's /r/vintageobscura. The dustiest — and most rewarding — place on the internet.",
       chartData: []
@@ -2576,7 +2620,8 @@ const WORLD_STATIONS_PAGES = [
       flag: '[UA]',
       freq: 'Online',
       timezone: 'Europe/Kyiv',
-      stream: 'https://20ft-radio.radiocult.fm/stream',
+      stream: 'https://20ft.ippro.co/live/',
+      streamFallback: 'https://c18.radioboss.fm:18146/stream',
       website: 'https://20ftradio.net',
       bio: 'Broadcasting from a 20-foot shipping container in a factory garden on Kyrylivska Street since 2016. Electronic, jazz, experimental and beyond — continuing to broadcast through adversity as a defiant cultural beacon.',
       chartData: []
@@ -2605,7 +2650,6 @@ const WORLD_STATIONS_PAGES = [
       freq: 'Online',
       timezone: 'America/New_York',
       stream: 'https://stream.nightride.fm/nightride.mp3',
-      streamFallback: 'https://stream.nightride.fm/chillsynth.mp3',
       website: 'https://nightride.fm',
       bio: 'Independent synthwave and retrowave internet radio at 320kbps. Music that exists in the space between 1986 and a future that never happened — darksynth, outrun, chillwave. Drive fast, windows down.',
       chartData: []
@@ -2620,7 +2664,6 @@ const WORLD_STATIONS_PAGES = [
       freq: '101.5 FM',
       timezone: 'Europe/Paris',
       stream: 'https://novazz.ice.infomaniak.ch/novazz-128.mp3',
-      streamFallback: 'https://nova-sm.ice.infomaniak.ch/nova-sm-128.mp3',
       website: 'https://nova.fr',
       bio: 'Paris eclectic radio since 1981. Reggae, jazz, hip-hop, world music, electro and rap — not as genres but as a single uninterrupted state of mind. Le Grand Mix. Allergic to whatever is fashionable, right about everything that isn\'t.',
       chartData: []
@@ -2634,8 +2677,8 @@ const WORLD_STATIONS_PAGES = [
       flag: '[US]',
       freq: '90.3 FM',
       timezone: 'America/Los_Angeles',
-      stream: 'http://live-mp3-128.kexp.org/kexp128.mp3',
-      streamFallback: 'http://live-aacplus-64.kexp.org/kexp64.aac',
+      stream: 'http://live-aacplus-64.kexp.org/kexp64.aac',
+      streamFallback: 'http://live-mp3-128.kexp.org/kexp128.mp3',
       website: 'https://kexp.org',
       bio: 'Seattle nonprofit since 1972. One of the most influential independent music stations in the world — Nirvana, Fleet Foxes, Death Cab all passed through these studios first. Where the music matters.',
       chartData: []
@@ -3079,7 +3122,10 @@ function updateMiniPlayer() {
     const st = window._lastPlayedStation;
     mini.style.display = 'flex';
     document.getElementById('miniPlayerLabel').textContent = st.name + (st.freq ? ' ' + st.freq : '');
-    if (miniPlay) miniPlay.textContent = isPlaying ? '▌▌' : '▶';
+    if (miniPlay) {
+      miniPlay.textContent = isPlaying ? '▌▌' : '▶';
+      miniPlay.classList.toggle('playing', isPlaying);
+    }
     if (isPlaying) {
       document.querySelectorAll('.mini-wave-bar').forEach(b => b.classList.add('active'));
     } else {
@@ -3173,14 +3219,10 @@ function _showArtInContainer(container, art) {
     window._worldZoomRaf = requestAnimationFrame(tickZoom);
     const el = document.getElementById('worldAsciiArt');
     if (!el) { cancelAnimationFrame(window._worldZoomRaf); return; }
-    if (CFG.asciiZoom !== 'off') {
-      zoomPhase = (zoomPhase + 0.003) % (Math.PI * 2);
-      const zT = (Math.sin(zoomPhase) + 1) / 2;
-      el.style.transform = `scale(${1 + zT * 0.08})`;
-      el.style.transformOrigin = 'center center';
-    } else {
-      el.style.transform = '';
-    }
+    zoomPhase = (zoomPhase + 0.003) % (Math.PI * 2);
+    const zT = (Math.sin(zoomPhase) + 1) / 2;
+    el.style.transform = `scale(${1 + zT * 0.08})`;
+    el.style.transformOrigin = 'center center';
     const H = baseLines.length;
     if (H === 0) return;
     Object.keys(glitchMap).forEach(k => {
@@ -3313,6 +3355,58 @@ function renderCharts(station, token) {
   container.appendChild(note);
 }
 
+// ─── ASCII ARTWORK RENDERER ───────────────────────────────────────────────────
+// Renders a station's ASCII art to a 512×512 canvas and returns a data URL.
+// Result is cached per station ID so we only draw once per session.
+window._artworkCache = {};
+
+function _renderAsciiArtwork(station) {
+  if (!station) return null;
+  const cacheKey = station.id || station.name;
+  if (window._artworkCache[cacheKey]) return window._artworkCache[cacheKey];
+
+  const arts = Object.assign({}, STATION_ASCII_ART);
+  if (window._asciiOverrides) Object.assign(arts, window._asciiOverrides);
+  const lines = arts[station.id] || arts[window._currentStateCode] || [];
+  if (!lines || lines.length === 0) return null;
+
+  const SIZE = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width  = SIZE;
+  canvas.height = SIZE;
+  const ctx = canvas.getContext('2d');
+
+  // Dark terminal background
+  ctx.fillStyle = '#030a04';
+  ctx.fillRect(0, 0, SIZE, SIZE);
+
+  // Fit font to art dimensions
+  // Share Tech Mono: char width ≈ 0.601 × fontSize, line height ≈ 1.2 × fontSize
+  const CHAR_RATIO = 0.601;
+  const LINE_RATIO = 1.2;
+  const maxLen  = lines.reduce((m, l) => Math.max(m, l.length), 1);
+  const rows    = lines.length;
+  const fsW     = SIZE / (maxLen * CHAR_RATIO);
+  const fsH     = SIZE / (rows  * LINE_RATIO);
+  const fontSize = Math.max(Math.min(fsW, fsH), 3);
+
+  const lineH  = fontSize * LINE_RATIO;
+  const totalW = maxLen  * fontSize * CHAR_RATIO;
+  const totalH = rows    * lineH;
+  const offX   = (SIZE - totalW) / 2;
+  const offY   = (SIZE - totalH) / 2;
+
+  ctx.fillStyle    = '#00c832';
+  ctx.font         = `${fontSize.toFixed(1)}px 'Share Tech Mono', monospace`;
+  ctx.textBaseline = 'top';
+
+  lines.forEach((line, i) => ctx.fillText(line, offX, offY + i * lineH));
+
+  const dataURL = canvas.toDataURL('image/png');
+  window._artworkCache[cacheKey] = dataURL;
+  return dataURL;
+}
+
 // ─── AUDIO ────────────────────────────────────────────────────────────────────
 function _onPlaySuccess(station, statusLabel) {
   const audio   = document.getElementById('audioPlayer');
@@ -3327,24 +3421,32 @@ function _onPlaySuccess(station, statusLabel) {
   startWaveAnimation();
   updateMiniPlayer();
   audio._userStopped = false;
+  _clearReconnect();
   audio.onpause = () => {
     if (audio._userStopped) return;
-    document.getElementById('playerStatus').textContent = 'RECONNECTING...';
-    document.getElementById('playerStatus').className   = 'player-status';
     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+    _scheduleReconnect(station);
   };
 
   _haptic(10);
   // ── Media Session metadata (works for both primary + fallback streams) ──
   if ('mediaSession' in navigator) {
+    // Try to use station-specific ASCII art rendered to canvas as lock screen art
+    const artDataURL = _renderAsciiArtwork(station);
+    const artwork = artDataURL
+      ? [
+          { src: artDataURL,            sizes: '512x512', type: 'image/png' },
+          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+        ]
+      : [
+          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+        ];
     navigator.mediaSession.metadata = new MediaMetadata({
       title:  station.fullName || station.name,
       artist: [station.freq, station.city].filter(Boolean).join(' · '),
       album:  'Community Radio Radar',
-      artwork: [
-        { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-        { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-      ]
+      artwork
     });
     navigator.mediaSession.playbackState = 'playing';
   }
@@ -3399,6 +3501,7 @@ function togglePlay() {
 
 function pauseAudio() {
   _haptic(4);
+  _clearReconnect();
   const audio = document.getElementById('audioPlayer');
   audio._userStopped = true;
   audio.onpause = null;
@@ -3413,9 +3516,44 @@ function pauseAudio() {
   if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
 }
 
+// ─── AUTO-RECONNECT ───────────────────────────────────────────────────────────
+let _reconnectAttempts = 0;
+let _reconnectTimer    = null;
+const MAX_RECONNECT    = 3;
+const RECONNECT_DELAY  = 8000; // ms between attempts
+
+function _clearReconnect() {
+  if (_reconnectTimer) { clearTimeout(_reconnectTimer); _reconnectTimer = null; }
+  _reconnectAttempts = 0;
+}
+
+function _scheduleReconnect(station) {
+  if (_reconnectAttempts >= MAX_RECONNECT) {
+    _clearReconnect();
+    _setNoSignal(document.getElementById('playBtn'));
+    return;
+  }
+  _reconnectAttempts++;
+  const status = document.getElementById('playerStatus');
+  if (status) {
+    status.textContent = `RECONNECTING ${_reconnectAttempts}/${MAX_RECONNECT}...`;
+    status.className   = 'player-status';
+  }
+  _reconnectTimer = setTimeout(() => {
+    const audio = document.getElementById('audioPlayer');
+    if (!audio || !isPlaying || audio._userStopped) { _clearReconnect(); return; }
+    audio.src = station.stream;
+    audio.load();
+    audio.play()
+      .then(() => { _clearReconnect(); _onPlaySuccess(station, '● LIVE'); })
+      .catch(() => _scheduleReconnect(station));
+  }, RECONNECT_DELAY);
+}
+
 function _setNoSignal(playBtn) {
+  _clearReconnect();
   const btn = playBtn || document.getElementById('playBtn');
-  btn.classList.remove('buffering');
+  btn.classList.remove('buffering', 'playing');
   btn.classList.add('signal-lost');
   btn.textContent = '▶';
   isPlaying = false;
@@ -3423,6 +3561,58 @@ function _setNoSignal(playBtn) {
   document.getElementById('playerStatus').className = 'player-status signal-lost-status';
   stopWaveAnimation();
   updateMiniPlayer();
+}
+
+// ─── SHARE STATION ────────────────────────────────────────────────────────────
+async function shareStation() {
+  // Resolve current station — prefer actively playing, fall back to selected
+  const station = window._lastPlayedStation ||
+    (currentState && STATIONS[currentState]
+      ? STATIONS[currentState][window._currentStationIdx || 0]
+      : null);
+  if (!station) return;
+
+  _haptic(6);
+  const btn      = document.getElementById('shareStationBtn');
+  const shareUrl = location.origin + location.pathname + '?s=' + station.id;
+  const title    = station.fullName || station.name;
+
+  // Build share payload
+  const shareData = {
+    title: title + ' — Community Radio Radar',
+    text:  'Streaming ' + title + ' on Community Radio Radar',
+    url:   shareUrl,
+  };
+
+  // Attach ASCII art image on mobile only — desktop share sheets (Windows/macOS)
+  // can't thumbnail canvas-generated PNGs and show a broken file icon instead
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobile && navigator.canShare) {
+    const artURL = _renderAsciiArtwork(station);
+    if (artURL) {
+      try {
+        const res  = await fetch(artURL);
+        const blob = await res.blob();
+        const file = new File([blob], (station.id || 'station') + '-radar.png', { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) shareData.files = [file];
+      } catch (_) {}
+    }
+  }
+
+  if (navigator.share) {
+    try { await navigator.share(shareData); } catch (_) { /* user cancelled */ }
+  } else {
+    // Desktop fallback: copy URL to clipboard
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = '✓';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = '↗'; btn.classList.remove('copied'); }, 2000);
+      }
+    } catch (_) {}
+  }
 }
 
 function startAudio() {
@@ -3499,6 +3689,7 @@ function startAudio() {
 
 function stopAudio() {
   _haptic([4, 40, 4]);
+  _clearReconnect();
   const audio = document.getElementById('audioPlayer');
   audio._userStopped = true;
   audio.onpause = null;
@@ -3783,7 +3974,7 @@ function _applySleep() {
   const count = document.getElementById('miniSleepCount');
   if (!_sleepMinutes) {
     _sleepEnd = null;
-    if (btn)   { btn.textContent = '☽'; btn.classList.remove('active'); }
+    if (btn)   { btn.textContent = '☾'; btn.classList.remove('active'); }
     if (count) count.style.display = 'none';
     return;
   }
@@ -3803,7 +3994,7 @@ function _tickSleep() {
     _sleepInterval = null;
     _sleepMinutes  = null;
     _sleepEnd      = null;
-    if (btn)   { btn.textContent = '☽'; btn.classList.remove('active'); }
+    if (btn)   { btn.textContent = '☾'; btn.classList.remove('active'); }
     if (count) count.style.display = 'none';
     stopAudio();
     return;
@@ -3812,7 +4003,7 @@ function _tickSleep() {
   const s = Math.floor((rem % 60000) / 1000);
   const timeStr = m + ':' + String(s).padStart(2, '0');
   if (btn)   btn.textContent = timeStr;
-  if (count) { count.style.display = ''; count.textContent = '☽ ' + timeStr; }
+  if (count) { count.style.display = ''; count.textContent = '☾ ' + timeStr; }
 }
 
 // ─── HAPTIC FEEDBACK ──────────────────────────────────────────────────────────
@@ -3957,13 +4148,17 @@ setTimeout(_resolveDeepLink, 100); // after init paints
       <span class="setting-label">LAST STATION</span>
       <button class="setting-pill" onclick="cycleSetting('lastStation',['remember','forget'])" id="pill-lastStation">REMEMBER</button>
     </div>
-    <div class="setting-row">
-      <span class="setting-label">ART ZOOM</span>
-      <button class="setting-pill" onclick="cycleSetting('asciiZoom',['on','off'])" id="pill-asciiZoom">ON</button>
-    </div>
-    <div class="setting-row" id="widgetSizeRow">
+<div class="setting-row" id="widgetSizeRow">
       <span class="setting-label">WIDGET SIZE</span>
       <button class="setting-pill" onclick="cycleSetting('widgetSize',['small','medium','large'])" id="pill-widgetSize">MEDIUM</button>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">STATION BIO</span>
+      <button class="setting-pill" onclick="cycleSetting('showBio',['show','hide'])" id="pill-showBio">SHOW</button>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">DEFAULT VIEW</span>
+      <button class="setting-pill" onclick="cycleSetting('defaultPanel',['chart','art'])" id="pill-defaultPanel">CHART</button>
     </div>
   </div>
   <div class="settings-footer">
@@ -3976,8 +4171,7 @@ setTimeout(_resolveDeepLink, 100); // after init paints
     <div class="settings-about-title">◎ ABOUT</div>
     <div class="settings-about-text">
       Community Radio Radar<br>
-      Discover &amp; stream Australian community radio.<br>
-      Built for the listeners, by the listeners.
+      Discover &amp; stream Australian community radio.
     </div>
     <div class="settings-about-links">
       <a href="https://github.com/chaos/community-radio-radar" target="_blank" rel="noopener">GITHUB</a>
@@ -4290,12 +4484,10 @@ if (FLAIR_WAVE_CHARTS) {
       const el = pipDoc.getElementById('pwArt');
       if (!el) { _stopAnim(); return; }
 
-      // zoom
-      if (typeof CFG === 'undefined' || CFG.asciiZoom !== 'off') {
-        zoomPhase = (zoomPhase + 0.003) % (Math.PI * 2);
-        const zT = (Math.sin(zoomPhase) + 1) / 2;
-        el.style.transform = `scale(${1 + zT * 0.06})`;
-      }
+      // zoom (always on)
+      zoomPhase = (zoomPhase + 0.003) % (Math.PI * 2);
+      const zT = (Math.sin(zoomPhase) + 1) / 2;
+      el.style.transform = `scale(${1 + zT * 0.06})`;
 
       // glitch
       Object.keys(glitchMap).forEach(k => {
@@ -4550,7 +4742,7 @@ const THEMES = {
 const FONT_SIZES = { small: '12px', medium: '14px', large: '17px', xlarge: '20px' };
 const HEADER_H   = { small: '56px', medium: '60px', large: '66px', xlarge: '73px' };
 
-const CFG_DEFAULTS = { theme: 'green', fontSize: 'medium', scanLines: 'low', clockFormat: '24hr', contrast: 'normal', lastStation: 'remember', asciiZoom: 'on', widgetSize: 'medium' };
+const CFG_DEFAULTS = { theme: 'green', fontSize: 'medium', scanLines: 'low', clockFormat: '24hr', contrast: 'normal', lastStation: 'remember', widgetSize: 'medium', showBio: 'show', defaultPanel: 'chart' };
 let CFG = Object.assign({}, CFG_DEFAULTS, JSON.parse(localStorage.getItem('rrCfg') || '{}'));
 
 function saveConfig() { localStorage.setItem('rrCfg', JSON.stringify(CFG)); }
@@ -4589,11 +4781,18 @@ function applyConfig() {
   const contrastPill = document.getElementById('pill-contrast');
   if (contrastPill) contrastPill.textContent = (CFG.contrast || 'normal').toUpperCase();
   document.getElementById('pill-lastStation').textContent = CFG.lastStation.toUpperCase();
-  const zoomPill = document.getElementById('pill-asciiZoom');
-  if (zoomPill) zoomPill.textContent = (CFG.asciiZoom || 'on').toUpperCase();
-
-  const widgetSizePill = document.getElementById('pill-widgetSize');
+const widgetSizePill = document.getElementById('pill-widgetSize');
   if (widgetSizePill) widgetSizePill.textContent = (CFG.widgetSize || 'medium').toUpperCase();
+
+  // Station bio visibility
+  document.body.classList.toggle('bio-hidden', CFG.showBio === 'hide');
+  const bioPill = document.getElementById('pill-showBio');
+  if (bioPill) bioPill.textContent = (CFG.showBio || 'show').toUpperCase();
+
+  // Default panel (art vs chart) — sets the session preference on load/change
+  window._artPreference = (CFG.defaultPanel === 'art');
+  const panelPill = document.getElementById('pill-defaultPanel');
+  if (panelPill) panelPill.textContent = (CFG.defaultPanel || 'chart').toUpperCase();
 
   document.querySelectorAll('.theme-swatch').forEach(s => {
     s.classList.toggle('active', s.dataset.theme === CFG.theme);
