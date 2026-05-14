@@ -954,6 +954,7 @@
   #volSlider::-webkit-slider-thumb { -webkit-appearance:none; width:10px; height:10px; background:var(--green); cursor:pointer; border:none; border-radius:0; }
   #volSlider::-moz-range-thumb { width:10px; height:10px; background:var(--green); cursor:pointer; border:none; border-radius:0; }
   @media (max-width: 700px) { #volControl { display:none !important; } }
+  @media (max-width: 700px) { #widgetSizeRow { display:none !important; } }
 
   @media (max-width: 700px) {
     header {
@@ -4133,14 +4134,6 @@ setTimeout(_resolveDeepLink, 100); // after init paints
       <button class="setting-pill" onclick="cycleSetting('fontSize',['small','medium','large','xlarge'])" id="pill-fontSize">MEDIUM</button>
     </div>
     <div class="setting-row">
-      <span class="setting-label">SCAN LINES</span>
-      <button class="setting-pill" onclick="cycleSetting('scanLines',['off','low','high'])" id="pill-scanLines">LOW</button>
-    </div>
-    <div class="setting-row">
-      <span class="setting-label">CLOCK</span>
-      <button class="setting-pill" onclick="cycleSetting('clockFormat',['24hr','12hr'])" id="pill-clockFormat">24HR</button>
-    </div>
-    <div class="setting-row">
       <span class="setting-label">IMG CONTRAST</span>
       <button class="setting-pill" onclick="cycleSetting('contrast',['low','normal','high'])" id="pill-contrast">NORMAL</button>
     </div>
@@ -4742,7 +4735,7 @@ const THEMES = {
 const FONT_SIZES = { small: '12px', medium: '14px', large: '17px', xlarge: '20px' };
 const HEADER_H   = { small: '56px', medium: '60px', large: '66px', xlarge: '73px' };
 
-const CFG_DEFAULTS = { theme: 'green', fontSize: 'medium', scanLines: 'low', clockFormat: '24hr', contrast: 'normal', lastStation: 'remember', widgetSize: 'medium', showBio: 'show', defaultPanel: 'chart' };
+const CFG_DEFAULTS = { theme: 'green', fontSize: 'medium', scanLines: 'high', clockFormat: '12hr', contrast: 'normal', lastStation: 'remember', widgetSize: 'medium', showBio: 'show', defaultPanel: 'chart' };
 let CFG = Object.assign({}, CFG_DEFAULTS, JSON.parse(localStorage.getItem('rrCfg') || '{}'));
 
 function saveConfig() { localStorage.setItem('rrCfg', JSON.stringify(CFG)); }
@@ -4776,9 +4769,7 @@ function applyConfig() {
   document.getElementById('appContainer').style.filter = CFG.contrast === 'normal' ? '' : 'contrast(' + contrastVal + ')';
 
   document.getElementById('pill-fontSize').textContent = CFG.fontSize.toUpperCase();
-  document.getElementById('pill-scanLines').textContent = CFG.scanLines.toUpperCase();
-  document.getElementById('pill-clockFormat').textContent = CFG.clockFormat.toUpperCase();
-  const contrastPill = document.getElementById('pill-contrast');
+const contrastPill = document.getElementById('pill-contrast');
   if (contrastPill) contrastPill.textContent = (CFG.contrast || 'normal').toUpperCase();
   document.getElementById('pill-lastStation').textContent = CFG.lastStation.toUpperCase();
 const widgetSizePill = document.getElementById('pill-widgetSize');
