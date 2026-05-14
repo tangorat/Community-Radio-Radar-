@@ -1744,12 +1744,26 @@
       display: flex !important;
       height: 36px !important;
     }
+
+    /* Side panel: slide in from the right (not up from bottom) */
     .side-panel {
       top: 36px !important;
-      height: calc(100vh - 36px - 36px) !important;
       bottom: 36px !important;
+      height: calc(100vh - 72px) !important;
+      left: auto !important;
+      right: -75vw !important;
+      width: 75vw !important;
+      border-left: 1px solid var(--border) !important;
+      border-top: none !important;
+      transform: none !important;
+      transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
       padding-top: 0 !important;
     }
+    .side-panel.open {
+      right: 0 !important;
+      transform: none !important;
+    }
+
     .settings-panel {
       top: 36px !important;
       height: calc(100vh - 36px - 36px) !important;
@@ -1776,7 +1790,34 @@
     .corner-tag { display: none !important; }
     .logo-row { display: none !important; }
     .logo { font-size: 0.85rem !important; line-height: 1 !important; }
-    .world-card { min-height: 80px !important; padding: 10px !important; }
+
+    /* World view: 2-col compact grid that fits landscape height */
+    .world-view {
+      padding: 6px 10px !important;
+      overflow-y: auto !important;
+    }
+    .world-title {
+      font-size: 0.55rem !important;
+      margin-bottom: 8px !important;
+    }
+    .world-grid {
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 6px !important;
+    }
+    .world-card {
+      min-height: 64px !important;
+      padding: 8px 6px !important;
+    }
+    .world-card-name { font-size: 0.85rem !important; }
+    .world-card-location { font-size: 0.52rem !important; }
+
+    /* Panel overlays content — don't push the map/world view */
+    .map-container.panel-open { margin-right: 0 !important; }
+    .world-view.panel-open    { margin-right: 0 !important; }
+
+    /* Hide world tab and mini player in landscape */
+    #tab-world    { display: none !important; }
+    .mini-player  { display: none !important; }
   }
 
   .mini-player-pip {
@@ -1859,6 +1900,9 @@
     cursor: pointer;
     white-space: nowrap;
     flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: color 0.2s, border-color 0.2s;
   }
   .share-station-btn:hover { color: var(--green); border-color: var(--green-dim); }
@@ -1880,7 +1924,6 @@
     font-size: 0.75rem;
     padding: 2px 8px;
     cursor: pointer;
-    letter-spacing: 1px;
     transition: color 0.15s, border-color 0.15s;
     white-space: nowrap;
     flex-shrink: 0;
@@ -1891,7 +1934,7 @@
     border-color: var(--green-dim);
   }
   @media (max-width: 1024px) {
-    .sleep-clock-btn { display: flex; align-items: center; gap: 4px; }
+    .sleep-clock-btn { display: inline-flex; align-items: center; justify-content: center; }
   }
 
   /* ─── SLEEP PICKER ROW ───────────────────────────────────────────── */
@@ -2114,7 +2157,7 @@
       <div class="player-section">
         <div class="player-label-row">
           <div class="player-label">// LIVE BROADCAST &nbsp;<span id="panelLocalTime" style="font-size:0.55rem; color:var(--muted); letter-spacing:4px;"></span></div>
-          <button class="share-station-btn" id="shareStationBtn" onclick="shareStation()" title="Share station">↗</button>
+          <button class="share-station-btn" id="shareStationBtn" onclick="shareStation()" title="Share station">➦</button>
           <button class="sleep-clock-btn" id="sleepClockBtn" onclick="toggleSleepPicker()" title="Sleep timer">☾</button>
         </div>
         <div class="player-controls">
@@ -3414,7 +3457,7 @@ function _onPlaySuccess(station, statusLabel) {
   const playBtn = document.getElementById('playBtn');
   isPlaying = true;
   window._lastPlayedStation = station;
-  playBtn.classList.remove('buffering');
+  playBtn.classList.remove('buffering', 'signal-lost');
   playBtn.textContent = '▌▌';
   playBtn.classList.add('playing');
   document.getElementById('playerStatus').textContent = statusLabel;
@@ -3610,7 +3653,7 @@ async function shareStation() {
         const orig = btn.textContent;
         btn.textContent = '✓';
         btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = '↗'; btn.classList.remove('copied'); }, 2000);
+        setTimeout(() => { btn.textContent = '➦'; btn.classList.remove('copied'); }, 2000);
       }
     } catch (_) {}
   }
@@ -3699,7 +3742,7 @@ function stopAudio() {
   isPlaying = false;
   window._lastPlayedStation = null;
   document.getElementById('playBtn').textContent = '▶';
-  document.getElementById('playBtn').classList.remove('playing', 'buffering');
+  document.getElementById('playBtn').classList.remove('playing', 'buffering', 'signal-lost');
   document.getElementById('playerStatus').textContent = 'STANDBY';
   document.getElementById('playerStatus').className   = 'player-status';
   stopWaveAnimation();
@@ -4071,15 +4114,44 @@ function _haptic(pattern) {
       }
 
       case ' ': {
-        // Space = play/pause, only if a station is selected
         if (!currentState && !window._currentWorldStation) return;
         e.preventDefault();
         togglePlay();
         break;
       }
 
+      case 'm':
+      case 'M': {
+        const audio = document.getElementById('audioPlayer');
+        if (!audio) return;
+        e.preventDefault();
+        audio.muted = !audio.muted;
+        break;
+      }
+
+      case 'w':
+      case 'W': {
+        e.preventDefault();
+        if (window.innerWidth <= 700) {
+          switchMobileTab('world');
+        } else {
+          if (currentView !== 'world') toggleWorldView();
+        }
+        break;
+      }
+
+      case 'a':
+      case 'A': {
+        e.preventDefault();
+        if (window.innerWidth <= 700) {
+          switchMobileTab('map');
+        } else {
+          if (currentView === 'world') toggleWorldView();
+        }
+        break;
+      }
+
       case 'Escape': {
-        // Close station panel
         if (document.getElementById('sidePanel')?.classList.contains('open')) {
           e.preventDefault();
           closePanel();
