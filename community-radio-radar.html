@@ -312,6 +312,7 @@
     pointer-events: none;
   }
 
+
   .map-title {
     position: absolute;
     top: 20px;
@@ -1493,6 +1494,7 @@
   }
 
   @media (max-width: 700px) {
+    .act-mobile-hit { display: block !important; }
     .world-view {
       padding: 12px;
     }
@@ -1895,8 +1897,8 @@
     border: 1px solid var(--border);
     color: var(--muted);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
-    padding: 2px 8px;
+    font-size: 1.1rem;
+    padding: 1px 7px;
     cursor: pointer;
     white-space: nowrap;
     flex-shrink: 0;
@@ -2121,6 +2123,8 @@
       <circle class="radar-ping" id="ping-TAS" cx="508" cy="616" r="5"/>
 
       <rect id="ACT-hitbox" x="514.9" y="384.6" width="28.8" height="28.8" fill="transparent" stroke="none" style="cursor:pointer;"/>
+      <!-- Mobile-only enlarged hit target for ACT (2× size, same centre 529.3,399.0) -->
+      <rect id="ACT-hitbox-mobile" x="500.5" y="370.2" width="57.6" height="57.6" fill="transparent" stroke="none" class="act-mobile-hit" style="cursor:pointer;display:none;"/>
       <path id="ACT" class="state-path coming-soon act-path"
         d="M 517.3,387.0 L 541.3,387.0 L 541.3,411.0 L 517.3,411.0 Z"/>
       <text class="state-label active-label" id="label-ACT" x="529.3" y="403.0" text-anchor="middle" font-size="7">ACT</text>
@@ -2786,6 +2790,8 @@ function init() {
   if (ntTop) { ntTop.style.touchAction = 'manipulation'; ntTop.addEventListener('click', () => handleStateTap('NT_TOP')); }
   const actHitbox = document.getElementById('ACT-hitbox');
   if (actHitbox) { actHitbox.style.touchAction = 'manipulation'; actHitbox.addEventListener('click', () => handleStateTap('ACT')); }
+  const actHitboxMobile = document.getElementById('ACT-hitbox-mobile');
+  if (actHitboxMobile) { actHitboxMobile.style.touchAction = 'manipulation'; actHitboxMobile.addEventListener('click', () => handleStateTap('ACT')); }
   if (ntBot) { ntBot.style.touchAction = 'manipulation'; ntBot.addEventListener('click', () => handleStateTap('NT_BOT')); }
 
   document.getElementById('panelCloseBtn').addEventListener('click', closePanel);
@@ -2935,7 +2941,20 @@ function renderStationTabs(code) {
     if (i === arr.length - 1) tab.style.borderRight = 'none';
     tab.addEventListener('mouseenter', function() { if (!this.classList.contains('active-tab')) this.style.color = 'var(--green-dim)'; });
     tab.addEventListener('mouseleave', function() { if (!this.classList.contains('active-tab')) this.style.color = i === currentIdx ? 'var(--green)' : 'var(--muted)'; });
-    tab.addEventListener('click', () => selectState(code, i));
+    // Single tap: select station. Double-tap on the already-active tab: play.
+    let _tabLastTap = 0;
+    tab.addEventListener('click', () => {
+      const now = Date.now();
+      const isActive = (window._currentStationIdx === i);
+      if (isActive && now - _tabLastTap < 350) {
+        // Double-tap on active tab — start playback
+        startAudio();
+        _tabLastTap = 0;
+      } else {
+        selectState(code, i);
+        _tabLastTap = now;
+      }
+    });
     tabsRow.appendChild(tab);
   });
 
@@ -3424,27 +3443,45 @@ function _renderAsciiArtwork(station) {
   ctx.fillStyle = '#030a04';
   ctx.fillRect(0, 0, SIZE, SIZE);
 
-  // Fit font to art dimensions
-  // Share Tech Mono: char width ≈ 0.601 × fontSize, line height ≈ 1.2 × fontSize
-  const CHAR_RATIO = 0.601;
+  // Fit font to art dimensions — two-pass for true pixel centering.
+  // Pass 1: estimate font size from char count, set font, measure actual widths.
+  // Pass 2: scale so widest measured line fits, then centre each line by its
+  //         real pixel width (not an approximated char-ratio estimate).
   const LINE_RATIO = 1.2;
-  const maxLen  = lines.reduce((m, l) => Math.max(m, l.length), 1);
-  const rows    = lines.length;
-  const fsW     = SIZE / (maxLen * CHAR_RATIO);
-  const fsH     = SIZE / (rows  * LINE_RATIO);
-  const fontSize = Math.max(Math.min(fsW, fsH), 3);
+  const maxLen = lines.reduce((m, l) => Math.max(m, l.length), 1);
+  const rows   = lines.length;
 
-  const lineH  = fontSize * LINE_RATIO;
-  const totalW = maxLen  * fontSize * CHAR_RATIO;
-  const totalH = rows    * lineH;
-  const offX   = (SIZE - totalW) / 2;
-  const offY   = (SIZE - totalH) / 2;
+  // Initial estimate (0.601 char-width ratio for Share Tech Mono)
+  let fontSize = Math.max(Math.min(
+    SIZE / (maxLen * 0.601),
+    SIZE / (rows  * LINE_RATIO)
+  ), 3);
 
   ctx.fillStyle    = '#00c832';
   ctx.font         = `${fontSize.toFixed(1)}px 'Share Tech Mono', monospace`;
   ctx.textBaseline = 'top';
 
-  lines.forEach((line, i) => ctx.fillText(line, offX, offY + i * lineH));
+  // Measure each line's actual rendered pixel width
+  const measuredW = lines.map(l => ctx.measureText(l).width);
+  const actualMaxW = Math.max(...measuredW, 1);
+
+  // Rescale so the widest line fits within SIZE (4% margin each side)
+  const MARGIN = SIZE * 0.04;
+  if (actualMaxW > SIZE - MARGIN * 2) {
+    fontSize *= (SIZE - MARGIN * 2) / actualMaxW;
+    ctx.font = `${fontSize.toFixed(1)}px 'Share Tech Mono', monospace`;
+    measuredW.splice(0, measuredW.length, ...lines.map(l => ctx.measureText(l).width));
+  }
+
+  const lineH  = fontSize * LINE_RATIO;
+  const totalH = rows * lineH;
+  const offY   = (SIZE - totalH) / 2;
+
+  // Draw each line centred by its own actual pixel width
+  lines.forEach((line, i) => {
+    const x = (SIZE - measuredW[i]) / 2;
+    ctx.fillText(line, x, offY + i * lineH);
+  });
 
   const dataURL = canvas.toDataURL('image/png');
   window._artworkCache[cacheKey] = dataURL;
@@ -3677,6 +3714,34 @@ function startAudio() {
   playBtn.textContent = '▶';
   document.getElementById('playerStatus').textContent = 'BUFFERING...';
 
+  // Register Media Session handlers immediately (before play resolves) — iOS
+  // requires handlers to be set synchronously within a user-gesture call stack.
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.setActionHandler('play', () => {
+      if (!isPlaying) startAudio();
+      else if (audio.paused) {
+        audio.src = station.stream; audio.load();
+        audio.play().catch(() => _setNoSignal(document.getElementById('playBtn')));
+      }
+    });
+    navigator.mediaSession.setActionHandler('pause',         () => { pauseAudio(); });
+    navigator.mediaSession.setActionHandler('stop',          () => { stopAudio(); });
+    navigator.mediaSession.setActionHandler('seekbackward',  null); // remove seek — we're a radio
+    navigator.mediaSession.setActionHandler('seekforward',   null);
+    navigator.mediaSession.setActionHandler('nexttrack', () => {
+      if (!currentState || !STATIONS[currentState]) return;
+      const arr = STATIONS[currentState];
+      const nextIdx = ((window._currentStationIdx || 0) + 1) % arr.length;
+      stopAudio(); selectState(currentState, nextIdx); setTimeout(startAudio, 80);
+    });
+    navigator.mediaSession.setActionHandler('previoustrack', () => {
+      if (!currentState || !STATIONS[currentState]) return;
+      const arr = STATIONS[currentState];
+      const prevIdx = ((window._currentStationIdx || 0) - 1 + arr.length) % arr.length;
+      stopAudio(); selectState(currentState, prevIdx); setTimeout(startAudio, 80);
+    });
+  }
+
   const targetSrc = station.stream;
   if (audio.src !== targetSrc || audio.readyState === 0) {
     audio.src = targetSrc;
@@ -3684,39 +3749,6 @@ function startAudio() {
   }
   audio.play().then(() => {
     _onPlaySuccess(station, '● LIVE');
-
-    if ('mediaSession' in navigator) {
-
-      navigator.mediaSession.setActionHandler('play', () => {
-        if (!isPlaying) startAudio();
-        else if (audio.paused) {
-          audio.src = station.stream; audio.load();
-          audio.play().catch(() => _setNoSignal(document.getElementById('playBtn')));
-        }
-      });
-      navigator.mediaSession.setActionHandler('pause', () => { if (isPlaying) pauseAudio(); });
-      navigator.mediaSession.setActionHandler('stop',  () => { if (isPlaying) stopAudio(); });
-
-      // Next / previous — cycle through stations in the current state
-      navigator.mediaSession.setActionHandler('nexttrack', () => {
-        if (!currentState || !STATIONS[currentState]) return;
-        const arr = STATIONS[currentState];
-        const idx = (window._currentStationIdx || 0);
-        const nextIdx = (idx + 1) % arr.length;
-        stopAudio();
-        selectState(currentState, nextIdx);
-        setTimeout(startAudio, 80);
-      });
-      navigator.mediaSession.setActionHandler('previoustrack', () => {
-        if (!currentState || !STATIONS[currentState]) return;
-        const arr = STATIONS[currentState];
-        const idx = (window._currentStationIdx || 0);
-        const prevIdx = (idx - 1 + arr.length) % arr.length;
-        stopAudio();
-        selectState(currentState, prevIdx);
-        setTimeout(startAudio, 80);
-      });
-    }
   }).catch(() => {
     if (station.streamFallback && audio.src !== station.streamFallback) {
       document.getElementById('playerStatus').textContent = 'TRYING BACKUP...';
@@ -3738,7 +3770,10 @@ function stopAudio() {
   audio._userStopped = true;
   audio.onpause = null;
   audio.pause();
-  audio.src = '';
+  // Don't clear audio.src — iOS Safari destroys the lock-screen media session
+  // when src is emptied. Instead, load() cancels network activity while keeping
+  // the audio element (and its session context) alive.
+  audio.load();
   isPlaying = false;
   window._lastPlayedStation = null;
   document.getElementById('playBtn').textContent = '▶';
@@ -4204,6 +4239,10 @@ setTimeout(_resolveDeepLink, 100); // after init paints
     <div class="setting-row">
       <span class="setting-label">FONT SIZE</span>
       <button class="setting-pill" onclick="cycleSetting('fontSize',['small','medium','large','xlarge'])" id="pill-fontSize">MEDIUM</button>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">SCAN LINES</span>
+      <button class="setting-pill" onclick="cycleSetting('scanLines',['off','low','high'])" id="pill-scanLines">HIGH</button>
     </div>
     <div class="setting-row">
       <span class="setting-label">IMG CONTRAST</span>
@@ -4841,6 +4880,8 @@ function applyConfig() {
   document.getElementById('appContainer').style.filter = CFG.contrast === 'normal' ? '' : 'contrast(' + contrastVal + ')';
 
   document.getElementById('pill-fontSize').textContent = CFG.fontSize.toUpperCase();
+  const scanPill = document.getElementById('pill-scanLines');
+  if (scanPill) scanPill.textContent = (CFG.scanLines || 'high').toUpperCase();
 const contrastPill = document.getElementById('pill-contrast');
   if (contrastPill) contrastPill.textContent = (CFG.contrast || 'normal').toUpperCase();
   document.getElementById('pill-lastStation').textContent = CFG.lastStation.toUpperCase();
