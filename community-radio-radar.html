@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#030a04">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Radio Radar">
@@ -960,14 +960,24 @@
   @media (max-width: 700px) {
     header {
       padding: 0 12px;
-      height: 48px;
+      padding-top: env(safe-area-inset-top);
+      height: calc(48px + env(safe-area-inset-top));
       display: flex !important;
-      justify-content: space-between !important;
+      justify-content: flex-end !important;
+      align-items: center;
+      position: relative;
     }
-    .logo-main { font-size: 0.9rem; }
+    .logo {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .logo-main { font-size: 0.9rem; white-space: nowrap; }
     .logo-sub   { display: none; }
     .header-centre { display: none !important; }
-    .header-right { margin-left: auto; }
+    .header-right { margin-left: 0; }
+    .clock { display: none !important; }
     .signal-indicator { display: none !important; }
     .signal-bar { display: none !important; }
     .amrap-panel { display: none !important; }
@@ -1898,13 +1908,14 @@
     color: var(--muted);
     font-family: 'Share Tech Mono', monospace;
     font-size: 1.1rem;
-    padding: 1px 7px;
+    padding: 2px 8px;
     cursor: pointer;
     white-space: nowrap;
     flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    line-height: 1;
     transition: color 0.2s, border-color 0.2s;
   }
   .share-station-btn:hover { color: var(--green); border-color: var(--green-dim); }
@@ -2887,6 +2898,9 @@ function selectState(code, stationIdx) {
   updateMiniPlayer();
 }
 
+// Survives tab re-renders — tracks which origIdx was last tapped and when
+let _stTabLastTap = { origIdx: -1, time: 0 };
+
 function renderStationTabs(code) {
   // Remove any existing tabs row
   const existing = document.getElementById('stationTabsRow');
@@ -2897,6 +2911,9 @@ function renderStationTabs(code) {
 
   const defaultIdx = getStateDefault(code);
   const currentIdx = (window._currentStationIdx !== undefined) ? window._currentStationIdx : 0;
+
+  // Build display order: starred station first, then the rest in original order
+  const order = [defaultIdx, ...arr.map((_,i) => i).filter(i => i !== defaultIdx)];
 
   const tabsRow = document.createElement('div');
   tabsRow.id = 'stationTabsRow';
@@ -2910,10 +2927,11 @@ function renderStationTabs(code) {
     'min-height:28px',
   ].join(';');
 
-  arr.forEach((st, i) => {
+  order.forEach((origIdx, displayPos) => {
+    const st = arr[origIdx];
+    const isActive = origIdx === currentIdx;
+    const isDefault = origIdx === defaultIdx;
     const tab = document.createElement('div');
-    const isActive = i === currentIdx;
-    const isDefault = i === defaultIdx;
     tab.style.cssText = [
       'flex:1',
       'min-width:55px',
@@ -2938,21 +2956,20 @@ function renderStationTabs(code) {
       underline.style.cssText = 'position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--green);';
       tab.appendChild(underline);
     }
-    if (i === arr.length - 1) tab.style.borderRight = 'none';
-    tab.addEventListener('mouseenter', function() { if (!this.classList.contains('active-tab')) this.style.color = 'var(--green-dim)'; });
-    tab.addEventListener('mouseleave', function() { if (!this.classList.contains('active-tab')) this.style.color = i === currentIdx ? 'var(--green)' : 'var(--muted)'; });
+    if (displayPos === order.length - 1) tab.style.borderRight = 'none';
+    tab.addEventListener('mouseenter', function() { this.style.color = 'var(--green-dim)'; });
+    tab.addEventListener('mouseleave', function() { this.style.color = isActive ? 'var(--green)' : 'var(--muted)'; });
     // Single tap: select station. Double-tap on the already-active tab: play.
-    let _tabLastTap = 0;
+    // _stTabLastTap is module-level so it survives tab re-renders.
     tab.addEventListener('click', () => {
       const now = Date.now();
-      const isActive = (window._currentStationIdx === i);
-      if (isActive && now - _tabLastTap < 350) {
-        // Double-tap on active tab — start playback
+      const stillActive = (window._currentStationIdx === origIdx);
+      if (stillActive && origIdx === _stTabLastTap.origIdx && now - _stTabLastTap.time < 350) {
         startAudio();
-        _tabLastTap = 0;
+        _stTabLastTap = { origIdx: -1, time: 0 };
       } else {
-        selectState(code, i);
-        _tabLastTap = now;
+        selectState(code, origIdx);
+        _stTabLastTap = { origIdx, time: now };
       }
     });
     tabsRow.appendChild(tab);
@@ -3423,6 +3440,15 @@ function renderCharts(station, token) {
 // Result is cached per station ID so we only draw once per session.
 window._artworkCache = {};
 
+function _dataURLtoBlob(dataURL) {
+  const [header, data] = dataURL.split(',');
+  const mime = header.match(/:(.*?);/)[1];
+  const binary = atob(data);
+  const arr = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
 function _renderAsciiArtwork(station) {
   if (!station) return null;
   const cacheKey = station.id || station.name;
@@ -3484,8 +3510,9 @@ function _renderAsciiArtwork(station) {
   });
 
   const dataURL = canvas.toDataURL('image/png');
-  window._artworkCache[cacheKey] = dataURL;
-  return dataURL;
+  const blobURL = URL.createObjectURL(_dataURLtoBlob(dataURL));
+  window._artworkCache[cacheKey] = blobURL;
+  return blobURL;
 }
 
 // ─── AUDIO ────────────────────────────────────────────────────────────────────
