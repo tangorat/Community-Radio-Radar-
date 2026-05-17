@@ -959,10 +959,15 @@
   @media (max-width: 700px) { #widgetSizeRow { display:none !important; } }
 
   @media (max-width: 700px) {
+    /* CSS variables for safe-area-aware heights — used everywhere below */
+    :root {
+      --mob-header-h: calc(38px + env(safe-area-inset-top, 0px));
+      --mob-tab-h:    calc(52px + env(safe-area-inset-bottom, 0px));
+    }
     header {
       padding: 0 12px;
-      padding-top: env(safe-area-inset-top);
-      height: calc(48px + env(safe-area-inset-top));
+      padding-top: env(safe-area-inset-top, 0px);
+      height: var(--mob-header-h);
       display: flex !important;
       justify-content: flex-end !important;
       align-items: center;
@@ -970,7 +975,8 @@
     }
     .logo {
       position: absolute;
-      top: calc(env(safe-area-inset-top, 0px) + 24px);
+      /* Centre in the 38px visible zone below the safe area */
+      top: calc(env(safe-area-inset-top, 0px) + 19px);
       left: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
@@ -986,7 +992,7 @@
     .amrap-toggle { display: none !important; }
     .app {
       margin-left: 0 !important;
-      height: calc(100vh - 48px - 48px);
+      height: calc(100vh - var(--mob-header-h) - var(--mob-tab-h));
       background: var(--bg);
       overflow: hidden;
       flex-direction: column;
@@ -1030,10 +1036,10 @@
       position: fixed !important;
       left: 0 !important;
       right: 0 !important;
-      bottom: 48px !important;
-      top: 48px !important;
+      bottom: var(--mob-tab-h) !important;
+      top: var(--mob-header-h) !important;
       width: 100vw !important;
-      height: calc(100vh - 48px - 48px) !important;
+      height: calc(100vh - var(--mob-header-h) - var(--mob-tab-h)) !important;
       border-left: none !important;
       border-top: 1px solid var(--border) !important;
       transform: translateY(110%);
@@ -1509,6 +1515,7 @@
     .act-mobile-hit { display: block !important; }
     .world-view {
       padding: 12px;
+      padding-bottom: 20px;
     }
     .world-grid {
       grid-template-columns: repeat(3, 1fr);
@@ -1698,7 +1705,8 @@
     display: none;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: 48px;
+    height: calc(52px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     background: var(--panel);
     border-top: 1px solid var(--border);
     z-index: 100;
@@ -1711,28 +1719,29 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 3px;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.45rem;
+    font-size: 0.5rem;
     letter-spacing: 0.08em;
     color: var(--muted);
     cursor: pointer;
     border: none;
     background: none;
     transition: color 0.15s, background 0.15s;
+    padding-bottom: 0;
   }
   .mobile-tab.active { color: var(--accent); }
   .mobile-tab:active { background: rgba(0,255,65,0.06); }
-  .mobile-tab-icon { font-size: 1.43rem; line-height: 1; }
-  .mobile-tab-ascii { font-family: 'Share Tech Mono', monospace; font-size: 1.69rem; color: inherit; }
+  .mobile-tab-icon { font-size: 1.6rem; line-height: 1; }
+  .mobile-tab-ascii { font-family: 'Share Tech Mono', monospace; font-size: 1.9rem; color: inherit; }
 
   /* ─── AMRAP MOBILE SHEET ───────────────────────────────────────────────── */
   .amrap-mobile-sheet {
     display: none;
     position: fixed;
     left: 0; right: 0;
-    bottom: 48px;
-    top: 48px;
+    bottom: var(--mob-tab-h, 52px);
+    top: var(--mob-header-h, 38px);
     background: var(--panel);
     z-index: 50;
     flex-direction: column;
