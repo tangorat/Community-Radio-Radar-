@@ -972,7 +972,7 @@
     header {
       padding: 0 12px;
       padding-top: env(safe-area-inset-top, 0px);
-      height: var(--mob-header-h);
+      height: calc(24px + env(safe-area-inset-top, 0px));
       display: flex !important;
       justify-content: flex-end !important;
       align-items: center;
@@ -1000,7 +1000,7 @@
          CSS custom property) to avoid WebKit bug where env() inside a custom
          property can silently fail, making var() resolve to 'auto'. */
       position: fixed !important;
-      top: var(--mob-header-h) !important;
+      top: calc(24px + env(safe-area-inset-top, 0px)) !important;
       bottom: calc(44px + max(env(safe-area-inset-bottom, 0px), 34px)) !important;
       left: 0 !important;
       right: 0 !important;
@@ -1052,7 +1052,7 @@
       left: 0 !important;
       right: 0 !important;
       bottom: calc(44px + max(env(safe-area-inset-bottom, 0px), 34px)) !important;
-      top: var(--mob-header-h) !important;
+      top: calc(24px + env(safe-area-inset-top, 0px)) !important;
       width: 100vw !important;
       height: auto !important;
       border-left: none !important;
@@ -1318,7 +1318,7 @@
 
   @media (max-width: 700px) {
     .settings-panel {
-      top: var(--mob-header-h, 24px);
+      top: calc(24px + env(safe-area-inset-top, 0px));
       bottom: calc(44px + max(env(safe-area-inset-bottom, 0px), 34px));
       height: auto;
       right: -100vw;
@@ -1761,8 +1761,8 @@
     display: none;
     position: fixed;
     left: 0; right: 0;
-    bottom: var(--mob-tab-h, 64px);
-    top: var(--mob-header-h, 24px);
+    bottom: calc(44px + max(env(safe-area-inset-bottom, 0px), 34px));
+    top: calc(24px + env(safe-area-inset-top, 0px));
     background: var(--panel);
     z-index: 50;
     flex-direction: column;
@@ -4957,11 +4957,9 @@ function applyConfig() {
   requestAnimationFrame(() => {
     _measureHeader();
     if (window.innerWidth <= 700) {
-      // Run immediately to set pixel values from frame 1, bypassing any
-      // env()-in-CSS-variable resolution issues.
-      _measureMobileSizes();
-      // Re-run after 150ms in case env(safe-area-inset-top) wasn't resolved yet.
-      setTimeout(_measureMobileSizes, 150);
+      // Delay measurement so env(safe-area-inset-*) values have resolved.
+      // Running immediately (before env() resolves) locks in wrong values.
+      setTimeout(_measureMobileSizes, 300);
     }
   });
 
