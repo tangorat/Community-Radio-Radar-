@@ -966,9 +966,15 @@
       --mob-header-h: calc(24px + env(safe-area-inset-top, 0px));
       --mob-tab-h:    calc(44px + max(env(safe-area-inset-bottom, 0px), 34px));
     }
-    /* Match html background to panel so any area below the tab bar (caused
-       by the Safari browser toolbar pushing fixed elements up) is invisible. */
-    html { background: var(--panel); }
+    /* Body becomes a flex column filling the full screen.
+       Tab bar is the last flex child — no position:fixed needed,
+       it simply lives at the bottom of the flex container. */
+    html, body {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
     header {
       padding: 0 12px;
       padding-top: env(safe-area-inset-top, 0px);
@@ -996,16 +1002,17 @@
     .amrap-panel { display: none !important; }
     .amrap-toggle { display: none !important; }
     .app {
-      /* Pin the app between header and tabs — env() used directly (not via
-         CSS custom property) to avoid WebKit bug where env() inside a custom
-         property can silently fail, making var() resolve to 'auto'. */
-      position: fixed !important;
-      top: calc(24px + env(safe-area-inset-top, 0px)) !important;
-      bottom: calc(44px + max(env(safe-area-inset-bottom, 0px), 34px)) !important;
-      left: 0 !important;
-      right: 0 !important;
+      /* Flex child — fills all space between header and tab bar.
+         No position:fixed, no viewport arithmetic, no env() needed here. */
+      position: relative !important;
+      flex: 1 1 0 !important;
+      min-height: 0 !important;
+      height: 0 !important;
+      top: auto !important;
+      bottom: auto !important;
+      left: auto !important;
+      right: auto !important;
       width: 100% !important;
-      height: auto !important;
       margin-left: 0 !important;
       display: flex !important;
       flex-direction: column !important;
@@ -1069,6 +1076,14 @@
     }
     .mobile-tabs {
       display: flex !important;
+      /* Override position:fixed — tab bar is a normal flex child at body bottom */
+      position: static !important;
+      bottom: auto !important;
+      left: auto !important;
+      right: auto !important;
+      width: 100% !important;
+      flex-shrink: 0 !important;
+      box-shadow: none !important;
     }
     .amrap-mobile-sheet {
       display: flex !important;
