@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#030a04">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Radio Radar">
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="/icons/favicon.png" type="image/png">
@@ -969,8 +970,9 @@
     }
     .logo {
       position: absolute;
+      top: calc(env(safe-area-inset-top, 0px) + 24px);
       left: 50%;
-      transform: translateX(-50%);
+      transform: translate(-50%, -50%);
       pointer-events: none;
     }
     .logo-main { font-size: 0.9rem; white-space: nowrap; }
@@ -2761,12 +2763,16 @@ function init() {
   setInterval(updateClock, 1000);
   updateClock();
 
-  requestAnimationFrame(() => {
+  const _measureHdr = () => {
     const hdrEl = document.querySelector('header');
     if (hdrEl) {
       const realH = Math.round(hdrEl.getBoundingClientRect().height);
       if (realH > 0) document.documentElement.style.setProperty('--header-h', realH + 'px');
     }
+  };
+  requestAnimationFrame(() => {
+    _measureHdr();
+    if (window.innerWidth <= 700) setTimeout(_measureHdr, 150);
   });
 
   const wf = document.getElementById('waveform');
@@ -4893,12 +4899,18 @@ function applyConfig() {
 
   const hh = HEADER_H[CFG.fontSize] || '60px';
   root.style.setProperty('--header-h', hh);
-  requestAnimationFrame(() => {
+  const _measureHeader = () => {
     const hdrEl = document.querySelector('header');
     if (hdrEl) {
       const realH = Math.round(hdrEl.getBoundingClientRect().height);
       if (realH > 0) root.style.setProperty('--header-h', realH + 'px');
     }
+  };
+  requestAnimationFrame(() => {
+    _measureHeader();
+    // On mobile, env(safe-area-inset-top) may not be resolved yet on first rAF —
+    // re-measure after a short delay to catch the correct safe-area height.
+    if (window.innerWidth <= 700) setTimeout(_measureHeader, 150);
   });
 
   const contrastMap = { low: '80%', normal: '100%', high: '130%' };
