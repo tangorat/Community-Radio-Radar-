@@ -966,13 +966,6 @@
       --mob-header-h: calc(24px + env(safe-area-inset-top, 0px));
       --mob-tab-h:    calc(44px + max(env(safe-area-inset-bottom, 0px), 20px));
     }
-    /* Flex column body so .app fills remaining space without dvh arithmetic */
-    html, body {
-      height: 100%;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
     header {
       padding: 0 12px;
       padding-top: env(safe-area-inset-top, 0px);
@@ -1000,13 +993,19 @@
     .amrap-panel { display: none !important; }
     .amrap-toggle { display: none !important; }
     .app {
+      /* Pin the app between header and tabs — no viewport-height arithmetic */
+      position: fixed !important;
+      top: var(--mob-header-h) !important;
+      bottom: var(--mob-tab-h) !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      height: auto !important;
       margin-left: 0 !important;
-      flex: 1;
-      min-height: 0;
-      padding-bottom: var(--mob-tab-h);
+      display: flex !important;
+      flex-direction: column !important;
       background: var(--bg);
       overflow: hidden;
-      flex-direction: column;
     }
     .map-container {
       flex: 1;
@@ -1050,8 +1049,7 @@
       bottom: var(--mob-tab-h) !important;
       top: var(--mob-header-h) !important;
       width: 100vw !important;
-      height: calc(100vh - var(--mob-header-h) - var(--mob-tab-h)) !important;
-      height: calc(100dvh - var(--mob-header-h) - var(--mob-tab-h)) !important;
+      height: auto !important;
       border-left: none !important;
       border-top: 1px solid var(--border) !important;
       transform: translateY(110%);
@@ -1316,8 +1314,8 @@
   @media (max-width: 700px) {
     .settings-panel {
       top: var(--mob-header-h, 24px);
-      height: calc(100vh - var(--mob-header-h, 24px) - var(--mob-tab-h, 64px));
-      height: calc(100dvh - var(--mob-header-h, 24px) - var(--mob-tab-h, 64px));
+      bottom: var(--mob-tab-h, 64px);
+      height: auto;
       right: -100vw;
       width: 100vw;
       border-left: none;
@@ -4930,11 +4928,29 @@ function applyConfig() {
       if (realH > 0) root.style.setProperty('--header-h', realH + 'px');
     }
   };
+  // On mobile, also measure the rendered tab bar and override the CSS vars with
+  // exact pixel values — bypasses any env() timing issues entirely.
+  const _measureMobileSizes = () => {
+    if (window.innerWidth > 700) return;
+    const hdrEl = document.querySelector('header');
+    const tabEl = document.querySelector('.mobile-tabs');
+    if (hdrEl) {
+      const realH = Math.round(hdrEl.getBoundingClientRect().height);
+      if (realH > 0) {
+        root.style.setProperty('--header-h', realH + 'px');
+        root.style.setProperty('--mob-header-h', realH + 'px');
+      }
+    }
+    if (tabEl) {
+      const realT = Math.round(tabEl.getBoundingClientRect().height);
+      if (realT > 0) root.style.setProperty('--mob-tab-h', realT + 'px');
+    }
+  };
   requestAnimationFrame(() => {
     _measureHeader();
     // On mobile, env(safe-area-inset-top) may not be resolved yet on first rAF —
     // re-measure after a short delay to catch the correct safe-area height.
-    if (window.innerWidth <= 700) setTimeout(_measureHeader, 150);
+    if (window.innerWidth <= 700) setTimeout(_measureMobileSizes, 150);
   });
 
   const contrastMap = { low: '80%', normal: '100%', high: '130%' };
