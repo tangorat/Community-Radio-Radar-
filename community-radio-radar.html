@@ -960,12 +960,15 @@
 
   @media (max-width: 700px) {
     /* CSS variables for safe-area-aware heights — used everywhere below.
-       max() ensures min 20px bottom padding even when Safari returns 0
+       max() ensures min 34px bottom padding even when Safari returns 0
        for safe-area-inset-bottom (common in non-PWA browser mode). */
     :root {
       --mob-header-h: calc(24px + env(safe-area-inset-top, 0px));
-      --mob-tab-h:    calc(44px + max(env(safe-area-inset-bottom, 0px), 20px));
+      --mob-tab-h:    calc(44px + max(env(safe-area-inset-bottom, 0px), 34px));
     }
+    /* Match html background to panel so any area below the tab bar (caused
+       by the Safari browser toolbar pushing fixed elements up) is invisible. */
+    html { background: var(--panel); }
     header {
       padding: 0 12px;
       padding-top: env(safe-area-inset-top, 0px);
@@ -1716,11 +1719,14 @@
     display: none;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    /* 44px content zone + at least 20px bottom clearance for home indicator.
-       max() handles Safari browser returning 0 for safe-area-inset-bottom. */
-    height: calc(44px + max(env(safe-area-inset-bottom, 0px), 20px));
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 20px);
+    /* 44px content zone + at least 34px bottom clearance for home indicator.
+       max() handles Safari browser returning 0 for safe-area-inset-bottom.
+       box-shadow bleeds the panel colour downward to cover any gap between
+       the visual-viewport bottom and the physical screen edge (Safari toolbar). */
+    height: calc(44px + max(env(safe-area-inset-bottom, 0px), 34px));
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 34px);
     background: var(--panel);
+    box-shadow: 0 300px 0 300px var(--panel);
     border-top: 1px solid var(--border);
     z-index: 100;
     flex-direction: row;
