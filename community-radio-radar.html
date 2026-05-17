@@ -959,10 +959,12 @@
   @media (max-width: 700px) { #widgetSizeRow { display:none !important; } }
 
   @media (max-width: 700px) {
-    /* CSS variables for safe-area-aware heights — used everywhere below */
+    /* CSS variables for safe-area-aware heights — used everywhere below.
+       max() ensures min 20px bottom padding even when Safari returns 0
+       for safe-area-inset-bottom (common in non-PWA browser mode). */
     :root {
-      --mob-header-h: calc(38px + env(safe-area-inset-top, 0px));
-      --mob-tab-h:    calc(52px + env(safe-area-inset-bottom, 0px));
+      --mob-header-h: calc(24px + env(safe-area-inset-top, 0px));
+      --mob-tab-h:    calc(44px + max(env(safe-area-inset-bottom, 0px), 20px));
     }
     header {
       padding: 0 12px;
@@ -975,8 +977,8 @@
     }
     .logo {
       position: absolute;
-      /* Centre in the 38px visible zone below the safe area */
-      top: calc(env(safe-area-inset-top, 0px) + 19px);
+      /* Centre in the 24px visible zone below the safe area */
+      top: calc(env(safe-area-inset-top, 0px) + 12px);
       left: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
@@ -993,6 +995,7 @@
     .app {
       margin-left: 0 !important;
       height: calc(100vh - var(--mob-header-h) - var(--mob-tab-h));
+      height: calc(100dvh - var(--mob-header-h) - var(--mob-tab-h));
       background: var(--bg);
       overflow: hidden;
       flex-direction: column;
@@ -1040,6 +1043,7 @@
       top: var(--mob-header-h) !important;
       width: 100vw !important;
       height: calc(100vh - var(--mob-header-h) - var(--mob-tab-h)) !important;
+      height: calc(100dvh - var(--mob-header-h) - var(--mob-tab-h)) !important;
       border-left: none !important;
       border-top: 1px solid var(--border) !important;
       transform: translateY(110%);
@@ -1303,8 +1307,9 @@
 
   @media (max-width: 700px) {
     .settings-panel {
-      top: 48px;
-      height: calc(100vh - 48px - 48px);
+      top: var(--mob-header-h, 24px);
+      height: calc(100vh - var(--mob-header-h, 24px) - var(--mob-tab-h, 64px));
+      height: calc(100dvh - var(--mob-header-h, 24px) - var(--mob-tab-h, 64px));
       right: -100vw;
       width: 100vw;
       border-left: none;
@@ -1705,8 +1710,10 @@
     display: none;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: calc(52px + env(safe-area-inset-bottom, 0px));
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    /* 44px content zone + at least 20px bottom clearance for home indicator.
+       max() handles Safari browser returning 0 for safe-area-inset-bottom. */
+    height: calc(44px + max(env(safe-area-inset-bottom, 0px), 20px));
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 20px);
     background: var(--panel);
     border-top: 1px solid var(--border);
     z-index: 100;
@@ -1740,8 +1747,8 @@
     display: none;
     position: fixed;
     left: 0; right: 0;
-    bottom: var(--mob-tab-h, 52px);
-    top: var(--mob-header-h, 38px);
+    bottom: var(--mob-tab-h, 64px);
+    top: var(--mob-header-h, 24px);
     background: var(--panel);
     z-index: 50;
     flex-direction: column;
