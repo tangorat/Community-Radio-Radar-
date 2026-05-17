@@ -966,6 +966,13 @@
       --mob-header-h: calc(24px + env(safe-area-inset-top, 0px));
       --mob-tab-h:    calc(44px + max(env(safe-area-inset-bottom, 0px), 20px));
     }
+    /* Flex column body so .app fills remaining space without dvh arithmetic */
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
     header {
       padding: 0 12px;
       padding-top: env(safe-area-inset-top, 0px);
@@ -994,8 +1001,9 @@
     .amrap-toggle { display: none !important; }
     .app {
       margin-left: 0 !important;
-      height: calc(100vh - var(--mob-header-h) - var(--mob-tab-h));
-      height: calc(100dvh - var(--mob-header-h) - var(--mob-tab-h));
+      flex: 1;
+      min-height: 0;
+      padding-bottom: var(--mob-tab-h);
       background: var(--bg);
       overflow: hidden;
       flex-direction: column;
