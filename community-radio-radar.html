@@ -996,10 +996,12 @@
     .amrap-panel { display: none !important; }
     .amrap-toggle { display: none !important; }
     .app {
-      /* Pin the app between header and tabs — no viewport-height arithmetic */
+      /* Pin the app between header and tabs — env() used directly (not via
+         CSS custom property) to avoid WebKit bug where env() inside a custom
+         property can silently fail, making var() resolve to 'auto'. */
       position: fixed !important;
       top: var(--mob-header-h) !important;
-      bottom: var(--mob-tab-h) !important;
+      bottom: calc(44px + max(env(safe-area-inset-bottom, 0px), 34px)) !important;
       left: 0 !important;
       right: 0 !important;
       width: 100% !important;
@@ -1049,7 +1051,7 @@
       position: fixed !important;
       left: 0 !important;
       right: 0 !important;
-      bottom: var(--mob-tab-h) !important;
+      bottom: calc(44px + max(env(safe-area-inset-bottom, 0px), 34px)) !important;
       top: var(--mob-header-h) !important;
       width: 100vw !important;
       height: auto !important;
@@ -1317,7 +1319,7 @@
   @media (max-width: 700px) {
     .settings-panel {
       top: var(--mob-header-h, 24px);
-      bottom: var(--mob-tab-h, 64px);
+      bottom: calc(44px + max(env(safe-area-inset-bottom, 0px), 34px));
       height: auto;
       right: -100vw;
       width: 100vw;
@@ -4954,9 +4956,13 @@ function applyConfig() {
   };
   requestAnimationFrame(() => {
     _measureHeader();
-    // On mobile, env(safe-area-inset-top) may not be resolved yet on first rAF —
-    // re-measure after a short delay to catch the correct safe-area height.
-    if (window.innerWidth <= 700) setTimeout(_measureMobileSizes, 150);
+    if (window.innerWidth <= 700) {
+      // Run immediately to set pixel values from frame 1, bypassing any
+      // env()-in-CSS-variable resolution issues.
+      _measureMobileSizes();
+      // Re-run after 150ms in case env(safe-area-inset-top) wasn't resolved yet.
+      setTimeout(_measureMobileSizes, 150);
+    }
   });
 
   const contrastMap = { low: '80%', normal: '100%', high: '130%' };
