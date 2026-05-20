@@ -959,34 +959,21 @@
   @media (max-width: 700px) { #widgetSizeRow { display:none !important; } }
 
   @media (max-width: 700px) {
-    /* CSS variables for safe-area-aware heights — used everywhere below.
-       max() ensures min 34px bottom padding even when Safari returns 0
-       for safe-area-inset-bottom (common in non-PWA browser mode). */
-    :root {
-      --mob-header-h: calc(24px + env(safe-area-inset-top, 0px));
-      --mob-tab-h:    calc(44px + max(env(safe-area-inset-bottom, 0px), 34px));
-    }
-    /* Body becomes a flex column filling the full screen.
-       Tab bar is the last flex child — no position:fixed needed,
-       it simply lives at the bottom of the flex container. */
-    html, body {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    /* ── HEADER: fixed at top, colour bleeds behind iOS status bar ──────── */
     header {
+      position: fixed !important;
+      top: 0 !important; left: 0 !important; right: 0 !important;
       padding: 0 12px;
       padding-top: env(safe-area-inset-top, 0px);
       height: calc(24px + env(safe-area-inset-top, 0px));
       display: flex !important;
       justify-content: flex-end !important;
       align-items: center;
-      position: relative;
+      z-index: 200;
     }
     .logo {
       position: absolute;
-      /* Centre in the 24px visible zone below the safe area */
+      /* vertically centred in the 24px visible zone below the status bar */
       top: calc(env(safe-area-inset-top, 0px) + 12px);
       left: 50%;
       transform: translate(-50%, -50%);
@@ -995,24 +982,21 @@
     .logo-main { font-size: 0.9rem; white-space: nowrap; }
     .logo-sub   { display: none; }
     .header-centre { display: none !important; }
-    .header-right { margin-left: 0; }
-    .clock { display: none !important; }
+    .header-right  { margin-left: 0; }
+    .clock         { display: none !important; }
     .signal-indicator { display: none !important; }
-    .signal-bar { display: none !important; }
-    .amrap-panel { display: none !important; }
-    .amrap-toggle { display: none !important; }
+    .signal-bar    { display: none !important; }
+    .amrap-panel   { display: none !important; }
+    .amrap-toggle  { display: none !important; }
+
+    /* ── APP AREA: fixed, fills space between header and tab bar ─────────── */
+    /* bottom MUST equal .mobile-tabs height so they meet flush with no gap. */
     .app {
-      /* Flex child — fills all space between header and tab bar.
-         No position:fixed, no viewport arithmetic, no env() needed here. */
-      position: relative !important;
-      flex: 1 1 0 !important;
-      min-height: 0 !important;
-      height: 0 !important;
-      top: auto !important;
-      bottom: auto !important;
-      left: auto !important;
-      right: auto !important;
-      width: 100% !important;
+      position: fixed !important;
+      top:    calc(24px + env(safe-area-inset-top,    0px)) !important;
+      bottom: calc(44px + max(env(safe-area-inset-bottom, 0px), 34px)) !important;
+      left: 0 !important; right: 0 !important;
+      width: 100% !important; height: auto !important;
       margin-left: 0 !important;
       display: flex !important;
       flex-direction: column !important;
@@ -1020,108 +1004,60 @@
       overflow: hidden;
     }
     .map-container {
-      flex: 1;
-      min-height: 0;
+      flex: 1; min-height: 0;
       padding: 4px 8px;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      align-items: center; justify-content: center;
       background: var(--bg);
-      overflow: hidden;
-      margin-right: 0;
+      overflow: hidden; margin-right: 0;
     }
     .map-container.panel-open { margin-right: 0; }
-    .world-view.panel-open { margin-right: 0; }
+    .world-view.panel-open    { margin-right: 0; }
     svg#australia-map {
-      margin: 0 auto;
-      display: block;
-      width: 100%;
-      height: auto;
-      max-height: 100%;
-      max-width: 100%;
+      margin: 0 auto; display: block;
+      width: 100%; height: auto;
+      max-height: 100%; max-width: 100%;
     }
-    .corner-tag {
-      bottom: 28px;
-      left: 12px;
-      font-size: 0.42rem;
-      letter-spacing: 1px;
-    }
-    .map-hint {
-      font-size: 0.42rem;
-      letter-spacing: 1px;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap;
-    }
+    .corner-tag { bottom: 28px; left: 12px; font-size: 0.42rem; letter-spacing: 1px; }
+    .map-hint   { font-size: 0.42rem; letter-spacing: 1px; bottom: 10px; left: 50%; transform: translateX(-50%); white-space: nowrap; }
+
+    /* ── SIDE PANEL ──────────────────────────────────────────────────────── */
     .side-panel {
       position: fixed !important;
-      left: 0 !important;
-      right: 0 !important;
+      left: 0 !important; right: 0 !important;
       bottom: calc(44px + max(env(safe-area-inset-bottom, 0px), 34px)) !important;
-      top: calc(24px + env(safe-area-inset-top, 0px)) !important;
-      width: 100vw !important;
-      height: auto !important;
+      top:    calc(24px + env(safe-area-inset-top, 0px)) !important;
+      width: 100vw !important; height: auto !important;
       border-left: none !important;
       border-top: 1px solid var(--border) !important;
       transform: translateY(110%);
       transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      z-index: 50;
-      overflow-y: auto;
-      padding-top: 0 !important;
+      z-index: 50; overflow-y: auto; padding-top: 0 !important;
     }
     .side-panel.open {
-      transform: translateY(0) !important;
-      right: 0 !important;
+      transform: translateY(0) !important; right: 0 !important;
     }
-    .mobile-tabs {
-      display: flex !important;
-      /* Override position:fixed — tab bar is a normal flex child at body bottom */
-      position: static !important;
-      bottom: auto !important;
-      left: auto !important;
-      right: auto !important;
-      width: 100% !important;
-      flex-shrink: 0 !important;
-      box-shadow: none !important;
-    }
-    .amrap-mobile-sheet {
-      display: flex !important;
-    }
-    .side-panel::before {
-      display: none;
-    }
+
+    /* ── TAB BAR: position:fixed + bottom:0 + height come from general CSS ─ */
+    /* We only need to flip display:none → display:flex here.               */
+    .mobile-tabs { display: flex !important; }
+
+    .amrap-mobile-sheet { display: flex !important; }
+    .side-panel::before { display: none; }
     .panel-drag-handle {
-      display: block;
-      width: 40px;
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      margin: 10px auto 4px;
-      flex-shrink: 0;
-      cursor: grab;
+      display: block; width: 40px; height: 4px;
+      background: var(--border); border-radius: 2px;
+      margin: 10px auto 4px; flex-shrink: 0; cursor: grab;
     }
-    .panel-header {
-      padding: 13px 56px 12px 16px;
-    }
-    .panel-close {
-      width: 36px;
-      height: 36px;
-      font-size: 1.2rem;
-      top: 12px;
-      right: 12px;
-    }
+    .panel-header { padding: 13px 56px 12px 16px; }
+    .panel-close  { width: 36px; height: 36px; font-size: 1.2rem; top: 12px; right: 12px; }
     #starDefaultBtn {
       position: absolute !important;
-      top: 56px !important;
-      right: 12px !important;
-      width: 36px !important;
-      height: 36px !important;
-      font-size: 2rem !important;
-      padding: 0 !important;
+      top: 56px !important; right: 12px !important;
+      width: 36px !important; height: 36px !important;
+      font-size: 2rem !important; padding: 0 !important;
       display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
+      align-items: center !important; justify-content: center !important;
     }
   }
 
