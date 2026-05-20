@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#030a04">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Radio Radar">
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="/icons/favicon.png" type="image/png">
@@ -959,12 +959,13 @@
   @media (max-width: 700px) { #widgetSizeRow { display:none !important; } }
 
   @media (max-width: 700px) {
-    /* ── HEADER: fixed at top ────────────────────────────────────────────── */
+    /* ── HEADER: fixed at top, bleeds behind iOS status bar ─────────────── */
     header {
       position: fixed !important;
       top: 0 !important; left: 0 !important; right: 0 !important;
       padding: 0 12px;
-      height: 48px;
+      padding-top: env(safe-area-inset-top, 0px);
+      height: calc(24px + env(safe-area-inset-top, 0px));
       display: flex !important;
       justify-content: flex-end !important;
       align-items: center;
@@ -972,7 +973,7 @@
     }
     .logo {
       position: absolute;
-      top: 50%;
+      top: calc(env(safe-area-inset-top, 0px) + 12px);
       left: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
@@ -990,8 +991,8 @@
     /* ── APP AREA: fixed, fills space between header and tab bar ─────────── */
     .app {
       position: fixed !important;
-      top:    48px !important;
-      bottom: 44px !important;
+      top:    calc(24px + env(safe-area-inset-top,    0px)) !important;
+      bottom: calc(44px + env(safe-area-inset-bottom, 0px)) !important;
       left: 0 !important; right: 0 !important;
       width: 100% !important; height: auto !important;
       margin-left: 0 !important;
@@ -1022,8 +1023,8 @@
     .side-panel {
       position: fixed !important;
       left: 0 !important; right: 0 !important;
-      bottom: 44px !important;
-      top:    48px !important;
+      bottom: calc(44px + env(safe-area-inset-bottom, 0px)) !important;
+      top:    calc(24px + env(safe-area-inset-top,    0px)) !important;
       width: 100vw !important; height: auto !important;
       border-left: none !important;
       border-top: 1px solid var(--border) !important;
@@ -1266,8 +1267,8 @@
 
   @media (max-width: 700px) {
     .settings-panel {
-      top: 48px;
-      bottom: 44px;
+      top: calc(24px + env(safe-area-inset-top,    0px));
+      bottom: calc(44px + env(safe-area-inset-bottom, 0px));
       height: auto;
       right: -100vw;
       width: 100vw;
@@ -1669,7 +1670,8 @@
     display: none;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: 44px;
+    height: calc(44px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     background: var(--panel);
     box-shadow: 0 300px 0 300px var(--panel);
     border-top: 1px solid var(--border);
@@ -1704,8 +1706,8 @@
     display: none;
     position: fixed;
     left: 0; right: 0;
-    bottom: 44px;
-    top: 48px;
+    bottom: calc(44px + env(safe-area-inset-bottom, 0px));
+    top: calc(24px + env(safe-area-inset-top, 0px));
     background: var(--panel);
     z-index: 50;
     flex-direction: column;
