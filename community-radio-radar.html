@@ -991,7 +991,7 @@
     .app {
       position: fixed !important;
       top:    calc(24px + env(safe-area-inset-top,    0px)) !important;
-      bottom: calc(44px + env(safe-area-inset-bottom, 0px)) !important;
+      bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
       left: 0 !important; right: 0 !important;
       width: 100% !important; height: auto !important;
       margin-left: 0 !important;
@@ -1022,7 +1022,7 @@
     .side-panel {
       position: fixed !important;
       left: 0 !important; right: 0 !important;
-      bottom: calc(44px + env(safe-area-inset-bottom, 0px)) !important;
+      bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
       top:    calc(24px + env(safe-area-inset-top,    0px)) !important;
       width: 100vw !important; height: auto !important;
       border-left: none !important;
@@ -1267,7 +1267,7 @@
   @media (max-width: 700px) {
     .settings-panel {
       top: calc(24px + env(safe-area-inset-top,    0px));
-      bottom: calc(44px + env(safe-area-inset-bottom, 0px));
+      bottom: calc(64px + env(safe-area-inset-bottom, 0px));
       height: auto;
       right: -100vw;
       width: 100vw;
@@ -1669,7 +1669,7 @@
     display: none;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: calc(44px + env(safe-area-inset-bottom, 0px));
+    height: calc(64px + env(safe-area-inset-bottom, 0px));
     padding-bottom: env(safe-area-inset-bottom, 0px);
     background: var(--panel);
     box-shadow: 0 300px 0 300px var(--panel);
@@ -1697,15 +1697,14 @@
   }
   .mobile-tab.active { color: var(--accent); }
   .mobile-tab:active { background: rgba(0,255,65,0.06); }
-  .mobile-tab-icon { font-size: 1.6rem; line-height: 1; }
-  .mobile-tab-ascii { font-family: 'Share Tech Mono', monospace; font-size: 1.9rem; color: inherit; }
+  .mobile-tab-icon { width: 24px; height: 24px; flex-shrink: 0; }
 
   /* ─── AMRAP MOBILE SHEET ───────────────────────────────────────────────── */
   .amrap-mobile-sheet {
     display: none;
     position: fixed;
     left: 0; right: 0;
-    bottom: calc(44px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
     top: calc(24px + env(safe-area-inset-top, 0px));
     background: var(--panel);
     z-index: 50;
@@ -4214,15 +4213,32 @@ setTimeout(_resolveDeepLink, 100); // after init paints
 </script><!-- Mobile Tab Bar -->
 <nav class="mobile-tabs" id="mobileTabs">
   <button class="mobile-tab active" id="tab-map" onclick="switchMobileTab('map')">
-    <span class="mobile-tab-icon mobile-tab-ascii">▣</span>
+    <svg class="mobile-tab-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M3 6 L10 4 L18 7 L25 5 L25 22 L18 24 L10 21 L3 23 Z"/>
+      <line x1="10" y1="4" x2="10" y2="21"/>
+      <line x1="18" y1="7" x2="18" y2="24"/>
+    </svg>
     MAP
   </button>
   <button class="mobile-tab" id="tab-config" onclick="switchMobileTab('config')">
-    <span class="mobile-tab-icon mobile-tab-ascii">◎</span>
+    <svg class="mobile-tab-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <line x1="3" y1="8" x2="25" y2="8"/>
+      <line x1="3" y1="14" x2="25" y2="14"/>
+      <line x1="3" y1="20" x2="25" y2="20"/>
+      <circle cx="9" cy="8" r="2.5" fill="var(--bg)"/>
+      <circle cx="17" cy="14" r="2.5" fill="var(--bg)"/>
+      <circle cx="12" cy="20" r="2.5" fill="var(--bg)"/>
+    </svg>
     CONFIG
   </button>
   <button class="mobile-tab" id="tab-world" onclick="switchMobileTab('world')">
-    <span class="mobile-tab-icon mobile-tab-ascii">◈</span>
+    <svg class="mobile-tab-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <circle cx="14" cy="14" r="11"/>
+      <ellipse cx="14" cy="14" rx="5" ry="11"/>
+      <line x1="3" y1="14" x2="25" y2="14"/>
+      <path d="M5 9 Q14 11 23 9"/>
+      <path d="M5 19 Q14 17 23 19"/>
+    </svg>
     WORLD
   </button>
 </nav>
