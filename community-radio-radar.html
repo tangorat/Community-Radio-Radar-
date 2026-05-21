@@ -25,7 +25,7 @@
   <meta name="twitter:description" content="Travel around the community radio landscape with ease! Pick your favourite stations and discover more.">
   <meta name="twitter:image"       content="https://communityradioradar.online/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oswald:wght@300;400;600&family=VT323&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oswald:wght@300;400;600&family=VT323&family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --green: #00ff41;
@@ -337,7 +337,11 @@
     fill: var(--inactive);
     stroke: var(--green-dim);
     stroke-width: 1.5;
-    transition: all 0.2s ease;
+    /* Exclude stroke/fill from transition — Chrome doesn't re-resolve
+       var() in SVG paint properties across an in-flight `transition: all`,
+       which leaves strokes stuck on the previous theme's accent when the
+       user changes themes. Animate everything else; let colours snap. */
+    transition: stroke-width 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
     cursor: default;
   }
 
@@ -395,7 +399,9 @@
     font-size: 11px;
     fill: var(--muted);
     pointer-events: none;
-    transition: fill 0.2s;
+    /* fill omitted from transition for the same reason as .state-path —
+       Chrome doesn't re-resolve var() across an in-flight transition. */
+    transition: font-size 0.2s;
     letter-spacing: 1px;
   }
 
@@ -462,7 +468,8 @@
     font-size: 1.9rem;
     font-weight: 600;
     color: var(--green);
-    text-shadow: 0 0 20px rgba(0,255,65,0.4);
+    /* Title glow uses the theme accent — was hard-coded green. */
+    text-shadow: 0 0 20px rgba(var(--glow-color, 0,255,65), 0.4);
     line-height: 1;
     margin-bottom: 4px;
   }
@@ -623,6 +630,18 @@
   }
 
   /* STATION BIO */
+  .weather-row {
+    padding: 8px 24px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .weather-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+  }
+
   .station-bio {
     padding: 14px 24px;
     border-bottom: 1px solid var(--border);
@@ -852,7 +871,7 @@
     letter-spacing: 1px;
     white-space: pre;
     margin-bottom: 20px;
-    text-shadow: 0 0 8px rgba(0,255,65,0.15);
+    text-shadow: 0 0 8px rgba(var(--glow-color, 0,255,65), 0.15);
   }
 
   .uc-title {
@@ -860,7 +879,7 @@
     font-size: 1.8rem;
     color: var(--green-dim);
     letter-spacing: 4px;
-    text-shadow: 0 0 12px rgba(0,255,65,0.3);
+    text-shadow: 0 0 12px rgba(var(--glow-color, 0,255,65), 0.3);
     margin-bottom: 8px;
     animation: blink 2s ease-in-out infinite;
   }
@@ -1354,7 +1373,7 @@
     font-weight: 600;
     color: var(--green);
     line-height: 1.1;
-    text-shadow: 0 0 12px rgba(0,255,65,0.3);
+    text-shadow: 0 0 12px rgba(var(--glow-color, 0,255,65), 0.3);
   }
   .world-card-location {
     font-size: 0.62rem;
@@ -1389,7 +1408,7 @@
   }
   @keyframes world-ascii-pulse {
     0%, 100% { opacity: 0.5; text-shadow: none; }
-    50% { opacity: 0.9; text-shadow: 0 0 8px rgba(0,255,65,0.5); }
+    50% { opacity: 0.9; text-shadow: 0 0 8px rgba(var(--glow-color, 0,255,65), 0.5); }
   }
   .world-ascii-label {
     font-size: 0.5rem;
@@ -1990,6 +2009,175 @@
 
 
 </style>
+<style id="theme-family-overrides">
+/* ──────────────────────────────────────────────────────────────────────
+   Theme family overrides — fonts and family-level effects.
+   Driven by html[data-family] set in applyConfig().
+   The legacy CSS leaves font-family declarations inline; rather than
+   rewriting every selector to use CSS vars, we override the handful that
+   matter on a per-family basis.
+   ────────────────────────────────────────────────────────────────────── */
+
+/* MONO family — sans-serif system: Inter for body, Inter Tight for
+   display, JetBrains Mono for label/tag text. */
+html[data-family="mono"] body,
+html[data-family="mono"] .station-bio,
+html[data-family="mono"] .bio-text,
+html[data-family="mono"] .panel-freq,
+html[data-family="mono"] .player-label,
+html[data-family="mono"] .charts-label,
+html[data-family="mono"] .panel-state-tag,
+html[data-family="mono"] .panel-local-time,
+html[data-family="mono"] .panel-local-time span,
+html[data-family="mono"] .amrap-label,
+html[data-family="mono"] .amrap-week,
+html[data-family="mono"] .amrap-track,
+html[data-family="mono"] .amrap-artist,
+html[data-family="mono"] .amrap-pos,
+html[data-family="mono"] .amrap-footer,
+html[data-family="mono"] .amrap-credits-text,
+html[data-family="mono"] .map-title,
+html[data-family="mono"] .map-hint,
+html[data-family="mono"] .corner-tag,
+html[data-family="mono"] .weather-label,
+html[data-family="mono"] .state-label,
+html[data-family="mono"] .mini-player-label,
+html[data-family="mono"] .world-card-flag,
+html[data-family="mono"] .world-card-city,
+html[data-family="mono"] .world-toggle-btn,
+html[data-family="mono"] .world-page-btn,
+html[data-family="mono"] .world-page-indicator,
+html[data-family="mono"] .world-title,
+html[data-family="mono"] .settings-title,
+html[data-family="mono"] .settings-close,
+html[data-family="mono"] .setting-label,
+html[data-family="mono"] .setting-pill,
+html[data-family="mono"] .chart-track,
+html[data-family="mono"] .chart-artist,
+html[data-family="mono"] .player-status,
+html[data-family="mono"] .sleep-pick-btn,
+html[data-family="mono"] .station-link,
+html[data-family="mono"] .clock,
+html[data-family="mono"] .uc-subtitle,
+html[data-family="mono"] .uc-progress-label,
+html[data-family="mono"] .uc-bar {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+html[data-family="mono"] body,
+html[data-family="mono"] .bio-text {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+html[data-family="mono"] .logo-main,
+html[data-family="mono"] .panel-station-name,
+html[data-family="mono"] .chart-num,
+html[data-family="mono"] .world-card-name,
+html[data-family="mono"] .uc-title,
+html[data-family="mono"] .amrap-title,
+html[data-family="mono"] .uc-chart-ascii {
+  font-family: 'Inter Tight', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+html[data-family="mono"] .logo-main { letter-spacing: -0.01em; }
+
+/* NEWSPRINT family — serif display + sans body. Print publication energy. */
+html[data-family="newsprint"] body,
+html[data-family="newsprint"] .bio-text {
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+html[data-family="newsprint"] .panel-freq,
+html[data-family="newsprint"] .player-label,
+html[data-family="newsprint"] .charts-label,
+html[data-family="newsprint"] .panel-state-tag,
+html[data-family="newsprint"] .panel-local-time,
+html[data-family="newsprint"] .panel-local-time span,
+html[data-family="newsprint"] .amrap-label,
+html[data-family="newsprint"] .amrap-week,
+html[data-family="newsprint"] .amrap-track,
+html[data-family="newsprint"] .amrap-artist,
+html[data-family="newsprint"] .amrap-footer,
+html[data-family="newsprint"] .amrap-credits-text,
+html[data-family="newsprint"] .map-title,
+html[data-family="newsprint"] .map-hint,
+html[data-family="newsprint"] .corner-tag,
+html[data-family="newsprint"] .weather-label,
+html[data-family="newsprint"] .state-label,
+html[data-family="newsprint"] .mini-player-label,
+html[data-family="newsprint"] .world-card-flag,
+html[data-family="newsprint"] .world-card-city,
+html[data-family="newsprint"] .world-toggle-btn,
+html[data-family="newsprint"] .world-page-btn,
+html[data-family="newsprint"] .world-page-indicator,
+html[data-family="newsprint"] .world-title,
+html[data-family="newsprint"] .settings-title,
+html[data-family="newsprint"] .settings-close,
+html[data-family="newsprint"] .setting-label,
+html[data-family="newsprint"] .setting-pill,
+html[data-family="newsprint"] .chart-track,
+html[data-family="newsprint"] .chart-artist,
+html[data-family="newsprint"] .player-status,
+html[data-family="newsprint"] .sleep-pick-btn,
+html[data-family="newsprint"] .station-link,
+html[data-family="newsprint"] .clock,
+html[data-family="newsprint"] .uc-subtitle,
+html[data-family="newsprint"] .uc-progress-label,
+html[data-family="newsprint"] .uc-bar {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+}
+html[data-family="newsprint"] .logo-main,
+html[data-family="newsprint"] .panel-station-name,
+html[data-family="newsprint"] .chart-num,
+html[data-family="newsprint"] .world-card-name,
+html[data-family="newsprint"] .uc-title,
+html[data-family="newsprint"] .amrap-title,
+html[data-family="newsprint"] .amrap-pos {
+  font-family: 'Source Serif 4', 'Source Serif Pro', Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+/* Logo is set in a smaller container on this UI — restore comfortable
+   serif leading and tracking; serif-at-large benefits from a slightly
+   tighter optical adjustment than sans. */
+html[data-family="newsprint"] .logo-main {
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+/* Newsprint suppresses scanlines + noise entirely — the look depends on
+   matte paper, not CRT artefacts. Users can re-enable via setting if
+   they really want them, but the family default is clean. */
+html[data-family="newsprint"] body::after,
+html[data-family="newsprint"] body::before {
+  display: none !important;
+}
+
+/* Newsprint also softens the SVG drop-shadow glow on map states — looks
+   wrong on paper. */
+html[data-family="newsprint"] .state-path.active:hover,
+html[data-family="newsprint"] .state-path.selected {
+  filter: none;
+}
+
+/* Mono family — slightly brighter accent-glow on hover than Original
+   themes (mono accents are pure single-hue and the small inner-shadow
+   reads as muddy without a clear glow layer). Subtle. */
+html[data-family="mono"] .state-path.active:hover {
+  filter: drop-shadow(0 0 4px var(--accent));
+}
+
+/* Theme-switching shim ───────────────────────────────────────────────
+   When CSS vars change on :root, Chrome doesn't re-evaluate var() across
+   an in-flight `transition: all` on SVG stroke/fill — the state-paths get
+   stuck at the previous accent colour. We suspend the relevant
+   transitions for one frame while applyConfig() flips themes, then
+   restore them. */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+}
+</style>
 <script>
 (function(){
   const HEADER_H = { small:'56px', medium:'60px', large:'66px', xlarge:'73px' };
@@ -2146,7 +2334,7 @@
 
       <div class="player-section">
         <div class="player-label-row">
-          <div class="player-label">// LIVE BROADCAST &nbsp;<span id="panelLocalTime" style="font-size:0.55rem; color:var(--muted); letter-spacing:4px;"></span></div>
+          <div class="player-label">// <span id="panelLocalTime" style="font-size:0.55rem; color:var(--muted); letter-spacing:4px;"></span></div>
           <button class="share-station-btn" id="shareStationBtn" onclick="shareStation()" title="Share station">➦</button>
           <button class="sleep-clock-btn" id="sleepClockBtn" onclick="toggleSleepPicker()" title="Sleep timer">☾</button>
         </div>
@@ -2163,6 +2351,10 @@
           <button class="sleep-pick-btn" onclick="setSleepFromPicker(60)">60 MIN</button>
           <button class="sleep-pick-btn" onclick="setSleepFromPicker(90)">90 MIN</button>
         </div>
+      </div>
+
+      <div class="weather-row" id="weatherRow" style="display:none">
+        <span class="weather-label" id="weatherLabel"></span>
       </div>
 
       <div class="station-bio">
@@ -3030,6 +3222,7 @@ function showStationPanel(station) {
   window._localTimerInterval = setInterval(updateLocalTime, 1000);
   document.getElementById('bioText').textContent          = station.bio;
   document.getElementById('stationLink').href             = station.website;
+  fetchWeather(station.city, station.country || null);
   document.getElementById('stationLink').textContent      = 'VISIT ' + station.name.toUpperCase() + ' ↗';
   document.getElementById('activeFreq').textContent       = station.freq;
 
@@ -3444,8 +3637,15 @@ function _renderAsciiArtwork(station) {
   canvas.height = SIZE;
   const ctx = canvas.getContext('2d');
 
-  // Dark terminal background
-  ctx.fillStyle = '#030a04';
+  // Pull the current theme's background + accent so the OS-level media
+  // session artwork (lock screen, notification, taskbar thumbnail) matches
+  // the in-app theme rather than always painting CRT green on dark green.
+  const _rs = getComputedStyle(document.documentElement);
+  const _themeBg     = (_rs.getPropertyValue('--bg').trim()    || '#030a04');
+  const _themeAccent = (_rs.getPropertyValue('--green-dim').trim() || _rs.getPropertyValue('--accent').trim() || '#00c832');
+
+  // Theme background fill
+  ctx.fillStyle = _themeBg;
   ctx.fillRect(0, 0, SIZE, SIZE);
 
   // Fit font to art dimensions — two-pass for true pixel centering.
@@ -3462,7 +3662,7 @@ function _renderAsciiArtwork(station) {
     SIZE / (rows  * LINE_RATIO)
   ), 3);
 
-  ctx.fillStyle    = '#00c832';
+  ctx.fillStyle    = _themeAccent;
   ctx.font         = `${fontSize.toFixed(1)}px 'Share Tech Mono', monospace`;
   ctx.textBaseline = 'top';
 
@@ -4210,6 +4410,176 @@ loadChartsFromAPI();
 loadAsciiArt();
 initVolume();
 setTimeout(_resolveDeepLink, 100); // after init paints
+
+// ─── WEATHER ──────────────────────────────────────────────────────────────────
+const _weatherCache = {};
+const _WEATHER_TTL = 30 * 60 * 1000; // 30 minutes
+let _currentWeatherKey = null; // track which station's weather is shown
+
+const _WX_CODE = {
+  0:'CLEAR', 1:'MAINLY CLEAR', 2:'PARTLY CLOUDY', 3:'OVERCAST',
+  45:'FOG', 48:'FOG',
+  51:'LIGHT DRIZZLE', 53:'DRIZZLE', 55:'HEAVY DRIZZLE',
+  61:'LIGHT RAIN', 63:'RAIN', 65:'HEAVY RAIN',
+  71:'LIGHT SNOW', 73:'SNOW', 75:'HEAVY SNOW', 77:'SNOW GRAINS',
+  80:'LIGHT SHOWERS', 81:'SHOWERS', 82:'HEAVY SHOWERS',
+  85:'SNOW SHOWERS', 86:'HEAVY SNOW SHOWERS',
+  95:'THUNDERSTORM', 96:'THUNDERSTORM', 99:'THUNDERSTORM'
+};
+
+function _formatWeather(d) {
+  // d = raw weather data object from Open-Meteo current block
+  const temp    = Math.round(d.temperature_2m);
+  const feels   = Math.round(d.apparent_temperature);
+  const humid   = Math.round(d.relativehumidity_2m);
+  const wind    = Math.round(d.windspeed_10m);
+  const cloud   = Math.round(d.cloudcover);
+  const vis     = d.visibility !== undefined ? (d.visibility / 1000).toFixed(1) : null;
+  const pres    = d.surface_pressure !== undefined ? Math.round(d.surface_pressure) : null;
+  const wdir    = d.winddirection_10m !== undefined ? Math.round(d.winddirection_10m) : null;
+  const code    = d.weathercode;
+  const cond    = _WX_CODE[code] || 'UNKNOWN';
+
+  const setting = (typeof CFG !== 'undefined' && CFG.weatherDetail) ? CFG.weatherDetail : 'default';
+
+  if (setting === 'off') return null;
+
+  if (setting === 'default') {
+    return `// ${temp}°C · ${cond} · ${humid}% HUM`;
+  }
+
+  // full — build it all up
+  let parts = [`// ${temp}°C`];
+  parts.push(cond);
+  parts.push(`FEELS ${feels}°C`);
+  parts.push(`${humid}% HUM`);
+  parts.push(`WIND ${wind}KM/H`);
+  if (wdir !== null) {
+    const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+    parts.push(dirs[Math.round(wdir / 22.5) % 16]);
+  }
+  parts.push(`${cloud}% CLOUD`);
+  if (vis !== null) parts.push(`${vis}KM VIS`);
+  if (pres !== null) parts.push(`${pres}HPA`);
+  return parts.join(' · ');
+}
+
+// Odometer animation — cycles digits upward before landing on real value
+function _odometerAnimate(el, finalText) {
+  // Extract the temperature number from the text e.g. "// 14°C · CLEAR · 55% HUM"
+  const match = finalText.match(/\/\/ (-?\d+)°C/);
+  if (!match) { el.textContent = finalText; return; }
+
+  const finalTemp = parseInt(match[1], 10);
+  const prefix = '// ';
+  const suffix = finalText.slice(match[0].length); // everything after the temp
+
+  // Build digit frames: start 20 steps below final, count up
+  const FRAMES = 18;
+  const startTemp = finalTemp - FRAMES;
+  let frame = 0;
+
+  // Clear any existing animation
+  if (el._odometerTimer) clearInterval(el._odometerTimer);
+
+  el._odometerTimer = setInterval(() => {
+    if (frame >= FRAMES) {
+      el.textContent = finalText;
+      clearInterval(el._odometerTimer);
+      el._odometerTimer = null;
+      return;
+    }
+    const displayTemp = startTemp + frame;
+    el.textContent = `${prefix}${displayTemp}°C${suffix}`;
+    frame++;
+  }, 40); // 40ms per frame = ~720ms total animation
+}
+
+async function fetchWeather(city, country) {
+  const key = city + (country || '');
+  _currentWeatherKey = key;
+
+  const weatherRow = document.getElementById('weatherRow');
+  const weatherLabel = document.getElementById('weatherLabel');
+
+  // If weather is off, hide and bail
+  if (CFG.weatherDetail === 'off') {
+    weatherRow.style.display = 'none';
+    return;
+  }
+
+  const cached = _weatherCache[key];
+  if (cached && (Date.now() - cached.ts < _WEATHER_TTL)) {
+    // From cache — no animation, just display
+    const text = _formatWeather(cached.data);
+    if (text) {
+      weatherRow.style.display = '';
+      weatherLabel.textContent = text;
+    } else {
+      weatherRow.style.display = 'none';
+    }
+    return;
+  }
+
+  weatherRow.style.display = '';
+  weatherLabel.textContent = '// FETCHING WEATHER...';
+
+  try {
+    const q = encodeURIComponent(city + (country ? ', ' + country : ''));
+    const geoRes = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${q}&count=1&language=en&format=json`
+    );
+    const geoData = await geoRes.json();
+    if (!geoData.results || !geoData.results.length) {
+      weatherRow.style.display = 'none';
+      return;
+    }
+    const { latitude, longitude } = geoData.results[0];
+
+    const wxRes = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}` +
+      `&current=temperature_2m,apparent_temperature,relativehumidity_2m,weathercode,` +
+      `windspeed_10m,winddirection_10m,cloudcover,visibility,surface_pressure`
+    );
+    const wxData = await wxRes.json();
+    const rawData = wxData.current;
+
+    _weatherCache[key] = { data: rawData, ts: Date.now() };
+
+    const text = _formatWeather(rawData);
+    if (text) {
+      weatherRow.style.display = '';
+      _odometerAnimate(weatherLabel, text);
+    } else {
+      weatherRow.style.display = 'none';
+    }
+  } catch(e) {
+    weatherRow.style.display = 'none';
+  }
+}
+
+// Called by applyConfig when weatherDetail setting changes
+function _refreshWeatherDisplay() {
+  const weatherRow = document.getElementById('weatherRow');
+  const weatherLabel = document.getElementById('weatherLabel');
+  if (!weatherRow || !weatherLabel || !_currentWeatherKey) return;
+
+  if (CFG.weatherDetail === 'off') {
+    weatherRow.style.display = 'none';
+    return;
+  }
+
+  const cached = _weatherCache[_currentWeatherKey];
+  if (!cached) return;
+
+  const text = _formatWeather(cached.data);
+  if (text) {
+    weatherRow.style.display = '';
+    weatherLabel.textContent = text;
+  } else {
+    weatherRow.style.display = 'none';
+  }
+}
 </script><!-- Mobile Tab Bar -->
 <nav class="mobile-tabs" id="mobileTabs">
   <button class="mobile-tab active" id="tab-map" onclick="switchMobileTab('map')">
@@ -4251,12 +4621,26 @@ setTimeout(_resolveDeepLink, 100); // after init paints
   <div class="settings-body">
     <div class="setting-row">
       <span class="setting-label">THEME</span>
+      <button class="setting-pill" onclick="cycleFamily()" id="pill-themeFamily">ORIGINAL</button>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">VARIANT</span>
       <div class="theme-swatches" id="themeSwatches">
-        <div class="theme-swatch active" data-theme="green" style="background:#030a04;" onclick="setSetting('theme','green')" title="Green"></div>
-        <div class="theme-swatch" data-theme="amber" style="background:#0a0800;" onclick="setSetting('theme','amber')" title="Amber"></div>
-        <div class="theme-swatch" data-theme="blue" style="background:#00050f;" onclick="setSetting('theme','blue')" title="Blue"></div>
-        <div class="theme-swatch" data-theme="white" style="background:#111;" onclick="setSetting('theme','white')" title="White"></div>
-        <div class="theme-swatch" data-theme="whiteplus" style="background:#ece9e3;border-color:#ccc;" onclick="setSetting('theme','whiteplus')" title="White+"></div>
+        <!-- Original family -->
+        <div class="theme-swatch active" data-theme="green"     data-family="original" style="background:#030a04;"                   onclick="setSetting('theme','green')"     title="Green"></div>
+        <div class="theme-swatch"        data-theme="amber"     data-family="original" style="background:#0a0800;"                   onclick="setSetting('theme','amber')"     title="Amber"></div>
+        <div class="theme-swatch"        data-theme="blue"      data-family="original" style="background:#00050f;"                   onclick="setSetting('theme','blue')"      title="Blue"></div>
+        <div class="theme-swatch"        data-theme="white"     data-family="original" style="background:#111;"                      onclick="setSetting('theme','white')"     title="White"></div>
+        <div class="theme-swatch"        data-theme="whiteplus" data-family="original" style="background:#ece9e3;border-color:#ccc;" onclick="setSetting('theme','whiteplus')" title="White+"></div>
+        <!-- Mono family -->
+        <div class="theme-swatch"        data-theme="mono-cyan"       data-family="mono"      style="background:linear-gradient(135deg,#000 55%,#00e5ff 55%);"                          onclick="setSetting('theme','mono-cyan')"       title="Mono · Ice Cyan"></div>
+        <div class="theme-swatch"        data-theme="mono-yellow"     data-family="mono"      style="background:linear-gradient(135deg,#000 55%,#ffd400 55%);"                          onclick="setSetting('theme','mono-yellow')"     title="Mono · Signal Yellow"></div>
+        <div class="theme-swatch"        data-theme="mono-red"        data-family="mono"      style="background:linear-gradient(135deg,#000 55%,#ff2f3a 55%);"                          onclick="setSetting('theme','mono-red')"        title="Mono · Broadcast Red"></div>
+        <!-- Newsprint family -->
+        <div class="theme-swatch"        data-theme="news-classic"    data-family="newsprint" style="background:linear-gradient(135deg,#f1ece2 55%,#c8331f 55%);border-color:#aaa;"     onclick="setSetting('theme','news-classic')"    title="Newsprint · Classic"></div>
+        <div class="theme-swatch"        data-theme="news-broadsheet" data-family="newsprint" style="background:linear-gradient(135deg,#faf6ee 55%,#a8231a 55%);border-color:#aaa;"     onclick="setSetting('theme','news-broadsheet')" title="Newsprint · Broadsheet"></div>
+        <div class="theme-swatch"        data-theme="news-inkblue"    data-family="newsprint" style="background:linear-gradient(135deg,#f1ece2 55%,#1f3a72 55%);border-color:#aaa;"     onclick="setSetting('theme','news-inkblue')"    title="Newsprint · Ink Blue"></div>
+        <div class="theme-swatch"        data-theme="news-dark"       data-family="newsprint" style="background:linear-gradient(135deg,#1a1612 55%,#e8533d 55%);"                       onclick="setSetting('theme','news-dark')"       title="Newsprint · Dark"></div>
       </div>
     </div>
     <div class="setting-row">
@@ -4271,10 +4655,7 @@ setTimeout(_resolveDeepLink, 100); // after init paints
       <span class="setting-label">IMG CONTRAST</span>
       <button class="setting-pill" onclick="cycleSetting('contrast',['low','normal','high'])" id="pill-contrast">NORMAL</button>
     </div>
-    <div class="setting-row">
-      <span class="setting-label">LAST STATION</span>
-      <button class="setting-pill" onclick="cycleSetting('lastStation',['remember','forget'])" id="pill-lastStation">REMEMBER</button>
-    </div>
+
 <div class="setting-row" id="widgetSizeRow">
       <span class="setting-label">WIDGET SIZE</span>
       <button class="setting-pill" onclick="cycleSetting('widgetSize',['small','medium','large'])" id="pill-widgetSize">MEDIUM</button>
@@ -4286,6 +4667,10 @@ setTimeout(_resolveDeepLink, 100); // after init paints
     <div class="setting-row">
       <span class="setting-label">DEFAULT VIEW</span>
       <button class="setting-pill" onclick="cycleSetting('defaultPanel',['chart','art'])" id="pill-defaultPanel">CHART</button>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label">WEATHER</span>
+      <button class="setting-pill" onclick="cycleSetting('weatherDetail',['default','full','off'])" id="pill-weatherDetail">DEFAULT</button>
     </div>
   </div>
   <div class="settings-footer">
@@ -4303,7 +4688,7 @@ setTimeout(_resolveDeepLink, 100); // after init paints
     <div class="settings-about-links">
       <a href="https://github.com/chaos/community-radio-radar" target="_blank" rel="noopener">GITHUB</a>
       <a href="https://apraamcos.com.au" target="_blank" rel="noopener">APRA AMCOS</a>
-      <a href="mailto:hello@radioradar.au">CONTACT</a>
+      <a href="/cdn-cgi/l/email-protection#f29a979e9e9db28093969b9d8093969380dc9387">CONTACT</a>
     </div>
   </div>
 </div>
@@ -4311,7 +4696,7 @@ setTimeout(_resolveDeepLink, 100); // after init paints
 <div class="amrap-mobile-sheet" id="amrapMobileSheet"></div>
 
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
@@ -4864,22 +5249,88 @@ const THEMES = {
   blue:     { '--green': '#44aaff', '--green-dim': '#2288dd', '--bg': '#00050f', '--panel': '#000a1a', '--border': '#002a5a', '--text': '#44aaff', '--muted': '#1a5a9e', '--inactive': '#00050f', '--fg': '#2277cc', '--accent': '#44aaff', '--hover-bg': 'rgba(68,170,255,0.1)', '--hover-border': '#44aaff', '--bio-text': '#2277cc', '--glow-color': '68,170,255', '--green-dark': '#000d1f', '--active-fill': '#000814' },
   white:    { '--green': '#cccccc', '--green-dim': '#999', '--bg': '#111', '--panel': '#1c1c1c', '--border': '#333', '--text': '#bbb', '--muted': '#666', '--inactive': '#111', '--fg': '#999', '--accent': '#ddd', '--hover-bg': 'rgba(200,200,200,0.1)', '--hover-border': '#ccc', '--bio-text': '#888', '--glow-color': '200,200,200', '--green-dark': '#1a1a1a', '--active-fill': '#222' },
   whiteplus:{ '--green': '#2a2a2a', '--green-dim': '#444', '--bg': '#f0ede8', '--panel': '#e8e5e0', '--border': '#ccc', '--text': '#333', '--muted': '#888', '--inactive': '#ddd', '--fg': '#555', '--accent': '#111', '--hover-bg': 'rgba(0,0,0,0.06)', '--hover-border': '#555', '--bio-text': '#555', '--glow-color': '42,42,42', '--green-dark': '#ddd8d0', '--active-fill': '#e8e4de' },
+
+  // ── MONO FAMILY ── dark, high-contrast, single accent
+  'mono-cyan':   { '--green': '#00e5ff', '--green-dim': '#00c5dd', '--bg': '#000000', '--panel': '#0a0a0a', '--border': '#262626', '--text': '#f4f4f4', '--muted': '#8e8e8e', '--inactive': '#181818', '--fg': '#f4f4f4', '--accent': '#00e5ff', '--hover-bg': 'rgba(0,229,255,0.10)',  '--hover-border': '#00e5ff', '--bio-text': '#c8c8c8', '--glow-color': '0,229,255',   '--green-dark': '#003a44', '--active-fill': '#001a20' },
+  'mono-yellow': { '--green': '#ffd400', '--green-dim': '#ffbf00', '--bg': '#000000', '--panel': '#0a0a0a', '--border': '#262626', '--text': '#f4f4f4', '--muted': '#8e8e8e', '--inactive': '#181818', '--fg': '#f4f4f4', '--accent': '#ffd400', '--hover-bg': 'rgba(255,212,0,0.10)',  '--hover-border': '#ffd400', '--bio-text': '#c8c8c8', '--glow-color': '255,212,0',   '--green-dark': '#332a00', '--active-fill': '#1a1500' },
+  'mono-red':    { '--green': '#ff2f3a', '--green-dim': '#dd2230', '--bg': '#000000', '--panel': '#0a0a0a', '--border': '#262626', '--text': '#f4f4f4', '--muted': '#8e8e8e', '--inactive': '#181818', '--fg': '#f4f4f4', '--accent': '#ff2f3a', '--hover-bg': 'rgba(255,47,58,0.10)',  '--hover-border': '#ff2f3a', '--bio-text': '#c8c8c8', '--glow-color': '255,47,58',   '--green-dark': '#3a0a0d', '--active-fill': '#1a0a0c' },
+
+  // ── NEWSPRINT FAMILY ── editorial paper stock, serif headlines
+  'news-classic':    { '--green': '#c8331f', '--green-dim': '#a8231a', '--bg': '#f1ece2', '--panel': '#e8e1d2', '--border': '#1a1a1a', '--text': '#0e0e0e', '--muted': '#5a544a', '--inactive': '#d6cfbb', '--fg': '#0e0e0e', '--accent': '#c8331f', '--hover-bg': 'rgba(200,51,31,0.10)', '--hover-border': '#c8331f', '--bio-text': '#2a251f', '--glow-color': '200,51,31',  '--green-dark': '#dccfb0', '--active-fill': '#e3dcc7' },
+  'news-broadsheet': { '--green': '#a8231a', '--green-dim': '#8a1a14', '--bg': '#faf6ee', '--panel': '#f2ede1', '--border': '#0a0a0a', '--text': '#000000', '--muted': '#4a443a', '--inactive': '#e0d8c4', '--fg': '#000000', '--accent': '#a8231a', '--hover-bg': 'rgba(168,35,26,0.10)', '--hover-border': '#a8231a', '--bio-text': '#1a1814', '--glow-color': '168,35,26',  '--green-dark': '#e0d8c4', '--active-fill': '#ebe4cf' },
+  'news-inkblue':    { '--green': '#1f3a72', '--green-dim': '#152a58', '--bg': '#f1ece2', '--panel': '#e8e1d2', '--border': '#1a1a1a', '--text': '#0e0e0e', '--muted': '#5a544a', '--inactive': '#d6cfbb', '--fg': '#0e0e0e', '--accent': '#1f3a72', '--hover-bg': 'rgba(31,58,114,0.10)', '--hover-border': '#1f3a72', '--bio-text': '#2a251f', '--glow-color': '31,58,114',  '--green-dark': '#d6cfbb', '--active-fill': '#e3dcc7' },
+  'news-dark':       { '--green': '#e8533d', '--green-dim': '#cf3d27', '--bg': '#1a1612', '--panel': '#221d18', '--border': '#3a3128', '--text': '#f0e8d5', '--muted': '#8a7e6e', '--inactive': '#221d18', '--fg': '#f0e8d5', '--accent': '#e8533d', '--hover-bg': 'rgba(232,83,61,0.10)', '--hover-border': '#e8533d', '--bio-text': '#d6cdb8', '--glow-color': '232,83,61',  '--green-dark': '#3a2820', '--active-fill': '#2a221c' },
 };
+
+// Maps each theme to its display family.
+const THEME_FAMILY = {
+  green: 'original', amber: 'original', blue: 'original', white: 'original', whiteplus: 'original',
+  'mono-cyan': 'mono', 'mono-yellow': 'mono', 'mono-red': 'mono',
+  'news-classic': 'newsprint', 'news-broadsheet': 'newsprint', 'news-inkblue': 'newsprint', 'news-dark': 'newsprint',
+};
+
+// First variant to show when a family is selected via the FAMILY pill.
+const FAMILY_DEFAULT_THEME = {
+  original: 'green',
+  mono: 'mono-cyan',
+  newsprint: 'news-classic',
+};
+
+function cycleFamily() {
+  const order = ['original', 'mono', 'newsprint'];
+  const cur = THEME_FAMILY[CFG.theme] || 'original';
+  const next = order[(order.indexOf(cur) + 1) % order.length];
+  // Preserve the user's last variant within a family if they've used it before.
+  const lastInFamily = JSON.parse(localStorage.getItem('rrLastThemeByFamily') || '{}');
+  CFG.theme = lastInFamily[next] || FAMILY_DEFAULT_THEME[next];
+  saveConfig();
+  applyConfig();
+}
 
 const FONT_SIZES = { small: '12px', medium: '14px', large: '17px', xlarge: '20px' };
 const HEADER_H   = { small: '56px', medium: '60px', large: '66px', xlarge: '73px' };
 
-const CFG_DEFAULTS = { theme: 'green', fontSize: 'medium', scanLines: 'high', clockFormat: '12hr', contrast: 'normal', lastStation: 'remember', widgetSize: 'medium', showBio: 'show', defaultPanel: 'chart' };
+const CFG_DEFAULTS = { theme: 'green', fontSize: 'medium', scanLines: 'high', clockFormat: '12hr', contrast: 'normal', widgetSize: 'medium', showBio: 'show', defaultPanel: 'chart', weatherDetail: 'default' };
 let CFG = Object.assign({}, CFG_DEFAULTS, JSON.parse(localStorage.getItem('rrCfg') || '{}'));
 
 function saveConfig() { localStorage.setItem('rrCfg', JSON.stringify(CFG)); }
 
 function applyConfig() {
   const root = document.documentElement;
+  // Suspend transitions while we flip CSS vars. Chrome does not re-resolve
+  // var() in SVG stroke/fill (and some other places) across an in-flight
+  // `transition: all`, so without this the map keeps painting the old
+  // theme's accent indefinitely. The forced reflow below is critical —
+  // without it Chrome batches the class-add with the setProperty calls
+  // into the same frame and the suspension never takes effect.
+  root.classList.add('theme-switching');
+  void root.offsetWidth; // force reflow so .theme-switching applies before var changes
+  // Defensive: if localStorage has an unknown theme key (e.g. removed in a
+  // future version), fall back to green rather than rendering an unstyled UI.
+  if (!THEMES[CFG.theme]) CFG.theme = 'green';
   const t = THEMES[CFG.theme] || THEMES.green;
   for (const [k, v] of Object.entries(t)) root.style.setProperty(k, v);
   const themeMeta = document.querySelector('meta[name="theme-color"]');
   if (themeMeta) themeMeta.content = t['--bg'] || '#030a04';
+
+  // Theme family + variant attributes — drive CSS overrides for fonts and
+  // family-level effects (e.g. newsprint suppresses scanlines).
+  const family = THEME_FAMILY[CFG.theme] || 'original';
+  root.setAttribute('data-theme', CFG.theme);
+  root.setAttribute('data-family', family);
+  // Remember the user's last variant inside each family so cycling FAMILY
+  // returns to where they were rather than always snapping back to default.
+  try {
+    const last = JSON.parse(localStorage.getItem('rrLastThemeByFamily') || '{}');
+    last[family] = CFG.theme;
+    localStorage.setItem('rrLastThemeByFamily', JSON.stringify(last));
+  } catch (e) {}
+  const familyPill = document.getElementById('pill-themeFamily');
+  if (familyPill) familyPill.textContent = family.toUpperCase();
+  // Show only the swatches matching the current family.
+  document.querySelectorAll('.theme-swatch').forEach(s => {
+    s.style.display = (s.dataset.family === family) ? '' : 'none';
+  });
   document.documentElement.style.fontSize = FONT_SIZES[CFG.fontSize] || '14px';
   const scanOpacity = { off: '0', low: '0.03', high: '0.08' };
   root.style.setProperty('--scan-opacity', scanOpacity[CFG.scanLines] || '0.03');
@@ -4933,7 +5384,6 @@ function applyConfig() {
   if (scanPill) scanPill.textContent = (CFG.scanLines || 'high').toUpperCase();
 const contrastPill = document.getElementById('pill-contrast');
   if (contrastPill) contrastPill.textContent = (CFG.contrast || 'normal').toUpperCase();
-  document.getElementById('pill-lastStation').textContent = CFG.lastStation.toUpperCase();
 const widgetSizePill = document.getElementById('pill-widgetSize');
   if (widgetSizePill) widgetSizePill.textContent = (CFG.widgetSize || 'medium').toUpperCase();
 
@@ -4947,9 +5397,31 @@ const widgetSizePill = document.getElementById('pill-widgetSize');
   const panelPill = document.getElementById('pill-defaultPanel');
   if (panelPill) panelPill.textContent = (CFG.defaultPanel || 'chart').toUpperCase();
 
+  // Weather detail setting
+  const wxPill = document.getElementById('pill-weatherDetail');
+  if (wxPill) wxPill.textContent = (CFG.weatherDetail || 'default').toUpperCase();
+  // Refresh weather display with new setting if panel is open and we have cached data
+  _refreshWeatherDisplay();
+
   document.querySelectorAll('.theme-swatch').forEach(s => {
     s.classList.toggle('active', s.dataset.theme === CFG.theme);
   });
+
+  // The OS-level media session artwork is rendered to canvas using the
+  // current theme colours; bust its per-station cache so the next play
+  // re-renders in the new theme rather than serving the previous theme's
+  // cached green-on-dark image.
+  if (window._artworkCache) window._artworkCache = {};
+
+  // Re-enable transitions on the next paint frame, after the new var()
+  // values have been resolved into computed styles. The double-rAF
+  // guarantees the new theme paints before transitions are restored;
+  // the setTimeout is a fallback in case rAF is throttled (background
+  // tabs, devtools paused, screenshotting freezes).
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => root.classList.remove('theme-switching'));
+  });
+  setTimeout(() => root.classList.remove('theme-switching'), 120);
 }
 
 function cycleSetting(key, options) {
