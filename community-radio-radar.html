@@ -319,12 +319,22 @@
     position: absolute;
     top: 20px;
     left: 28px;
+    z-index: 2;
     font-size: 0.6rem;
     color: var(--muted);
     letter-spacing: 5px;
     text-transform: uppercase;
   }
-  @media (max-width: 700px) { .map-title { display: none; } }
+  /* Keep the title visible at the top-left on mobile (smaller), rather than
+     hidden — it should anchor the corner, not float centred. */
+  @media (max-width: 700px) {
+    .map-title {
+      display: block;
+      top: 10px; left: 12px;
+      font-size: 0.5rem; letter-spacing: 2px;
+      max-width: 70%;
+    }
+  }
 
   svg#australia-map {
     height: auto;
@@ -1034,8 +1044,12 @@
     .map-container.panel-open { margin-right: 0; }
     .world-view.panel-open    { margin-right: 0; }
     svg#australia-map {
-      margin: 0 auto; display: block;
-      width: 100%; height: auto;
+      /* Fill the available box and contain-fit via the SVG's own
+         preserveAspectRatio (xMidYMid meet) so the whole map — including
+         Tasmania — is always centred and visible regardless of the iOS
+         dynamic-viewport / URL-bar height changes. */
+      margin: 0; display: block;
+      width: 100%; height: 100%;
       max-height: 100%; max-width: 100%;
     }
     .corner-tag { bottom: 28px; left: 12px; font-size: 0.42rem; letter-spacing: 1px; }
@@ -1343,19 +1357,27 @@
   @keyframes savedPulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
   @media (max-width: 700px) {
+    /* Settings now rises from the BOTTOM like the charts / diary sheets,
+       instead of sliding in from the right, for consistent mobile motion. */
     .settings-panel {
-      top: 0;
+      top: calc(24px + env(safe-area-inset-top, 0px));
       bottom: calc(64px + env(safe-area-inset-bottom, 0px));
       height: auto;
-      right: -100vw;
+      right: 0;
+      left: 0;
       width: 100vw;
       border-left: none;
-      border-top: none;
+      border-top: 1px solid var(--border);
       overflow-y: auto;
       padding-top: 0;
+      transform: translateY(110%);
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .settings-panel.open { right: 0; }
+    .settings-panel.open { right: 0; transform: translateY(0); }
     .settings-btn { display: none; }
+
+    /* Image contrast is forced to normal on mobile — hide the control. */
+    #contrastRow { display: none !important; }
   }
 
   /* ─── WORLD VIEW ────────────────────────────────────────────────────────── */
@@ -1727,6 +1749,27 @@
   }
   .amrap-collection-pane.active { display: flex; }
   .collection-scroll { flex: 1; overflow-y: auto; padding: 6px 0; }
+
+  /* Tablet portrait: the screen is wide enough for a 2-up grid of larger tiles. */
+  @media (min-width: 701px) and (max-width: 1024px) {
+    .collection-scroll {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 12px;
+      align-content: start;
+    }
+    .collection-tile {
+      border-bottom: none !important;
+      border: 1px solid rgba(var(--glow-color), 0.14);
+      border-radius: 4px;
+      padding: 12px;
+    }
+    .collection-art { width: 52px !important; height: 52px !important; }
+    .collection-track { font-size: 1.05rem; }
+    .collection-meta  { font-size: 0.78rem; }
+    .collection-remove { font-size: 0.85rem; padding: 6px; }
+  }
   .collection-footer {
     display: flex; justify-content: space-between; align-items: center;
     padding: 6px 10px; border-top: 1px solid rgba(var(--glow-color), 0.08);
@@ -2329,9 +2372,11 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 50px;
-    flex-shrink: 0;
-    gap: 3px;
+    /* Grow to share the nav height evenly so the 5 buttons spread out and each
+       gets a large, easy-to-hit tap target instead of bunching at the top. */
+    flex: 1 1 0;
+    min-height: 56px;
+    gap: 4px;
     background: none;
     border: none;
     color: var(--muted);
@@ -2342,6 +2387,7 @@
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
+  .ls-nav-btn svg { width: 22px; height: 22px; }
   .ls-nav-btn:active,
   .ls-nav-btn.active {
     color: var(--accent);
@@ -2355,7 +2401,8 @@
     line-height: 1;
     pointer-events: none;
   }
-  .ls-nav-spacer { flex: 1 0 8px; min-height: 8px; }
+  /* No bottom spacer — buttons now flex-fill the whole nav height. */
+  .ls-nav-spacer { display: none; }
   .ls-nav-divider {
     width: 28px;
     height: 1px;
@@ -2560,13 +2607,15 @@
   }
 
   /* ─── LOG NOW BUTTON ─────────────────────────────────────────────── */
+  /* log-now (✎) and sleep-clock (☾) share identical box dimensions so the
+     two icons line up as equal squares regardless of glyph width. */
   .log-now-btn {
     background: none;
     border: 1px solid var(--border);
     color: var(--muted);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 1.1rem;
-    padding: 2px 8px;
+    font-size: 1rem;
+    width: 34px; height: 34px; padding: 0;
     cursor: pointer;
     white-space: nowrap;
     flex-shrink: 0;
@@ -2596,12 +2645,13 @@
     border: 1px solid var(--border);
     color: var(--muted);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 1.1rem;
-    padding: 2px 8px;
+    font-size: 1rem;
+    width: 34px; height: 34px; padding: 0;
     cursor: pointer;
     transition: color 0.15s, border-color 0.15s;
     white-space: nowrap;
     flex-shrink: 0;
+    line-height: 1;
   }
   .sleep-clock-btn:hover { color: var(--green); border-color: var(--green-dim); }
   .sleep-clock-btn.active {
@@ -4270,14 +4320,18 @@ const SEARCH_PROVIDERS = {
   google:  { label: 'GOOGLE',        url: q => 'https://www.google.com/search?q=' + encodeURIComponent(q) },
   ytmusic: { label: 'YOUTUBE MUSIC', url: q => 'https://music.youtube.com/search?q=' + encodeURIComponent(q) },
   spotify: { label: 'SPOTIFY',       url: q => 'https://open.spotify.com/search/' + encodeURIComponent(q) },
-  bandcamp:{ label: 'BANDCAMP',      url: q => 'https://bandcamp.com/search?q=' + encodeURIComponent(q) }
+  bandcamp:{ label: 'BANDCAMP',      url: q => 'https://bandcamp.com/search?q=' + encodeURIComponent(q) },
+  off:     { label: 'OFF',           url: null }
 };
-const SEARCH_PROVIDER_ORDER = ['google', 'ytmusic', 'spotify', 'bandcamp'];
+const SEARCH_PROVIDER_ORDER = ['google', 'ytmusic', 'spotify', 'bandcamp', 'off'];
 
 function _lookupSong(artist, track) {
+  // 'off' — keep the user inside the app (no external navigation)
+  if (typeof CFG !== 'undefined' && CFG.searchProvider === 'off') return;
   const q = ((artist || '') + ' ' + (track || '')).trim();
   if (!q) return;
   const prov = SEARCH_PROVIDERS[(typeof CFG !== 'undefined' && CFG.searchProvider)] || SEARCH_PROVIDERS.google;
+  if (!prov.url) return;
   window.open(prov.url(q), '_blank');
 }
 
@@ -4944,6 +4998,11 @@ function renderAMRAP(data) {
     el.style.cursor = 'pointer';
     el.title = 'Search ' + (t.artist || '') + ' — ' + (t.title || '');
     el.onclick = () => _lookupSong(t.artist, t.title);
+    _entryData(el, {
+      artist: t.artist || '', track: t.title || '', album: t.title || '',
+      station: 'AMRAP', stationId: '',
+      imgSrc: t.localImg || t.imgSrc || t.remoteImg || '', source: 'AMRAP Metro Chart'
+    });
 
     const thumb = document.createElement('div');
     thumb.className = 'amrap-thumb';
@@ -5071,6 +5130,33 @@ function _populateAmrapSheet() {
     if (el) el.remove();
   });
   sheet.innerHTML = clone.innerHTML;
+
+  // cloneNode/innerHTML does NOT copy the .onclick handlers, so wire the sheet
+  // up ONCE with a delegated listener that reads the data-* attributes on each
+  // entry. This makes both song lookup (tap row) and add-to-collection (tap +)
+  // work inside the cloned sheet. (#3)
+  if (!sheet.dataset.delegated) {
+    sheet.dataset.delegated = '1';
+    sheet.addEventListener('click', function(e) {
+      const addBtn = e.target.closest('.add-to-coll-btn');
+      const entry  = e.target.closest('.amrap-entry, .chart-entry');
+      if (addBtn && entry) {
+        e.stopPropagation();
+        if (addBtn.classList.contains('added')) { _showCollToast('Already in Collection'); return; }
+        const d = entry.dataset;
+        const added = addToCollection({
+          artist: d.artist, track: d.track, album: d.album,
+          station: d.station, stationId: d.stationid, imgSrc: d.img, source: d.source
+        });
+        addBtn.textContent = '✓';
+        addBtn.classList.add('added');
+        _showCollToast(added === false ? 'Already in Collection' : 'Added to Collection');
+        if (typeof _haptic === 'function') _haptic(8);
+        return;
+      }
+      if (entry) _lookupSong(entry.dataset.artist, entry.dataset.track);
+    });
+  }
 }
 
 function _syncAmrapSheetIfOpen() {
@@ -5478,6 +5564,20 @@ function _isInCollection(artist, track) {
   return items.some(i => (i.artist || '') + '||' + (i.track || '') === key);
 }
 
+// Tag an entry element with the data needed to (a) look the song up and
+// (b) add it to the collection — via data-* attributes. These survive an
+// innerHTML clone (unlike .onclick handlers), so the cloned mobile charts
+// sheet can drive both actions through one delegated listener.
+function _entryData(el, d) {
+  el.dataset.artist    = d.artist    || '';
+  el.dataset.track     = d.track     || '';
+  el.dataset.album     = d.album     || '';
+  el.dataset.source    = d.source    || '';
+  el.dataset.station   = d.station   || '';
+  el.dataset.stationid = d.stationId || '';
+  el.dataset.img       = d.imgSrc    || '';
+}
+
 // Build a consistent "+ / ✓" add button with clear feedback. Used by every
 // chart/editorial/AMRAP entry so behaviour is identical everywhere.
 function _makeAddButton(data) {
@@ -5772,44 +5872,91 @@ async function shareCollection() {
   ctx.strokeStyle = muted; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(80, 300); ctx.lineTo(W - 80, 300); ctx.stroke();
 
-  // Track list
+  // Preload album art (CORS-safe). Images that don't allow cross-origin use
+  // simply resolve to null and get a placeholder box — this keeps the canvas
+  // un-tainted so toBlob() always succeeds.
+  function _loadImg(src) {
+    return new Promise(resolve => {
+      if (!src) return resolve(null);
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      let done = false;
+      const finish = v => { if (!done) { done = true; resolve(v); } };
+      img.onload = () => finish(img);
+      img.onerror = () => finish(null);
+      setTimeout(() => finish(null), 4000);
+      img.src = src;
+    });
+  }
+  const arts = await Promise.all(shown.map(it => _loadImg(it.imgSrc)));
+
+  // Track list — each row has the album art on the RIGHT
   let y = 360;
-  const rowH = 88;
+  const rowH = 92;
+  const artSize = 62;
   shown.forEach((it, i) => {
-    ctx.fillStyle = panel; ctx.fillRect(80, y - 50, W - 160, rowH - 14);
+    const rowTop = y - 54;
+    ctx.fillStyle = panel; ctx.fillRect(80, rowTop, W - 160, rowH - 12);
+
+    // rank
     ctx.fillStyle = accent;
     ctx.font = '700 40px "Share Tech Mono", monospace';
+    ctx.textBaseline = 'alphabetic';
     ctx.fillText(String(i + 1).padStart(2, '0'), 104, y);
+
+    // track title
     ctx.fillStyle = text;
     ctx.font = '600 38px "Inter", sans-serif';
-    const track = (it.track || it.artist || '').slice(0, 34);
-    ctx.fillText(track, 180, y - 8);
+    ctx.fillText((it.track || it.artist || '').slice(0, 30), 180, y - 8);
+
+    // artist — bigger than before
     ctx.fillStyle = muted;
-    ctx.font = '400 26px "Share Tech Mono", monospace';
-    const meta = [it.artist, it.source].filter(Boolean).join('  ·  ').slice(0, 52);
-    ctx.fillText(meta, 180, y + 26);
+    ctx.font = '500 31px "Inter", sans-serif';
+    const meta = [it.artist, it.source].filter(Boolean).join('  ·  ').slice(0, 46);
+    ctx.fillText(meta, 180, y + 28);
+
+    // album art thumbnail on the right
+    const ax = W - 80 - artSize - 12;
+    const ay = rowTop + (rowH - 12 - artSize) / 2;
+    if (arts[i]) {
+      ctx.save();
+      ctx.beginPath(); ctx.rect(ax, ay, artSize, artSize); ctx.clip();
+      ctx.drawImage(arts[i], ax, ay, artSize, artSize);
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+      ctx.strokeRect(ax, ay, artSize, artSize);
+    } else {
+      ctx.fillStyle = bg; ctx.fillRect(ax, ay, artSize, artSize);
+      ctx.strokeStyle = muted; ctx.lineWidth = 1; ctx.strokeRect(ax, ay, artSize, artSize);
+      ctx.fillStyle = muted; ctx.font = '400 16px "Share Tech Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('ART', ax + artSize / 2, ay + artSize / 2 + 6);
+      ctx.textAlign = 'left';
+    }
     y += rowH;
   });
 
   if (items.length > shown.length) {
     ctx.fillStyle = muted;
     ctx.font = '400 28px "Share Tech Mono", monospace';
-    ctx.fillText('+ ' + (items.length - shown.length) + ' more…', 104, y + 10);
+    ctx.fillText('+ ' + (items.length - shown.length) + ' more…', 104, y + 12);
   }
 
-  // Footer
+  // Footer — link to the site
   ctx.fillStyle = accent;
-  ctx.font = '400 26px "Share Tech Mono", monospace';
-  ctx.fillText('communityradioradar.online', 80, H - 80);
+  ctx.font = '700 28px "Share Tech Mono", monospace';
+  ctx.fillText('communityradioradar.online', 80, H - 78);
 
   const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
   if (!blob) { alert('Could not generate share image.'); return; }
   const file = new File([blob], 'radio-radar-hits.png', { type: 'image/png' });
-  const shareText = 'My Radio Radar Hits — ' + dateStr + ' · found on Community Radio Radar';
+  // No date in the caption; lead with the link so it travels with the image.
+  const shareText = 'My Radio Radar Hits — curated on Community Radio Radar';
+  const shareUrl  = 'https://communityradioradar.online';
 
   try {
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'Radio Radar Hits', text: shareText });
+      await navigator.share({ files: [file], title: 'Radio Radar Hits', text: shareText, url: shareUrl });
       return;
     }
   } catch (e) { if (e && e.name === 'AbortError') return; }
@@ -6532,6 +6679,11 @@ function _renderEditorial(source) {
     const q = ((t.artist || '') + ' ' + (t.album || t.track || '')).trim();
     el.onclick = () => _lookupSong(t.artist, t.album || t.track);
     el.title = 'Search ' + q;
+    _entryData(el, {
+      artist: t.artist || '', track: t.album || t.track || '', album: t.album || '',
+      station: source.station || '', stationId: '',
+      imgSrc: t.imgSrc || '', source: source.chart_title || source.station || ''
+    });
 
     const rank = document.createElement('div');
     rank.className = 'amrap-rank' + (i === 0 ? ' top1' : '');
@@ -6610,8 +6762,12 @@ function _renderDualStack(sourceA, sourceB) {
       const el = document.createElement('div');
       el.className = 'amrap-entry editorial-entry editorial-stack-entry';
       el.style.cursor = 'pointer';
-      const q = ((t.artist || '') + ' ' + (t.album || t.track || '')).trim();
-      el.onclick = () => window.open('https://www.google.com/search?q=' + encodeURIComponent(q), '_blank');
+      el.onclick = () => _lookupSong(t.artist, t.album || t.track);
+      _entryData(el, {
+        artist: t.artist || '', track: t.album || t.track || '', album: t.album || '',
+        station: src.station || '', stationId: '',
+        imgSrc: t.imgSrc || '', source: src.chart_title || src.station || ''
+      });
 
       const rank = document.createElement('div');
       rank.className = 'amrap-rank';
@@ -6854,14 +7010,6 @@ function _refreshWeatherDisplay() {
 }
 </script><!-- Mobile Tab Bar -->
 <nav class="mobile-tabs" id="mobileTabs">
-  <button class="mobile-tab active" id="tab-map" onclick="switchMobileTab('map')">
-    <svg class="mobile-tab-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
-      <path d="M3 6 L10 4 L18 7 L25 5 L25 22 L18 24 L10 21 L3 23 Z"/>
-      <line x1="10" y1="4" x2="10" y2="21"/>
-      <line x1="18" y1="7" x2="18" y2="24"/>
-    </svg>
-    MAP
-  </button>
   <button class="mobile-tab" id="tab-config" onclick="switchMobileTab('config')">
     <svg class="mobile-tab-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
       <line x1="3" y1="8" x2="25" y2="8"/>
@@ -6882,6 +7030,14 @@ function _refreshWeatherDisplay() {
       <path d="M5 19 Q14 17 23 19"/>
     </svg>
     WORLD
+  </button>
+  <button class="mobile-tab active" id="tab-map" onclick="switchMobileTab('map')">
+    <svg class="mobile-tab-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M3 6 L10 4 L18 7 L25 5 L25 22 L18 24 L10 21 L3 23 Z"/>
+      <line x1="10" y1="4" x2="10" y2="21"/>
+      <line x1="18" y1="7" x2="18" y2="24"/>
+    </svg>
+    MAP
   </button>
   <button class="mobile-tab" id="tab-charts" onclick="switchMobileTab('charts')">
     <svg class="mobile-tab-icon" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
@@ -6937,7 +7093,7 @@ function _refreshWeatherDisplay() {
       <span class="setting-label">FONT SIZE</span>
       <button class="setting-pill" onclick="cycleSetting('fontSize',['small','medium','large','xlarge'])" id="pill-fontSize">MEDIUM</button>
     </div>
-    <div class="setting-row">
+    <div class="setting-row" id="contrastRow">
       <span class="setting-label">IMG CONTRAST</span>
       <button class="setting-pill" onclick="cycleSetting('contrast',['low','normal','high'])" id="pill-contrast">NORMAL</button>
     </div>
@@ -6960,7 +7116,7 @@ function _refreshWeatherDisplay() {
     </div>
     <div class="setting-row">
       <span class="setting-label">SONG SEARCH</span>
-      <button class="setting-pill" onclick="cycleSetting('searchProvider',['google','ytmusic','spotify','bandcamp'])" id="pill-searchProvider">GOOGLE</button>
+      <button class="setting-pill" onclick="cycleSetting('searchProvider',['google','ytmusic','spotify','bandcamp','off'])" id="pill-searchProvider">GOOGLE</button>
     </div>
     <div class="setting-row">
       <span class="setting-label">NOTES</span>
@@ -7222,8 +7378,21 @@ if (FLAIR_COORD_TIP) {
 // ── CHART WAVEFORM HOVER ───────────────────────────────────────
 if (FLAIR_WAVE_CHARTS) {
   const WAVE_CSS = `
-    .chart-wave { display:none; align-items:center; gap:2px; height:14px; margin-left:auto; padding-right:4px; }
-    .chart-entry:hover .chart-wave { display:flex; }
+    /* Hover waveform is purely decorative. It's positioned ABSOLUTELY so it
+       never shifts the layout (and never pushes the + button sideways), and
+       only shown on devices with a true hover pointer — so a tap on touch
+       devices never triggers a sticky-hover shift that moves the + button. */
+    .chart-wave { display:none; }
+    @media (hover: hover) and (pointer: fine) {
+      .chart-wave {
+        align-items:center; gap:2px; height:14px;
+        position:absolute; right:44px; top:50%; transform:translateY(-50%);
+        pointer-events:none; opacity:0;
+        transition: opacity 0.15s;
+      }
+      .chart-entry { position: relative; }
+      .chart-entry:hover .chart-wave { display:flex; opacity:1; }
+    }
     .chart-wave span {
       display:inline-block; width:2px; background:rgba(var(--glow-color,0,255,65),0.7);
       border-radius:1px; animation: cw-pulse 0.5s ease-in-out infinite alternate;
@@ -7690,10 +7859,14 @@ function applyConfig() {
     }
   });
 
+  // Image contrast — less pertinent on phones, so it's forced to normal there
+  // (and the setting row is hidden via CSS on mobile).
+  const _mobileContrast = window.innerWidth <= 700;
   const contrastMap = { low: '80%', normal: '100%', high: '130%' };
-  const contrastVal = contrastMap[CFG.contrast] || '100%';
+  const effContrast = _mobileContrast ? 'normal' : (CFG.contrast || 'normal');
+  const contrastVal = contrastMap[effContrast] || '100%';
   root.style.setProperty('--img-contrast', contrastVal);
-  document.getElementById('appContainer').style.filter = CFG.contrast === 'normal' ? '' : 'contrast(' + contrastVal + ')';
+  document.getElementById('appContainer').style.filter = effContrast === 'normal' ? '' : 'contrast(' + contrastVal + ')';
 
   document.getElementById('pill-fontSize').textContent = FONT_SIZE_LABELS[CFG.fontSize] || CFG.fontSize.toUpperCase();
 const contrastPill = document.getElementById('pill-contrast');
