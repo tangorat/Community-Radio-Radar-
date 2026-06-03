@@ -1,0 +1,1416 @@
+{
+  "generated_at": "2026-06-03T10:59:44.123690+00:00",
+  "charts": {
+    "triple_r": {
+      "station": "VIC",
+      "chart_title": "Triple R Soundscape",
+      "chart_subtitle": "Weekly featured releases - 1 June 2026",
+      "updated": "2026-06-03T10:59:11.636256+00:00",
+      "source_url": "https://www.rrr.org.au/explore/soundscape/triple-r-soundscape-1-2026",
+      "tracks": [
+        {
+          "rank": 1,
+          "artist": "Eddy Current Suppression Ring",
+          "track": "In Light of Recent Events",
+          "label": "Independent",
+          "type": "featured_album",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/92/e7/98/92e798b1-20d6-bbf7-52d9-00b327bb9afe/447754.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 2,
+          "artist": "Mulga Bore Hard Rock",
+          "track": "Sweet Home Mulga Bore",
+          "label": "Community Music",
+          "type": "featured_album",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/2c/50/e1/2c50e1d5-86da-a3f2-de0d-53c9fe3537a5/8721253778097.png/200x200bb.jpg"
+        },
+        {
+          "rank": 3,
+          "artist": "Kuzco",
+          "track": "Bound To Be",
+          "label": "Energy Exchange Records",
+          "type": "featured_album",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/e9/86/8f/e9868f75-19aa-fa8b-27dc-c4461a3bba0b/4070209012537_3000.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 4,
+          "artist": "Clear Path Ensemble",
+          "track": "Ascending",
+          "label": "CPE",
+          "type": "featured_album",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/6b/80/4a/6b804a3a-3d00-b649-9465-e6a5452498ce/artwork.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 5,
+          "artist": "Brian Jackson",
+          "track": "Now More Than Ever",
+          "label": "BBE",
+          "type": "featured_album",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/3f/31/9f/3f319f2c-c1ca-7b6d-2613-1f1a50d8aa2c/199066570043.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 6,
+          "artist": "Marisa Anderson",
+          "track": "The Anthology of UnAmerican Folk Music",
+          "label": "Thrill Jockey",
+          "type": "featured_album",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/63/eb/43/63eb439d-554f-f4f0-f805-c0bc095a8639/790377065466.png/200x200bb.jpg"
+        },
+        {
+          "rank": 7,
+          "artist": "Boards of Canada",
+          "track": "Inferno",
+          "label": "Warp/Inertia",
+          "type": "featured_album",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/18/f7/ee/18f7ee40-b891-3d7f-e0b3-e4e2470cbdac/5056818808906.png/200x200bb.jpg"
+        },
+        {
+          "rank": 8,
+          "artist": "Thee Marloes",
+          "track": "Di Hotel Malibu",
+          "label": "Big Crown",
+          "type": "featured_album",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/04/50/9a/04509a0e-0ee7-d92c-9848-d2d3ec8fcc0d/63172.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 9,
+          "artist": "LXRP",
+          "track": "LXRP",
+          "label": "Trans-Brunswick Express",
+          "type": "featured_album",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/6e/6c/9a/6e6c9a49-3f44-7ec4-1ab9-44ab6da34abb/TBE202606.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 10,
+          "artist": "Ela Stiles",
+          "track": "Rassberry EP",
+          "label": "Felt Sense Records",
+          "type": "featured_album",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/fb/31/dd/fb31dd7c-9ca4-f511-db2d-a87d02bd688b/artwork.jpg/200x200bb.jpg"
+        }
+      ]
+    },
+    "rtrfm": {
+      "station": "WA",
+      "chart_title": "RTRFM Featured Music",
+      "chart_subtitle": "This week's picks - This week",
+      "updated": "2026-06-03T10:59:19.686404+00:00",
+      "source_url": "https://rtrfm.com.au/featured-music/rtrfm-featured-music-1-june-2026/",
+      "tracks": [
+        {
+          "rank": 1,
+          "artist": "Boards Of Canada",
+          "track": "Father And Son",
+          "label": "Inferno",
+          "type": "sound_selection",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/18/f7/ee/18f7ee40-b891-3d7f-e0b3-e4e2470cbdac/5056818808906.png/200x200bb.jpg"
+        },
+        {
+          "rank": 2,
+          "artist": "Aja Monet",
+          "track": "Say It With Your Chest",
+          "label": "The Color Of Rain",
+          "type": "sound_selection",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/75/c2/48/75c24802-2830-2a49-c008-dd52bc20bc8b/61659.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 3,
+          "artist": "Catherine Traicos",
+          "track": "Beauty Of The Moon (A Glimpse Of Scene 1)",
+          "label": "In The Heart Of The Night",
+          "type": "sound_selection",
+          "imgSrc": ""
+        },
+        {
+          "rank": 4,
+          "artist": "Dorsal X Loksr",
+          "track": "Kryptkeeper (Feat. Skeeny)",
+          "label": "Liquid Memories",
+          "type": "sound_selection",
+          "imgSrc": ""
+        },
+        {
+          "rank": 5,
+          "artist": "Lxrp",
+          "track": "Decouple",
+          "label": "Lxrp",
+          "type": "sound_selection",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/6e/6c/9a/6e6c9a49-3f44-7ec4-1ab9-44ab6da34abb/TBE202606.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 6,
+          "artist": "Mock Media",
+          "track": "Mock City Rock",
+          "label": "Rat Bastard",
+          "type": "sound_selection",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/f7/0a/77/f70a7712-8b0f-97f5-8117-30ec1aa20f0d/820200562852.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 7,
+          "artist": "Nana Osei Twum Barin",
+          "track": "Moni Ft. Lara Rosseel",
+          "label": "Journey To The Unknown",
+          "type": "sound_selection",
+          "imgSrc": ""
+        },
+        {
+          "rank": 8,
+          "artist": "Mulga Bore Hard Rock",
+          "track": "Warna Prut",
+          "label": "Sweet Home Mulga Bore",
+          "type": "sound_selection",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/5d/28/e1/5d28e100-c707-fff7-8caf-74e6c69bfffd/8721465967180.png/200x200bb.jpg"
+        },
+        {
+          "rank": 9,
+          "artist": "Ratsalad",
+          "track": "Fiidc",
+          "label": "Pest From The West",
+          "type": "sound_selection",
+          "imgSrc": ""
+        },
+        {
+          "rank": 10,
+          "artist": "Spacerhead",
+          "track": "Major Look",
+          "label": "Yo Mama Preach De Soya X",
+          "type": "sound_selection",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/6e/77/03/6e7703eb-d36d-1d07-b6f3-13d9df42b999/193468.jpg/200x200bb.jpg"
+        }
+      ]
+    },
+    "three_d": {
+      "station": "SA",
+      "chart_title": "Three D Radio Top 20+1",
+      "chart_subtitle": "Week ending This week",
+      "updated": "2026-06-03T10:59:21.207436+00:00",
+      "source_url": "https://threedradio.com/chart/various-artists-this-cant-be-today-american-psychedelia-the-paisley-underground-1977-1988-2/",
+      "tracks": [
+        {
+          "rank": 1,
+          "artist": "Various Artists",
+          "track": "This Can'T Be Today: American Psychedelia & The Paisley Underground 1977-1988",
+          "label": "International",
+          "last_week": "1",
+          "type": "chart",
+          "imgSrc": ""
+        },
+        {
+          "rank": 2,
+          "artist": "Pearly Stars",
+          "track": "The Greatest Gift",
+          "label": "Local",
+          "last_week": "3",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/67/96/61/679661d5-f4d9-573a-04a8-4c61048e7e88/artwork.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 3,
+          "artist": "Swapmeet",
+          "track": "Sand",
+          "label": "Local",
+          "last_week": "9",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/01/fa/bc/01fabcf2-d6fe-a523-17df-16dc847de3c0/64086.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 4,
+          "artist": "Mince For Vince",
+          "track": "Apartment",
+          "label": "Local",
+          "last_week": "20",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/e8/d7/65/e8d765e3-d4ca-3391-66da-09f4a53e1097/artwork.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 5,
+          "artist": "Courtney Barnett",
+          "track": "Creature Of Habit",
+          "label": "Australian",
+          "last_week": "Re-Entry",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/d2/6e/66/d26e665d-be8a-ec36-cff7-9b6e788267de/198704848773_Cover.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 6,
+          "artist": "Ryan Martin John",
+          "track": "Honey, Honey",
+          "label": "Local",
+          "last_week": "8",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/4d/42/73/4d42738b-51c5-7726-310b-afca2cfa819f/438383.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 7,
+          "artist": "Any Young Mechanic",
+          "track": "Pretty Strange World",
+          "label": "Local",
+          "last_week": "17",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/86/e5/fe/86e5fe1e-dd8f-688d-06f7-72dd30d971bf/093624823940.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 8,
+          "artist": "Ebop",
+          "track": "You Stole My Name",
+          "label": "Local",
+          "last_week": "2",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/4a/40/f7/4a40f781-ac0c-93d9-c911-22b78b678ac4/431693.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 9,
+          "artist": "Paula Standing",
+          "track": "Pink Feather Dress",
+          "label": "Local",
+          "last_week": "7",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/53/79/b0/5379b077-c6a6-857b-9fcc-7dda418f7826/5063960624308_cover.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 10,
+          "artist": "Glassxteeth",
+          "track": "Whispers Heard Through Waiting Room Windows",
+          "label": "Local",
+          "last_week": "Re-Entry",
+          "type": "chart",
+          "imgSrc": ""
+        },
+        {
+          "rank": 11,
+          "artist": "Sacrificial Larynx",
+          "track": "Model Citizen",
+          "label": "Local",
+          "last_week": "Re-Entry",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/76/d9/c6/76d9c6d2-8e47-c94c-f89a-dda45969b18f/artwork.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 12,
+          "artist": "Cagefly Discarded",
+          "track": "Headlights (Discarded Remix)",
+          "label": "Local",
+          "last_week": "5",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/a7/f6/7b/a7f67b1f-cb78-d6ad-c0d8-29d94de4cf2e/441236.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 13,
+          "artist": "Caressa",
+          "track": "I Don'T Wanna Know",
+          "label": "Local",
+          "last_week": "Re-Entry",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/85/d6/cc/85d6cc27-85f2-6bfe-dca7-a966e2bc0cee/00602557378047.rgb.jpg/200x200bb.jpg"
+        }
+      ]
+    },
+    "zzz": {
+      "station": "QLD",
+      "chart_title": "4ZZZ Chart Show",
+      "chart_subtitle": "Top 20 most played - This week",
+      "updated": "2026-06-03T10:59:22.611531+00:00",
+      "source_url": "https://4zzz.org.au/program/the-chart-show",
+      "tracks": [
+        {
+          "rank": 1,
+          "artist": "The Phosphenes",
+          "track": "D.Y.V",
+          "label": "",
+          "locality": "LOCAL",
+          "type": "chart",
+          "imgSrc": ""
+        },
+        {
+          "rank": 2,
+          "artist": "Drifting Clouds",
+          "track": "Rarrandharr",
+          "label": "",
+          "locality": "AUS",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/c1/01/83/c101837c-8679-ef97-406a-119e025c510e/7321170941447.png/200x200bb.jpg"
+        },
+        {
+          "rank": 3,
+          "artist": "Teenage Joans",
+          "track": "Coming Up From Hell",
+          "label": "",
+          "locality": "AUS",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/07/70/1f/07701f8e-fbd1-c4e4-de8c-4411868c2cf3/820200938343.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 4,
+          "artist": "Violent Soho",
+          "track": "Golden Days",
+          "label": "",
+          "locality": "LOCAL",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/58/90/93/589093fa-1f7e-22b4-5ee6-4d866c45930d/9787.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 5,
+          "artist": "Bikini Kill",
+          "track": "Liar",
+          "label": "",
+          "locality": "",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music3/v4/f2/5d/2c/f25d2c8b-4b0a-90fb-6087-6286a4a22b55/BK001digart.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 6,
+          "artist": "Ursula",
+          "track": "Save Victoria Park Barrambin",
+          "label": "",
+          "locality": "LOCAL",
+          "type": "chart",
+          "imgSrc": ""
+        },
+        {
+          "rank": 7,
+          "artist": "Death In Vegas",
+          "track": "Aisha",
+          "label": "",
+          "locality": "",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music/a9/37/24/mzi.wxaahujt.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 8,
+          "artist": "dirty linen",
+          "track": "LEAVE ME ALONE",
+          "label": "",
+          "locality": "LOCAL",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/1c/fb/1d/1cfb1dec-aa4c-1cd7-da73-9d8b27e0ac41/886448798040.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 9,
+          "artist": "Lonely Sort Of Death",
+          "track": "Cuts Like A Knife",
+          "label": "",
+          "locality": "LOCAL",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/62/91/5f/62915f33-ce25-f398-a1a9-a30e1e4be889/438556.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 10,
+          "artist": "Ringlets",
+          "track": "Hard Evidence",
+          "label": "",
+          "locality": "",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/62/0f/78/620f7824-680f-150c-0936-807b18ca0d21/617230800791.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 11,
+          "artist": "Parquet Courts",
+          "track": "Almost Had To Start A Fight / In And Out Of Patience",
+          "label": "",
+          "locality": "",
+          "type": "chart",
+          "imgSrc": ""
+        },
+        {
+          "rank": 12,
+          "artist": "Ruby Mae",
+          "track": "Aunty",
+          "label": "",
+          "locality": "AUS",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/9e/ad/8e/9ead8e7f-5fc8-e5af-bb3a-06614723920e/430771.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 13,
+          "artist": "Babyccino",
+          "track": "Violent Fate",
+          "label": "",
+          "locality": "AUS",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/f6/be/83/f6be8362-4b60-42ad-f24e-ecbfc193aba5/5063960682544_cover.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 14,
+          "artist": "Swapmeet",
+          "track": "2 C U",
+          "label": "",
+          "locality": "AUS",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/01/fa/bc/01fabcf2-d6fe-a523-17df-16dc847de3c0/64086.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 15,
+          "artist": "Dry Cleaning",
+          "track": "Strong Feelings",
+          "label": "",
+          "locality": "",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/97/88/77/978877e3-628d-3b5a-4108-e8112e3df12e/191400025479.png/200x200bb.jpg"
+        },
+        {
+          "rank": 16,
+          "artist": "Eddy Current Suppression Ring",
+          "track": "Bop",
+          "label": "",
+          "locality": "AUS",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/92/e7/98/92e798b1-20d6-bbf7-52d9-00b327bb9afe/447754.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 17,
+          "artist": "Gashhound",
+          "track": "Weird Boob",
+          "label": "",
+          "locality": "LOCAL",
+          "type": "chart",
+          "imgSrc": ""
+        },
+        {
+          "rank": 18,
+          "artist": "Rat Revenge",
+          "track": "I Hate Myself",
+          "label": "",
+          "locality": "LOCAL",
+          "type": "chart",
+          "imgSrc": ""
+        },
+        {
+          "rank": 19,
+          "artist": "Vinted Vineer",
+          "track": "Hope",
+          "label": "",
+          "locality": "LOCAL",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/bb/86/64/bb866487-8819-bf68-507b-401a8e216689/418536.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 20,
+          "artist": "Tiahn",
+          "track": "Bitch Face",
+          "label": "",
+          "locality": "LOCAL",
+          "type": "chart",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/f6/49/e1/f649e18b-281b-9b93-9d86-15a2c6549d84/433570.jpg/200x200bb.jpg"
+        }
+      ]
+    },
+    "fbi": {
+      "station": "NSW",
+      "chart_title": "FBI Radio The Playlist",
+      "chart_subtitle": "Weekly new releases - 29.05.2026",
+      "updated": "2026-06-03T10:59:29.686950+00:00",
+      "source_url": "https://www.fbi.radio/programs/the-playlist/episodes/the-playlist-29th-may-2026",
+      "tracks": [
+        {
+          "rank": 1,
+          "artist": "Jewel Owusu",
+          "track": "blurryeyed",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/bf/08/7e/bf087e87-b9c5-4e3a-e003-b0d0f192a724/437992.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 2,
+          "artist": "Cob",
+          "track": "Breathing",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/5f/b9/1b/5fb91bc6-8b2d-5030-2dec-af15c572e651/artwork.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 3,
+          "artist": "Marcus Whale",
+          "track": "Unborn",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/80/bc/4e/80bc4eaf-9569-1cc8-de51-f410b3dcad9e/artwork.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 4,
+          "artist": "Swapmeet",
+          "track": "2 C U",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/01/fa/bc/01fabcf2-d6fe-a523-17df-16dc847de3c0/64086.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 5,
+          "artist": "Miles Nautu",
+          "track": "closer",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": ""
+        },
+        {
+          "rank": 6,
+          "artist": "Bb trickz",
+          "track": "le le",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/68/a1/c4/68a1c477-2aef-e6d4-2715-7947c7976a06/196874386231.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 7,
+          "artist": "Erika Ever",
+          "track": "2 Hours (feat. Teether)",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": ""
+        },
+        {
+          "rank": 8,
+          "artist": "They Are Gutting A Body Of Water & Horse Jumper of Love",
+          "track": "charter spec",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/ae/1e/85/ae1e85fc-68bc-56ca-46a2-26362e16c318/1690.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 9,
+          "artist": "Air Max '97",
+          "track": "Fool's Errand",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/a7/61/b3/a761b317-b90c-099e-2bc3-3a90b9c3d32b/16632.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 10,
+          "artist": "Shewita",
+          "track": "Geminii",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/07/3c/86/073c8634-7b74-1010-3f0b-64fd4498581d/MIE039C.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 11,
+          "artist": "Duval Timothy & Carlos Niño",
+          "track": "beautiful, tender, colours (feat. Navy Blue)",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/82/1b/c3/821bc36f-d7e1-f80e-1722-0834da051566/artwork.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 12,
+          "artist": "Blood Lotus",
+          "track": "Nightfall (feat. Heart Armour)",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": ""
+        },
+        {
+          "rank": 13,
+          "artist": "Cloud Ice 9",
+          "track": "Ghost In The Shirt",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": ""
+        },
+        {
+          "rank": 14,
+          "artist": "CLAMM",
+          "track": "The Licensing",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/d7/d9/eb/d7d9ebf4-2e08-c0e1-3896-2ace5123e60e/820233309912.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 15,
+          "artist": "aja monet",
+          "track": "for the Congo",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": ""
+        },
+        {
+          "rank": 16,
+          "artist": "Por Vida",
+          "track": "azul (feat. ZK King)",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/1a/8c/77/1a8c7739-c29c-230f-4594-27450ae35b86/827425388977.png/200x200bb.jpg"
+        },
+        {
+          "rank": 17,
+          "artist": "Body Type",
+          "track": "Mulberry",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/7b/8d/ce/7b8dcefa-abc2-e914-043f-ef8932775ef8/820233000697.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 18,
+          "artist": "LILPIXIE",
+          "track": "zero gravity",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": ""
+        },
+        {
+          "rank": 19,
+          "artist": "Sweet Boy Sonnet",
+          "track": "What have I done",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/83/32/dc/8332dc9e-b5c3-aff0-2ca6-f527c2a71fa6/cover.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 20,
+          "artist": "Little Simz",
+          "track": "Open Arms (feat. DEELA)",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/30/64/10/3064103f-d543-bbdf-1461-947ecc5a49db/820233138581.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 21,
+          "artist": "The Garden",
+          "track": "5 Mile Ponytail",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/23/5f/e2/235fe249-766a-1112-03d3-3f9ff3e34c69/1076348.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 22,
+          "artist": "Cherry Rype, Pinegrove & Bren",
+          "track": "this action will Need 2 have consequences",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": ""
+        },
+        {
+          "rank": 23,
+          "artist": "ALIZADE",
+          "track": "ABAZA",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": ""
+        },
+        {
+          "rank": 24,
+          "artist": "Big Fat Loud City",
+          "track": "Horse",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/79/74/e5/7974e574-b250-1abe-79d8-2870196ade9d/artwork.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 25,
+          "artist": "silkii",
+          "track": "LOVE IT",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/73/23/66/7323660f-ca29-acda-4954-fd70f93a444e/12UMGIM09582.rgb.jpg/200x200bb.jpg"
+        }
+      ]
+    },
+    "twoxx": {
+      "station": "ACT",
+      "chart_title": "2XX Aus Music Hour",
+      "chart_subtitle": "Recent Australian independent music - 2",
+      "updated": "2026-06-03T10:59:34.836194+00:00",
+      "source_url": "https://www.2xxfm.org.au/shows/aus-music-hour/",
+      "tracks": [
+        {
+          "rank": 1,
+          "artist": "belac",
+          "track": "need it, breathe it",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/82/7f/8e/827f8e10-82db-d947-4899-62a8477d162a/5400863203245_cover.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 2,
+          "artist": "Alexandra Stan",
+          "track": "Mr. Saxobeat (Dj Teos Electro Remix)",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": ""
+        },
+        {
+          "rank": 3,
+          "artist": "Moody",
+          "track": "Royalty",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/f0/cf/75/f0cf75c4-ac7f-a3bc-edc9-a9d9beffc4c2/8718522525018.png/200x200bb.jpg"
+        },
+        {
+          "rank": 4,
+          "artist": "loveshovel",
+          "track": "G.O.A.T.",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/34/25/1d/34251dfe-8e91-3bb5-ce01-447eaafcfa55/175234.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 5,
+          "artist": "Shaka J",
+          "track": "Shooting star",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/74/ee/f7/74eef740-23ee-c9f0-c5ef-7f040b23cc67/159862.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 6,
+          "artist": "Sertra",
+          "track": "Fish Song",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/d0/0a/bb/d00abbe1-9312-9444-8c4d-5df7d0fae0ce/artwork.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 7,
+          "artist": "Dave Graney, Clare Moore",
+          "track": "Creative Creep",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/c1/79/56/c179565a-96da-7963-0b29-6fa9ea0dd1aa/197190878448.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 8,
+          "artist": "Trawlers",
+          "track": "Bucked Blood",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/c7/bf/e5/c7bfe57f-5347-0fa8-45e4-6165d55a4a56/178644.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 9,
+          "artist": "Anna Smyrk",
+          "track": "Skin Thinner",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/d2/ed/93/d2ed93a4-8f16-27f3-b0f9-eee0aedf67d6/8721465482676.png/200x200bb.jpg"
+        },
+        {
+          "rank": 10,
+          "artist": "New Delica",
+          "track": "Dreamin'",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/1d/4b/4f/1d4b4f2f-46dc-2c7b-a949-9719a83ad525/artwork.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 11,
+          "artist": "Jordie Tomas",
+          "track": "I HOPE YOU'RE WATCHING",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/47/c3/0c/47c30c9e-1813-3f6c-e21d-bb4b109609c4/8721466421230.png/200x200bb.jpg"
+        },
+        {
+          "rank": 12,
+          "artist": "Pond",
+          "track": "Neon River",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/de/66/eb/de66eb29-db62-2a6d-26b6-fc840662d6b4/44663.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 13,
+          "artist": "It's a Hoax",
+          "track": "Trying For Easy",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/cc/a3/05/cca30541-3efa-47e6-45d3-c2eca671c232/artwork.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 14,
+          "artist": "Human Noise",
+          "track": "Radiate",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/75/95/a1/7595a10c-f3d0-6390-908c-57b95c16044c/198500150568.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 15,
+          "artist": "Hiatus Kaiyote",
+          "track": "Everything’s Beautiful",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/da/b6/c4/dab6c441-ef8e-bfa0-55e3-d74d5e76ea68/5054429192285.png/200x200bb.jpg"
+        },
+        {
+          "rank": 16,
+          "artist": "Beyonce's Fiancés",
+          "track": "These Four Walls",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/50/d9/24/50d92486-f906-830e-1b4a-a734fae4f4ce/artwork.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 17,
+          "artist": "DOWNGIRL",
+          "track": "CPR",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/7c/1e/1a/7c1e1a21-013c-f31d-dc2c-c8118439641d/18UMGIM66021.rgb.jpg/200x200bb.jpg"
+        },
+        {
+          "rank": 18,
+          "artist": "Echo Omen, Jackson Brown",
+          "track": "Cosmic Cuppa",
+          "label": "",
+          "type": "playlist",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/5a/5a/75/5a5a75a8-196f-eedf-b72a-b6904dead24f/artwork.jpg/200x200bb.jpg"
+        }
+      ]
+    }
+  },
+  "editorial": [
+    {
+      "station": "Bandcamp Daily",
+      "chart_title": "Bandcamp Daily",
+      "chart_subtitle": "AOTD & Essential Releases",
+      "updated": "2026-06-03T10:59:38.237545+00:00",
+      "source_url": "https://daily.bandcamp.com/",
+      "type": "editorial",
+      "tracks": [
+        {
+          "rank": 1,
+          "artist": "The Barigozzi Group",
+          "track": "",
+          "album": "Woman's Colours",
+          "label": "Album of the Day",
+          "imgSrc": "https://f4.bcbits.com/img/0045196279_2.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 2,
+          "artist": "Nathan Evans Fox",
+          "track": "",
+          "album": "Heirloom",
+          "label": "Album of the Day",
+          "imgSrc": "https://f4.bcbits.com/img/0045158163_2.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 3,
+          "artist": "White Heaven",
+          "track": "",
+          "album": "Next to Nothing",
+          "label": "Album of the Day",
+          "imgSrc": "https://f4.bcbits.com/img/0045158268_2.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 4,
+          "artist": "Monolord",
+          "track": "",
+          "album": "Neverending",
+          "label": "Album of the Day",
+          "imgSrc": "https://f4.bcbits.com/img/0045158076_2.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 5,
+          "artist": "feeble little horse",
+          "track": "",
+          "album": "bitknot",
+          "label": "Album of the Day",
+          "imgSrc": "https://f4.bcbits.com/img/0045157030_2.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 6,
+          "artist": "Cookin Soul",
+          "track": "",
+          "album": "& Estee NackAL-ANDALUS",
+          "label": "Essential Release",
+          "imgSrc": "https://f4.bcbits.com/img/0020941463_2.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 7,
+          "artist": "Vinyl Digital",
+          "track": "",
+          "album": "The Premise",
+          "label": "Essential Release",
+          "imgSrc": "https://f4.bcbits.com/img/0037559800_2.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 8,
+          "artist": "MARBLED EYE",
+          "track": "",
+          "album": "Forever",
+          "label": "Essential Release",
+          "imgSrc": "https://f4.bcbits.com/img/0044253802_2.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 9,
+          "artist": "Nymphlord",
+          "track": "",
+          "album": "Shedding Velvet",
+          "label": "Essential Release",
+          "imgSrc": "https://f4.bcbits.com/img/0032181502_2.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 10,
+          "artist": "Thee Marloes",
+          "track": "",
+          "album": "Di Hotel Malibu",
+          "label": "Essential Release",
+          "imgSrc": "https://f4.bcbits.com/img/0043121780_2.jpg",
+          "type": "editorial"
+        }
+      ]
+    },
+    {
+      "station": "Pitchfork",
+      "chart_title": "Best New Music",
+      "chart_subtitle": "BNM-rated albums",
+      "updated": "2026-06-03T10:59:39.506217+00:00",
+      "source_url": "https://pitchfork.com/reviews/best/albums/",
+      "type": "editorial",
+      "tracks": [
+        {
+          "rank": 1,
+          "artist": "Boards of Canada",
+          "track": "",
+          "album": "Inferno",
+          "label": "Electronic",
+          "imgSrc": "https://media.pitchfork.com/photos/6a184638c26aa3f286532e4a/1:1/w_120,c_limit/Boards%20of%20Canada%20Inferno.png",
+          "type": "editorial"
+        },
+        {
+          "rank": 2,
+          "artist": "Aldous Harding",
+          "track": "",
+          "album": "Train on the Island",
+          "label": "Folk/Country",
+          "imgSrc": "https://media.pitchfork.com/photos/69a74be0d195be68418183f5/1:1/w_120,c_limit/aldous%20harding%20train%20on%20the%20island.png",
+          "type": "editorial"
+        },
+        {
+          "rank": 3,
+          "artist": "Ana Roxanne",
+          "track": "",
+          "album": "Poem 1",
+          "label": "Experimental",
+          "imgSrc": "https://media.pitchfork.com/photos/699483a0916d569fd95d34db/1:1/w_120,c_limit/Ana-Roxanne-Poem-1.jpeg",
+          "type": "editorial"
+        },
+        {
+          "rank": 4,
+          "artist": "Starker",
+          "track": "",
+          "album": "LIVING TYPE DANGEROUS Vol. 1",
+          "label": "Rap",
+          "imgSrc": "https://media.pitchfork.com/photos/69e91650556614c9bfc04bcd/1:1/w_120,c_limit/Starker%20-%20LIVING%20TYPE%20DANGEROUS%20Vol.%201%20album%20art.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 5,
+          "artist": "My New Band Believe",
+          "track": "",
+          "album": "My New Band Believe",
+          "label": "Rock",
+          "imgSrc": "https://media.pitchfork.com/photos/69d67c86fb43b4012c9d2abd/1:1/w_120,c_limit/My%20New%20Band%20Believe%20-%20My%20New%20Band%20Believe%20album%20art%20HI%20RES.png",
+          "type": "editorial"
+        },
+        {
+          "rank": 6,
+          "artist": "Wendy Eisenberg",
+          "track": "",
+          "album": "Wendy Eisenberg",
+          "label": "Rock",
+          "imgSrc": "https://media.pitchfork.com/photos/69d6a561117a16414f93f9e4/1:1/w_120,c_limit/Wendy%20Eisenberg%20Wendy%20Eisenberg.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 7,
+          "artist": "Slayyyter",
+          "track": "",
+          "album": "WOR$T GIRL IN AMERICA",
+          "label": "Pop/R&B",
+          "imgSrc": "https://media.pitchfork.com/photos/69cd5ad80c5bb9f902012376/1:1/w_120,c_limit/Slayyyter%20-%20WOR$T%20GIRL%20IN%20AMERICA%20album%20art.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 8,
+          "artist": "Neurosis",
+          "track": "",
+          "album": "An Undying Love for a Burning World",
+          "label": "Metal",
+          "imgSrc": "https://media.pitchfork.com/photos/69c438d6ad154c688dda316c/1:1/w_120,c_limit/Neurosis%20An%20Undying%20Love%20for%20a%20Burning%20World.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 9,
+          "artist": "By",
+          "track": "",
+          "album": "underscores",
+          "label": "Pop/R&B",
+          "imgSrc": "https://media.pitchfork.com/photos/69a2041ce473192849553978/1:1/w_120,c_limit/Underscores-U.jpeg",
+          "type": "editorial"
+        },
+        {
+          "rank": 10,
+          "artist": "Grace Ives",
+          "track": "",
+          "album": "Girlfriend",
+          "label": "Pop/R&B",
+          "imgSrc": "https://media.pitchfork.com/photos/69987e7049d58e1fbf82aa65/1:1/w_120,c_limit/GRACE%20IVES_GIRLFRIEND%20COVER.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 11,
+          "artist": "Sideshow",
+          "track": "",
+          "album": "TIGRAY FUNK",
+          "label": "Rap",
+          "imgSrc": "https://media.pitchfork.com/photos/69a713e46211c961b76ad4db/1:1/w_120,c_limit/Sideshow%20-%20TIGRAY%20FUNK.jpg",
+          "type": "editorial"
+        },
+        {
+          "rank": 12,
+          "artist": "Zel",
+          "track": "",
+          "album": "Still Right Here",
+          "label": "Rap",
+          "imgSrc": "https://media.pitchfork.com/photos/699e00b33c47fccc460dbb7c/1:1/w_120,c_limit/Zel%20-%20Still%20Right%20Here%20album%20art.jpg",
+          "type": "editorial"
+        }
+      ]
+    },
+    {
+      "station": "Best Fit",
+      "chart_title": "New Tracks",
+      "chart_subtitle": "The Line of Best Fit",
+      "updated": "2026-06-03T10:59:41.270332+00:00",
+      "source_url": "https://www.thelineofbestfit.com/new-music",
+      "type": "editorial",
+      "tracks": [
+        {
+          "rank": 1,
+          "artist": "Doss",
+          "track": "YOUGOTSTYLE",
+          "album": "YOUGOTSTYLE",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/Landscape1-copy.jpg?fit=cover&height=438&width=768&s=MSBrm_v3G9sX3YtG86mGDCE9L8Mlqs6fdLtZ_V7T8u4",
+          "type": "editorial"
+        },
+        {
+          "rank": 2,
+          "artist": "Taylor Bleu",
+          "track": "s alt-R&B debut",
+          "album": "s alt-R&B debut",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/Landscape1-Taylor-Bleu.jpg?fit=cover&height=438&width=768&s=8LbAqusXjCJq8xdyRDWUxht9WDe2es4yzrOmKsvpxL0",
+          "type": "editorial"
+        },
+        {
+          "rank": 3,
+          "artist": "Eilish Constance",
+          "track": "Hold my hand hunter",
+          "album": "Hold my hand hunter",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/445B138C-F92B-46D6-8DE0-D89D283A2EC3.JPEG?fit=cover&height=438&width=768&s=NQp5L--TmTft6j7QlTYWTE5B_98NVJylG6WbMqge3O4",
+          "type": "editorial"
+        },
+        {
+          "rank": 4,
+          "artist": "effe",
+          "track": "Lick The Flame",
+          "album": "Lick The Flame",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/Effe-landscape.jpg?fit=cover&height=438&width=768&s=cbg2gXDXumxsBPJj5iRfOVPq8MusNe4fdneJAsAYolQ",
+          "type": "editorial"
+        },
+        {
+          "rank": 5,
+          "artist": "Sabodi",
+          "track": "Flower$ in the Rain",
+          "album": "Flower$ in the Rain",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/IMG_1524.jpeg?fit=cover&height=438&width=768&s=HROP5ybA3aeNBduz7CiNR6xTuz5XNklA6gNoiNWHhfM",
+          "type": "editorial"
+        },
+        {
+          "rank": 6,
+          "artist": "Girl Apocrypha",
+          "track": "Thank God!",
+          "album": "Thank God!",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/Landscape-3.jpg?fit=cover&height=438&width=768&s=ZOO7MSbXxM_A1TqEh4h680qKG7rIDviVCmHReq_wfuA",
+          "type": "editorial"
+        },
+        {
+          "rank": 7,
+          "artist": "Formal Sppeedwear",
+          "track": "Who Needs Spain Ball?",
+          "album": "Who Needs Spain Ball?",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/LOBF-EXCL.jpg?fit=cover&height=438&width=768&s=A9dC1C6nSVscQFABkoTnOKuQ-v7U8MUj__T_CtTcaDU",
+          "type": "editorial"
+        },
+        {
+          "rank": 8,
+          "artist": "Biita Houdei",
+          "track": "Life Inside the Hourglass",
+          "album": "Life Inside the Hourglass",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/USE-THIS-ONE-Landscape-Biita-Houdei-credit-Seth-Naugle.png?fit=cover&height=438&width=768&s=ekwPDJSuHdlwvRiTWNFTrPGVgTjPWIs_gf6FRoGP17k",
+          "type": "editorial"
+        },
+        {
+          "rank": 9,
+          "artist": "Moriah Mensah",
+          "track": "Hero",
+          "album": "Hero",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/MORIAH_PRESS-22.jpg?fit=cover&height=438&width=768&s=pHznfJgrTnZYj1TvYm-LH5bKct3LJt2l0-kQqY3s_z4",
+          "type": "editorial"
+        },
+        {
+          "rank": 10,
+          "artist": "Olympia Vitalis",
+          "track": "Money Tree",
+          "album": "Money Tree",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/000011.png?fit=cover&height=438&width=768&s=2pu76shvmICwgZus0UzP5dBUcXLFEvETP0qfZOAFFXw",
+          "type": "editorial"
+        },
+        {
+          "rank": 11,
+          "artist": "Alfreda",
+          "track": "Patsy",
+          "album": "Patsy",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/Alfreda-Landscape.jpg?fit=cover&height=438&width=768&s=Y0g2CwEWmNzeTAvOwfKPp6_8saDLyFBSQBTaChuPdnM",
+          "type": "editorial"
+        },
+        {
+          "rank": 12,
+          "artist": "Pamela.",
+          "track": "Better Than Before",
+          "album": "Better Than Before",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/Pamela-Landscape.jpg?fit=cover&height=438&width=768&s=GxLYqR9U56vtl2vCo4fCRkQp3I5SBb_A3jFTdPL3n38",
+          "type": "editorial"
+        },
+        {
+          "rank": 13,
+          "artist": "Tintin",
+          "track": "Faithless",
+          "album": "Faithless",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/Landscape1.jpg?fit=cover&height=438&width=768&s=FFvaHcTWG67XjDv9CFf5TUGfAFgkC4QBbAjPjTU5Cj0",
+          "type": "editorial"
+        },
+        {
+          "rank": 14,
+          "artist": "Sofia Cordoba",
+          "track": "Symptom of Love",
+          "album": "Symptom of Love",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/SC-Press-Photo-Landscape.jpg?fit=cover&height=438&width=768&s=EAp7CYuSyoRLwNxqSxtAIOZwFMBQsjCHSGwM-fMY6c4",
+          "type": "editorial"
+        },
+        {
+          "rank": 15,
+          "artist": "jasper dean",
+          "track": "TELEMONKEY",
+          "album": "TELEMONKEY",
+          "label": "",
+          "imgSrc": "https://cdn.craft.cloud/3747bbfe-07db-499d-aa3d-b239ba21c062/assets/images/attachment-1_2026-04-29-065115_quip.jpeg?fit=cover&height=438&width=768&s=aFwANLG46EY_vaaoPsP9e0AzUVdrXNTgHb1hbMCCJk8",
+          "type": "editorial"
+        }
+      ]
+    },
+    {
+      "station": "UK Indie Albums",
+      "chart_title": "Independent Albums",
+      "chart_subtitle": "UK Official Independent Albums Chart",
+      "updated": "2026-06-03T10:59:44.123435+00:00",
+      "source_url": "https://www.officialcharts.com/charts/independent-albums-chart/",
+      "type": "editorial",
+      "tracks": [
+        {
+          "rank": 1,
+          "artist": "MICHAEL BALL",
+          "track": "",
+          "album": "GLOW",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/60/77/4e/60774e6c-4b62-2973-9034-d950a2f6d2e8/199806555590.jpg/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 2,
+          "artist": "BLEACHERS",
+          "track": "",
+          "album": "EVERYONE FOR TEN MINUTES",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/04/29/b4/0429b4fb-b221-2cc6-d051-2287f6319705/125585.jpg/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 3,
+          "artist": "A",
+          "track": "",
+          "album": "PRANG",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/0d/5b/1a/0d5b1a3e-8957-eef7-189f-f2a6efa76b34/8721465678116.png/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 4,
+          "artist": "BILLY LOCKETT",
+          "track": "",
+          "album": "THINGS ARE LOOKING UP",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/25/67/85/2567853a-dfde-a051-6ab6-3ae574d49639/57942.jpg/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 5,
+          "artist": "ED O'BRIEN",
+          "track": "",
+          "album": "BLUE MORPHO",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5c/14/2c/5c142cc6-a185-26b0-4fc0-505447293d27/199806495339.jpg/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 6,
+          "artist": "MARMOZETS",
+          "track": "",
+          "album": "CO.WAR.DICE",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/8f/8b/f8/8f8bf8b4-b0d4-d74b-96a3-3935946a6ed1/cover.jpg/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 7,
+          "artist": "HAYLEY WILLIAMS",
+          "track": "",
+          "album": "EGO DEATH AT A BACHELORETTE PARTY",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/de/ad/4a/dead4ad9-1255-8af4-646f-a524ba4fbc47/191400090774.png/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 8,
+          "artist": "ROYSTON CLUB",
+          "track": "",
+          "album": "SONGS FOR THE SPINE",
+          "label": "",
+          "imgSrc": "https://is2-ssl.mzstatic.com/image/thumb/Music128/v4/1b/99/a6/1b99a6c3-a27e-9fec-870f-30ec786cf6bb/cover.jpg/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 9,
+          "artist": "DAN BYRNE",
+          "track": "",
+          "album": "THIS IS WHERE THE SHOW BEGINS",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/84/a8/1e/84a81ea5-5a09-7672-19af-53efeb997fbc/5400863202606_cover.jpg/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 10,
+          "artist": "RAYE",
+          "track": "",
+          "album": "THIS MUSIC MAY CONTAIN HOPE.",
+          "label": "",
+          "imgSrc": "https://is3-ssl.mzstatic.com/image/thumb/Music124/v4/c2/04/31/c20431f7-a8f4-1ecc-3224-03fcfb1093e9/0045778747801.png/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 11,
+          "artist": "DIMMU BORGIR",
+          "track": "",
+          "album": "GRAND SERPENT RISING",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/de/5b/8e/de5b8ece-134b-1dcb-e785-52005810f134/199350548420.jpg/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 12,
+          "artist": "HANNAH PEEL & BEIBEI WANG",
+          "track": "",
+          "album": "THE ENDLESS DANCE",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/a5/c6/9b/a5c69b1d-22ba-a7e3-e1c2-970c6b53c8eb/634904078065.png/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 13,
+          "artist": "FUTURE ISLANDS",
+          "track": "",
+          "album": "FROM A HOLE IN THE FLOOR TO A FOUNTAIN",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/01/cd/11/01cd1162-7af4-b8ca-3ca7-9bb0c47bf035/3663729419668_cover.jpg/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 14,
+          "artist": "X-RAY SPEX",
+          "track": "",
+          "album": "OBSESSED WITH YOU - THE EARLY YEARS",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/c1/89/f4/c189f498-d7bd-6e08-75db-1f4830d756d9/1604.jpg/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 15,
+          "artist": "BIG ATTRACTION/GIDDY UP",
+          "track": "",
+          "album": "RE",
+          "label": "",
+          "imgSrc": "https://is4-ssl.mzstatic.com/image/thumb/Features125/v4/cf/9b/96/cf9b9637-f619-eceb-5382-e9b4d44e74fb/dj.npwkgmai.jpg/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 16,
+          "artist": "ARCTIC MONKEYS",
+          "track": "",
+          "album": "AM",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/a6/23/be/a623beed-1659-48d1-83de-1c35260f9d1e/4099964217681.jpg/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 17,
+          "artist": "KNEECAP",
+          "track": "",
+          "album": "FENIAN",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/71/87/11/7187119a-dca7-bc82-6bd8-e369a982bad0/191400087378.png/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 18,
+          "artist": "RADIOHEAD",
+          "track": "",
+          "album": "OK COMPUTER",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/c8/80/22/c8802262-6e0a-406f-5789-c9d69eb1ecb7/820200000569.jpg/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 19,
+          "artist": "ALL OUR GODS HAVE ABANDONED US",
+          "track": "",
+          "album": "RE",
+          "label": "",
+          "imgSrc": "https://is3-ssl.mzstatic.com/image/thumb/Music115/v4/1f/46/84/1f468438-c8ff-6c7c-d790-7d9ad31a55b6/dj.ofwxjvjm.jpg/247x247bb.jpg",
+          "type": "chart"
+        },
+        {
+          "rank": 20,
+          "artist": "FONTAINES DC",
+          "track": "",
+          "album": "ROMANCE",
+          "label": "",
+          "imgSrc": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/d7/d9/9e/d7d99eca-a4ec-80c1-afec-379a26af58c6/4099964193565.jpg/247x247bb.jpg",
+          "type": "chart"
+        }
+      ]
+    }
+  ],
+  "errors": {}
+}

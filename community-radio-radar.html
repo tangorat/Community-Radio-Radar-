@@ -1617,10 +1617,10 @@
   .amrap-diary-textarea {
     flex: 1;
     background: var(--bg);
-    border: 1px solid var(--border);
+    border: 1px solid rgba(var(--glow-color), 0.08);
     color: var(--text);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.6rem;
+    font-size: 0.75rem;
     line-height: 1.6;
     padding: 8px;
     resize: none;
@@ -1650,6 +1650,68 @@
     border-radius: 2px;
   }
   .amrap-diary-clear:hover { color: var(--text); border-color: var(--text); }
+
+  /* ── Collection pane ── */
+  .amrap-collection-pane {
+    flex: 1; display: none; flex-direction: column;
+    overflow-y: auto; padding: 6px 0;
+  }
+  .amrap-collection-pane.active { display: flex; }
+  .collection-empty {
+    text-align: center; padding: 24px 12px;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.52rem;
+    color: var(--muted); letter-spacing: 0.08em; line-height: 2;
+  }
+  .collection-empty span { font-size: 0.44rem; opacity: 0.6; }
+  .collection-tile {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 10px 5px 8px; cursor: pointer;
+    transition: background 0.12s;
+    border-bottom: 1px solid rgba(var(--glow-color), 0.05);
+  }
+  .collection-tile:hover { background: var(--hover-bg, rgba(0,255,65,0.06)); }
+  .collection-art {
+    width: 34px; height: 34px; flex-shrink: 0;
+    background: var(--inactive); border-radius: 2px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .collection-art img { width: 100%; height: 100%; object-fit: cover; }
+  .collection-art-ph {
+    font-family: 'Share Tech Mono', monospace; font-size: 0.45rem;
+    color: var(--muted); letter-spacing: 0.05em;
+  }
+  .collection-info { flex: 1; min-width: 0; }
+  .collection-track {
+    font-size: 0.85rem; color: var(--text); font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .collection-meta {
+    font-size: 0.65rem; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    letter-spacing: 0.03em; margin-top: 2px;
+  }
+  .collection-remove {
+    flex-shrink: 0; background: none; border: none;
+    color: var(--muted); font-size: 0.6rem; cursor: pointer;
+    padding: 4px 2px; opacity: 0.5; transition: opacity 0.15s, color 0.15s;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .collection-remove:hover { opacity: 1; color: var(--text); }
+
+  /* ── Add-to-collection button on chart entries ── */
+  .add-to-coll-btn {
+    flex-shrink: 0; width: 22px; height: 22px;
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); font-size: 0.75rem; line-height: 1;
+    cursor: pointer; border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    font-family: 'Share Tech Mono', monospace;
+    margin-left: auto; flex-shrink: 0;
+  }
+  .add-to-coll-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .add-to-coll-btn.added { color: var(--accent); border-color: var(--accent);
+    background: rgba(var(--glow-color), 0.1); }
 
   /* ── Panel source navigator ── */
   .amrap-nav-row {
@@ -1800,6 +1862,15 @@
     0%, 100% { content: '.'; }
     33% { content: '..'; }
     66% { content: '...'; }
+  }
+  .amrap-pong {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-align: center;
+    padding: 32px 12px;
+    letter-spacing: 0.12em;
+    user-select: none;
   }
   /* ─── FULLSCREEN OVERLAY ───────────────────────────────────────────────── */
   #fullscreenOverlay {
@@ -2748,11 +2819,13 @@ html.theme-switching *::after {
       <div class="amrap-tab-row">
         <button class="amrap-tab-btn active" id="amrapTabCharts" onclick="switchAmrapTab('charts')">CHARTS</button>
         <button class="amrap-tab-btn" id="amrapTabDiary" onclick="switchAmrapTab('diary')">DIARY</button>
+        <button class="amrap-tab-btn" id="amrapTabCollection" onclick="switchAmrapTab('collection')">COLL.</button>
       </div>
     </div>
     <div class="amrap-tracks" id="amrapTracks">
-      <div class="amrap-loading">FETCHING DATA</div>
+      <div class="amrap-pong" id="amrapPongEl"></div>
     </div>
+    <div class="amrap-collection-pane" id="amrapCollectionPane"></div>
     <div class="amrap-diary-pane" id="amrapDiaryPane">
       <textarea class="amrap-diary-textarea" id="amrapDiaryTextarea" placeholder="your listening diary..." oninput="saveDiaryFromPanel()"></textarea>
       <div class="amrap-diary-footer">
@@ -4120,6 +4193,30 @@ function renderCharts(station, token) {
       '</div>' +
       '<div class="chart-weeks">WK' + (Math.floor(Math.random() * 8) + 1) + '</div>';
 
+    // + button to add to collection
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-to-coll-btn';
+    addBtn.textContent = '+';
+    addBtn.title = 'Add to Collection';
+    addBtn.onclick = function(e) {
+      e.stopPropagation();
+      const added = addToCollection({
+        artist:    entry.artist,
+        track:     entry.track,
+        album:     '',
+        station:   station.name,
+        stationId: station.id,
+        imgSrc:    '',
+        source:    station.chartTitle || (station.name + ' Chart')
+      });
+      if (added !== false) {
+        this.textContent = '✓';
+        this.classList.add('added');
+        setTimeout(() => { this.textContent = '+'; this.classList.remove('added'); }, 1200);
+      }
+    };
+    el.appendChild(addBtn);
+
     // Swipe right on a chart entry → log it to diary
     let _swX = null, _swY = null;
     el.addEventListener('touchstart', function(e) {
@@ -4591,6 +4688,25 @@ function stopWaveAnimation() {
   });
 }
 
+// ─── PONG LOADER ──────────────────────────────────────────────────────────────
+function _startPong(el) {
+  if (!el) return;
+  const W   = 11;   // spaces between the pipes
+  const DOT = '●'; // ●
+  let pos = 0;
+  let dir = 1;
+  function frame() {
+    const row = Array(W).fill('·'); // middle dots as faint fill (·)
+    row[pos] = DOT;
+    el.textContent = '| ' + row.join('') + ' |';
+    pos += dir;
+    if (pos >= W - 1) { pos = W - 2; dir = -1; }
+    if (pos <= 0)     { pos = 1;     dir = 1;  }
+  }
+  frame();
+  el._pongTimer = setInterval(frame, 70);
+}
+
 // ─── AMRAP METRO CHART ────────────────────────────────────────────────────────
 async function loadAMRAP() {
   try {
@@ -4611,9 +4727,10 @@ async function loadAMRAP() {
     }
     startPanelTimer();
   } catch (e) {
-    document.getElementById('amrapTracks').innerHTML =
-      '<div class="amrap-loading" style="animation:none">OFFLINE</div>';
-    document.getElementById('amrapWeek').textContent = 'SERVER OFFLINE';
+    const t = document.getElementById('amrapTracks');
+    t.innerHTML = '<div class="amrap-pong" id="amrapPongEl"></div>';
+    _startPong(document.getElementById('amrapPongEl'));
+    document.getElementById('amrapWeek').textContent = '';
   }
 }
 
@@ -4636,6 +4753,10 @@ function renderAMRAP(data) {
     const d = new Date(data.generated_at);
     week.textContent = 'UPDATED ' + d.toLocaleDateString('en-AU', { day:'2-digit', month:'short' }).toUpperCase();
   }
+
+  // Stop any running pong animation before replacing content
+  const _pongEl = document.getElementById('amrapPongEl');
+  if (_pongEl && _pongEl._pongTimer) clearInterval(_pongEl._pongTimer);
 
   tracks.innerHTML = '';
   (data.tracks || []).forEach((t, i) => {
@@ -4676,9 +4797,32 @@ function renderAMRAP(data) {
     info.innerHTML = '<div class="amrap-track">' + (t.title || '') + '</div>' +
                      '<div class="amrap-artist">' + (t.artist || '') + '</div>';
 
+    // + button
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-to-coll-btn';
+    addBtn.textContent = '+';
+    addBtn.title = 'Add to Collection';
+    addBtn.onclick = function(e) {
+      e.stopPropagation();
+      const added = addToCollection({
+        artist:    t.artist || '',
+        track:     t.title  || '',
+        album:     t.title  || '',
+        station:   'AMRAP',
+        stationId: '',
+        imgSrc:    t.localImg || t.imgSrc || t.remoteImg || '',
+        source:    'AMRAP Metro Chart'
+      });
+      if (added !== false) {
+        this.textContent = '✓';
+        this.classList.add('added');
+        setTimeout(() => { this.textContent = '+'; this.classList.remove('added'); }, 1200);
+      }
+    };
     el.appendChild(rank);
     el.appendChild(thumb);
     el.appendChild(info);
+    el.appendChild(addBtn);
     tracks.appendChild(el);
   });
 }
@@ -4748,7 +4892,8 @@ function switchMobileTab(tab) {
   const worldView      = document.getElementById('worldView');
   const sidePanel      = document.getElementById('sidePanel');
   const amrapSheet     = document.getElementById('amrapMobileSheet');
-  const diarySheet     = document.getElementById('diaryMobileSheet');
+  const diarySheet      = document.getElementById('diaryMobileSheet');
+  const collSheet       = document.getElementById('collectionMobileSheet');
   const tabMap         = document.getElementById('tab-map');
   const tabWorld       = document.getElementById('tab-world');
   const tabAmrap       = document.getElementById('tab-amrap');
@@ -4758,6 +4903,7 @@ function switchMobileTab(tab) {
 
   if (amrapSheet) amrapSheet.classList.remove('open');
   if (diarySheet) diarySheet.classList.remove('open');
+  if (collSheet)  collSheet.classList.remove('open');
   if (tabMap)    tabMap.classList.remove('active');
   if (tabWorld)  tabWorld.classList.remove('active');
   if (tabAmrap)  tabAmrap.classList.remove('active');
@@ -4805,6 +4951,8 @@ function switchMobileTab(tab) {
       if (navProg) navProg.remove();
       const diaryPane = clone.querySelector('.amrap-diary-pane');
       if (diaryPane) diaryPane.remove();
+      const collPane = clone.querySelector('.amrap-collection-pane');
+      if (collPane) collPane.remove();
       amrapSheet.innerHTML = clone.innerHTML;
       amrapSheet.dataset.populated = '1';
     }
@@ -4828,6 +4976,8 @@ function switchMobileTab(tab) {
       if (navProg) navProg.remove();
       const diaryPane = clone.querySelector('.amrap-diary-pane');
       if (diaryPane) diaryPane.remove();
+      const collPane = clone.querySelector('.amrap-collection-pane');
+      if (collPane) collPane.remove();
       amrapSheet.innerHTML = clone.innerHTML;
       amrapSheet.dataset.populated = '1';
     }
@@ -4854,6 +5004,19 @@ function switchMobileTab(tab) {
       diarySheet.classList.add('open');
     }
     if (tabDiary) tabDiary.classList.add('active');
+    sidePanel.classList.remove('open');
+    currentView = 'australia';
+    return;
+  } else if (tab === 'collection') {
+    _prevMobileTab = currentView === 'world' ? 'world' : 'map';
+    if (currentView !== 'world') {
+      worldView.classList.remove('active');
+      mapContainer.style.display = '';
+    }
+    if (collSheet) {
+      renderCollection();
+      collSheet.classList.add('open');
+    }
     sidePanel.classList.remove('open');
     currentView = 'australia';
     return;
@@ -5081,56 +5244,206 @@ function _haptic(pattern) {
   });
 })();
 
+// ─── COLLECTION ───────────────────────────────────────────────────────────────
+function _findStationById(id) {
+  if (!id) return null;
+  for (const arr of Object.values(STATIONS)) {
+    const st = arr.find(s => s.id === id);
+    if (st) return st;
+  }
+  if (window.WORLD_STATIONS_PAGES) {
+    for (const page of WORLD_STATIONS_PAGES) {
+      const st = page.find(s => s.id === id);
+      if (st) return st;
+    }
+  }
+  return null;
+}
+
+function addToCollection(data) {
+  let items;
+  try { items = JSON.parse(localStorage.getItem('rrCollection') || '[]'); } catch(e) { items = []; }
+  // Prevent exact duplicates (same artist + track)
+  const key = (data.artist || '') + '||' + (data.track || '');
+  if (items.some(i => (i.artist||'') + '||' + (i.track||'') === key)) return false;
+  items.unshift({
+    id:        Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    artist:    data.artist    || '',
+    track:     data.track     || '',
+    album:     data.album     || '',
+    station:   data.station   || '',
+    stationId: data.stationId || '',
+    imgSrc:    data.imgSrc    || '',
+    source:    data.source    || '',
+    addedAt:   Date.now()
+  });
+  try { localStorage.setItem('rrCollection', JSON.stringify(items)); } catch(e) {}
+  // Re-render any open collection pane
+  renderCollection();
+  return true;
+}
+
+function removeFromCollection(id) {
+  let items;
+  try { items = JSON.parse(localStorage.getItem('rrCollection') || '[]'); } catch(e) { items = []; }
+  items = items.filter(i => i.id !== id);
+  try { localStorage.setItem('rrCollection', JSON.stringify(items)); } catch(e) {}
+  renderCollection();
+}
+
+function renderCollection() {
+  const panes = [
+    document.getElementById('amrapCollectionPane'),
+    document.getElementById('collectionMobilePaneInner')
+  ];
+  let items;
+  try { items = JSON.parse(localStorage.getItem('rrCollection') || '[]'); } catch(e) { items = []; }
+
+  panes.forEach(pane => {
+    if (!pane) return;
+    pane.innerHTML = '';
+
+    if (!items.length) {
+      const empty = document.createElement('div');
+      empty.className = 'collection-empty';
+      empty.innerHTML = 'NO ITEMS YET<br><span>TAP + ON ANY CHART ENTRY</span>';
+      pane.appendChild(empty);
+      return;
+    }
+
+    items.forEach(item => {
+      const tile = document.createElement('div');
+      tile.className = 'collection-tile';
+      const q = ((item.artist || '') + ' ' + (item.track || '')).trim();
+      tile.onclick = () => window.open('https://www.google.com/search?q=' + encodeURIComponent(q), '_blank');
+      tile.title = q;
+
+      // Art — image, ASCII artwork, or placeholder
+      const art = document.createElement('div');
+      art.className = 'collection-art';
+      if (item.imgSrc) {
+        const img = document.createElement('img');
+        img.src = item.imgSrc;
+        img.alt = '';
+        img.loading = 'lazy';
+        img.onerror = () => _loadCollectionAscii(item, art);
+        art.appendChild(img);
+      } else {
+        _loadCollectionAscii(item, art);
+      }
+
+      // Info
+      const info = document.createElement('div');
+      info.className = 'collection-info';
+      const metaParts = [item.artist];
+      if (item.source) metaParts.push(item.source);
+      info.innerHTML =
+        '<div class="collection-track">' + (item.track || item.artist || '') + '</div>' +
+        '<div class="collection-meta">' + metaParts.filter(Boolean).join(' · ') + '</div>';
+
+      // Remove
+      const rm = document.createElement('button');
+      rm.className = 'collection-remove';
+      rm.textContent = '✕';
+      rm.title = 'Remove';
+      rm.onclick = e => { e.stopPropagation(); removeFromCollection(item.id); };
+
+      tile.appendChild(art);
+      tile.appendChild(info);
+      tile.appendChild(rm);
+      pane.appendChild(tile);
+    });
+  });
+}
+
+function _loadCollectionAscii(item, artEl) {
+  if (!item.stationId) {
+    artEl.innerHTML = '<div class="collection-art-ph">ART</div>';
+    return;
+  }
+  const station = _findStationById(item.stationId);
+  if (!station) {
+    artEl.innerHTML = '<div class="collection-art-ph">ART</div>';
+    return;
+  }
+  // _renderAsciiArtwork uses a cache — safe to call synchronously
+  const url = _renderAsciiArtwork(station);
+  if (url) {
+    artEl.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = '';
+    artEl.appendChild(img);
+  } else {
+    // Fallback: station abbreviation
+    artEl.innerHTML = '<div class="collection-art-ph">' +
+      (station.name || '').slice(0,3).toUpperCase() + '</div>';
+  }
+}
+
 // ─── LISTENING DIARY ─────────────────────────────────────────────────────────
 function switchAmrapTab(tab) {
-  const tracks  = document.getElementById('amrapTracks');
-  const diary   = document.getElementById('amrapDiaryPane');
-  const footer  = document.getElementById('amrapFooter');
-  const credits = document.getElementById('amrapCredits');
-  const btnC    = document.getElementById('amrapTabCharts');
-  const btnD    = document.getElementById('amrapTabDiary');
-  const titleEl = document.getElementById('amrapPanelTitle');
-  const weekEl  = document.getElementById('amrapWeek');
-  const navRow  = document.getElementById('amrapNavRow');
-  const navProg = document.querySelector('.amrap-nav-progress-wrap');
-  const labelEl = document.querySelector('#amrapPanel .amrap-label');
+  const tracks     = document.getElementById('amrapTracks');
+  const diary      = document.getElementById('amrapDiaryPane');
+  const collection = document.getElementById('amrapCollectionPane');
+  const footer     = document.getElementById('amrapFooter');
+  const credits    = document.getElementById('amrapCredits');
+  const btnC       = document.getElementById('amrapTabCharts');
+  const btnD       = document.getElementById('amrapTabDiary');
+  const btnK       = document.getElementById('amrapTabCollection');
+  const titleEl    = document.getElementById('amrapPanelTitle');
+  const weekEl     = document.getElementById('amrapWeek');
+  const navRow     = document.getElementById('amrapNavRow');
+  const navProg    = document.querySelector('.amrap-nav-progress-wrap');
+  const labelEl    = document.querySelector('#amrapPanel .amrap-label');
   if (!tracks || !diary) return;
 
   // Persist selected tab
   try { localStorage.setItem('rrAmrapTab', tab); } catch(e) {}
 
+  // Reset all
+  [btnC, btnD, btnK].forEach(b => b && b.classList.remove('active'));
+  diary.classList.remove('active');
+  if (collection) collection.classList.remove('active');
+
   if (tab === 'charts') {
     tracks.style.display = '';
     if (footer)  footer.style.display  = '';
     if (credits) credits.style.display = '';
-    // Restore header elements — use visibility so layout stays stable
     if (titleEl) { titleEl.style.visibility = ''; titleEl.style.display = ''; }
     if (weekEl)  { weekEl.style.visibility  = ''; weekEl.style.display  = ''; }
     if (navRow)  navRow.style.display  = '';
     if (navProg) navProg.style.display = '';
     if (labelEl) labelEl.textContent = '// NATIONAL AIRPLAY';
-    diary.classList.remove('active');
     if (btnC) btnC.classList.add('active');
-    if (btnD) btnD.classList.remove('active');
-  } else {
+
+  } else if (tab === 'diary') {
     tracks.style.display = 'none';
     if (footer)  footer.style.display  = 'none';
     if (credits) credits.style.display = 'none';
-    // Hide title/week with visibility:hidden so header height doesn't change
     if (titleEl) titleEl.style.visibility = 'hidden';
     if (weekEl)  weekEl.style.visibility  = 'hidden';
-    // Hide the chart source navigator — redundant in diary mode
     if (navRow)  navRow.style.display  = 'none';
     if (navProg) navProg.style.display = 'none';
     if (labelEl) labelEl.textContent = '// LISTENING DIARY';
     diary.classList.add('active');
-    if (btnC) btnC.classList.remove('active');
     if (btnD) btnD.classList.add('active');
-    // Load diary content
     const ta = document.getElementById('amrapDiaryTextarea');
     if (ta) ta.value = localStorage.getItem('rrDiary') || '';
-    // Last-heard auto-fill: if diary is empty and a station is active, pre-populate
     if (ta && !ta.value) _diaryAutoFill(ta);
+
+  } else if (tab === 'collection') {
+    tracks.style.display = 'none';
+    if (footer)  footer.style.display  = 'none';
+    if (credits) credits.style.display = 'none';
+    if (titleEl) titleEl.style.visibility = 'hidden';
+    if (weekEl)  weekEl.style.visibility  = 'hidden';
+    if (navRow)  navRow.style.display  = 'none';
+    if (navProg) navProg.style.display = 'none';
+    if (labelEl) labelEl.textContent = '// COLLECTION';
+    if (collection) collection.classList.add('active');
+    if (btnK) btnK.classList.add('active');
+    renderCollection();
   }
 }
 
@@ -5579,9 +5892,33 @@ function _renderEditorial(source) {
                      '<div class="amrap-artist">' + (t.artist || '') + '</div>' +
                      labelHtml;
 
+    // + button
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-to-coll-btn';
+    addBtn.textContent = '+';
+    addBtn.title = 'Add to Collection';
+    addBtn.onclick = function(e) {
+      e.stopPropagation();
+      const added = addToCollection({
+        artist:    t.artist  || '',
+        track:     t.album   || t.track || '',
+        album:     t.album   || '',
+        station:   source.station || '',
+        stationId: '',
+        imgSrc:    t.imgSrc  || '',
+        source:    source.chart_title || source.station || ''
+      });
+      if (added !== false) {
+        this.textContent = '✓';
+        this.classList.add('added');
+        setTimeout(() => { this.textContent = '+'; this.classList.remove('added'); }, 1200);
+      }
+    };
+
     el.appendChild(rank);
     el.appendChild(thumb);
     el.appendChild(info);
+    el.appendChild(addBtn);
     tracksEl.appendChild(el);
   });
 }
@@ -5666,6 +6003,8 @@ function startPanelTimer() {
 
 // ─── KICK OFF ─────────────────────────────────────────────────────────────────
 init();
+// Start pong on the initial panel placeholder before AMRAP data arrives
+_startPong(document.getElementById('amrapPongEl'));
 loadAMRAP();
 loadChartsFromAPI();
 loadAsciiArt();
@@ -5991,6 +6330,13 @@ function _refreshWeatherDisplay() {
   </div>
 </div>
 
+<div class="amrap-mobile-sheet diary-mobile-sheet" id="collectionMobileSheet">
+  <div class="amrap-mobile-sheet-header">
+    <div class="amrap-label">// COLLECTION</div>
+    <button class="amrap-mobile-sheet-close" onclick="switchMobileTab(_prevMobileTab)">✕</button>
+  </div>
+  <div class="amrap-collection-pane active" id="collectionMobilePaneInner" style="flex:1;overflow-y:auto;"></div>
+</div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 if ('serviceWorker' in navigator) {

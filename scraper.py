@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Community Radio Radar - Chart Scraper
 Scrapes weekly music data from:
@@ -12,8 +13,11 @@ import json
 import re
 import ssl
 import sys
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import quote
 from urllib.request import urlopen, Request
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; CommunityRadioRadar/1.0)"}
@@ -40,6 +44,54 @@ def fetch(url):
     req = Request(url, headers=HEADERS)
     with urlopen(req, timeout=20, context=_SSL_CTX) as r:
         return r.read().decode("utf-8", errors="replace")
+
+
+# ---------------------------------------------------------------------------
+# ARTWORK HELPERS
+# ---------------------------------------------------------------------------
+
+def _itunes_art(artist, track, size=200):
+    """Fetch album artwork URL from iTunes Search API. Returns '' on failure."""
+    try:
+        q   = quote(f"{artist} {track}")
+        url = f"https://itunes.apple.com/search?term={q}&entity=song&limit=1&country=AU"
+        data = json.loads(fetch(url))
+        results = data.get("results", [])
+        if results:
+            art = results[0].get("artworkUrl100", "")
+            if art:
+                return art.replace("100x100bb", f"{size}x{size}bb")
+    except Exception:
+        pass
+    return ""
+
+
+def _enrich_artwork(tracks, workers=8, delay=0.05):
+    """
+    Add imgSrc to each track dict by querying iTunes.
+    Uses a thread pool to fetch in parallel.
+    Skips tracks that already have imgSrc set.
+    """
+    to_fetch = [(i, t) for i, t in enumerate(tracks) if not t.get("imgSrc")]
+    if not to_fetch:
+        return tracks
+
+    def _fetch_one(args):
+        i, t = args
+        art = _itunes_art(t.get("artist", ""), t.get("track", "") or t.get("album", ""))
+        time.sleep(delay)
+        return i, art
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = {pool.submit(_fetch_one, arg): arg for arg in to_fetch}
+        for future in as_completed(futures):
+            try:
+                i, art = future.result()
+                tracks[i]["imgSrc"] = art
+            except Exception:
+                pass
+
+    return tracks
 
 
 # ---------------------------------------------------------------------------
@@ -102,6 +154,8 @@ def scrape_triple_r():
         if len(tracks) >= 15:
             break
 
+    print("  Triple R: fetching artwork...")
+    _enrich_artwork(tracks)
     return {
         "station": "VIC",
         "chart_title": "Triple R Soundscape",
@@ -177,6 +231,8 @@ def scrape_rtrfm():
                 "type": "sound_selection"
             })
 
+    print("  RTRFM: fetching artwork...")
+    _enrich_artwork(tracks)
     return {
         "station": "WA",
         "chart_title": "RTRFM Featured Music",
@@ -238,6 +294,8 @@ def scrape_three_d():
         if len(tracks) >= 21:
             break
 
+    print("  Three D: fetching artwork...")
+    _enrich_artwork(tracks)
     return {
         "station": "SA",
         "chart_title": "Three D Radio Top 20+1",
@@ -310,6 +368,8 @@ def scrape_4zzz():
         if len(tracks) >= 20:
             break
 
+    print("  4ZZZ: fetching artwork...")
+    _enrich_artwork(tracks)
     return {
         "station": "QLD",
         "chart_title": "4ZZZ Chart Show",
@@ -387,6 +447,8 @@ def scrape_fbi():
         else:
             i += 1
 
+    print("  FBI: fetching artwork...")
+    _enrich_artwork(tracks)
     return {
         "station": "NSW",
         "chart_title": "FBI Radio The Playlist",
@@ -464,6 +526,8 @@ def scrape_2xx():
             if len(tracks) >= 25:
                 break
 
+    print("  2XX: fetching artwork...")
+    _enrich_artwork(tracks)
     return {
         "station": "ACT",
         "chart_title": "2XX Aus Music Hour",
@@ -631,6 +695,19 @@ def scrape_pitchfork_bnm():
         'Features', 'Lists', 'Columns', 'Video', 'All rights reserved',
     }
 
+    # Extract images before stripping — deduplicate by photo ID, keep 1:1 ratio
+    all_img_urls = re.findall(
+        r'https://media\.pitchfork\.com/photos/[a-f0-9]+/1:1/[^\s"\'&<]+', html)
+    seen_pids = set(); pitchfork_imgs = []
+    for img_url in all_img_urls:
+        pid = re.search(r'/photos/([a-f0-9]+)/', img_url)
+        if pid and pid.group(1) not in seen_pids:
+            seen_pids.add(pid.group(1))
+            pitchfork_imgs.append(img_url)
+    # First image is often a site-wide header — skip it if hash looks like old site art
+    if pitchfork_imgs and '5935a027' in pitchfork_imgs[0]:
+        pitchfork_imgs.pop(0)
+
     tracks = []
     i = 0
     while i < len(lines) and len(tracks) < 12:
@@ -642,12 +719,14 @@ def scrape_pitchfork_bnm():
                 artist = lines[i + 2]
                 # Sanity: skip if either looks like nav/boilerplate
                 if album not in SKIP and artist not in SKIP and len(album) > 1:
+                    img = pitchfork_imgs[len(tracks)] if len(tracks) < len(pitchfork_imgs) else ""
                     tracks.append({
                         "rank":   len(tracks) + 1,
                         "artist": artist,
                         "track":  "",
                         "album":  album,
-                        "label":  line,   # genre as label
+                        "label":  line,
+                        "imgSrc": img,
                         "type":   "editorial"
                     })
                 i += 3
@@ -675,46 +754,54 @@ def scrape_line_of_best_fit():
     url  = "https://www.thelineofbestfit.com/new-music"
     html = fetch(url)
 
-    raw   = re.sub(r'<style[\s\S]*?</style>', '', html)
-    raw   = re.sub(r'<script[\s\S]*?</script>', '', raw)
-    raw   = re.sub(r'<[^>]+>', '\n', raw)
-    lines = [l.strip() for l in raw.split('\n') if l.strip() and len(l.strip()) > 1]
+    # Images: cdn.craft.cloud 768w srcset - appear in same order as articles
+    art_imgs_raw = re.findall(
+        r'(https://cdn\.craft\.cloud/[^\s"\']+width=768[^\s"\']*)', html)
+    art_imgs = [i.replace("&amp;", "&") for i in art_imgs_raw]
 
-    SKIP = {'Tracks', 'Albums', 'Features', 'News', 'About', 'Contact',
-            'Advertise', 'Newsletter', 'Instagram', 'Search', 'Loading...',
-            'The Line', 'Best Fit', 'Close', 'The Line of Best Fit'}
-    DATE_RE = re.compile(r'^\d{2}\.\d{2}\.\d{4}')
+    # Artists: italic span tags appear in same order as articles
+    bf_artists = re.findall(r"<span[^>]*class=['\"]italic['\"][^>]*>([^<]+)</span>", html)
 
+    # Pair artist+image, deduplicate by artist
+    seen_a = set(); paired_imgs = []; paired_artists = []
+    for artist, img in zip(bf_artists, art_imgs):
+        if artist not in seen_a:
+            seen_a.add(artist)
+            paired_artists.append(artist)
+            paired_imgs.append(img)
+
+    raw = re.sub(r"<style[\s\S]*?</style>", "", html)
+    raw = re.sub(r"<script[\s\S]*?</script>", "", raw)
+    raw = re.sub(r"<[^>]+>", " ", raw)
+    lines = [l.strip() for l in raw.splitlines() if l.strip() and len(l.strip()) > 2]
+
+    # Each article is one merged line: "Artist  description with ‘TRACK’ in it"
+    # Match lines starting with a known paired artist name, extract quoted track
+    QUOTE_RE = re.compile(
+        u"[\u2018\u2019\u201c\u201d\'\"](\w[^\u2018\u2019\u201c\u201d\'\"]"
+        u"{2,60})[\u2018\u2019\u201c\u201d\'\"]"
+    )
     tracks = []
-    seen   = set()
-    i = 0
-    while i < len(lines) and len(tracks) < 15:
-        line = lines[i]
-        if line in SKIP or DATE_RE.match(line):
-            i += 1
-            continue
-        # Check if next line looks like a track description (contains apostrophe, quote, or music words)
-        if i + 1 < len(lines):
-            nxt = lines[i + 1]
-            if (len(line) <= 50 and len(nxt) > 20 and
-                    (nxt.startswith('‘') or nxt.startswith('"') or nxt.startswith("'") or
-                     "'" in nxt or '’' in nxt) and
-                    line not in seen):
-                # Extract track name from description (usually in quotes)
-                track_m = re.search(r'[‘“’”\'"]([\w][^\'\"]{3,60})[‘“’”\']', nxt)
-                track = track_m.group(1).strip() if track_m else ""
-                seen.add(line)
-                tracks.append({
-                    "rank":   len(tracks) + 1,
-                    "artist": line,
-                    "track":  track,
-                    "album":  track,
-                    "label":  "",
-                    "type":   "editorial"
-                })
-                i += 2
+    seen_a = set()
+    for artist, img in zip(paired_artists, paired_imgs):
+        if artist in seen_a or len(tracks) >= 15:
+            break
+        for line in lines:
+            if not line.startswith(artist):
                 continue
-        i += 1
+            seen_a.add(artist)
+            all_m = QUOTE_RE.findall(line)
+            track = all_m[-1].strip() if all_m else ""
+            tracks.append({
+                "rank":   len(tracks) + 1,
+                "artist": artist,
+                "track":  track,
+                "album":  track,
+                "label":  "",
+                "imgSrc": img,
+                "type":   "editorial"
+            })
+            break
 
     return {
         "station": "Best Fit",
@@ -859,6 +946,11 @@ def scrape_uk_indie():
     print("  UK Indie Albums: fetching...")
     html = fetch("https://www.officialcharts.com/charts/independent-albums-chart/")
 
+    # The page embeds Apple Music 247x247 cover art — 2 per entry, take every other one
+    all_art = re.findall(
+        r'src="(https://is\d+-ssl\.mzstatic\.com/[^"]+/247x247bb\.jpg)"', html)
+    art_imgs = all_art[::2]  # deduplicate: 2 copies per entry, take first of each pair
+
     # Page strips to: ... 'Number' → 'N' → movement → 'ALBUM' → 'ARTIST' → metadata ...
     raw   = re.sub(r'<style[\s\S]*?</style>', '', html)
     raw   = re.sub(r'<script[\s\S]*?</script>', '', raw)
@@ -870,22 +962,22 @@ def scrape_uk_indie():
     tracks = []
     i = 0
     while i < len(lines) and len(tracks) < 20:
-        # Look for the "Number" sentinel followed by a digit
         if lines[i] == 'Number' and i + 1 < len(lines) and re.match(r'^\d{1,2}$', lines[i + 1]):
             rank = int(lines[i + 1])
-            # Skip past rank digit and any movement words
             j = i + 2
             while j < len(lines) and MOVEMENT.match(lines[j]):
                 j += 1
             album  = lines[j]     if j < len(lines) else ""
             artist = lines[j + 1] if j + 1 < len(lines) else ""
             if album and artist and re.search(r'[A-Za-z]{2,}', album):
+                img = art_imgs[len(tracks)] if len(tracks) < len(art_imgs) else ""
                 tracks.append({
                     "rank":   rank,
                     "artist": artist,
                     "track":  "",
                     "album":  album,
                     "label":  "",
+                    "imgSrc": img,
                     "type":   "chart"
                 })
             i = j + 2
