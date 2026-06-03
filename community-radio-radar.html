@@ -5554,19 +5554,33 @@ function _renderEditorial(source) {
     rank.className = 'amrap-rank' + (i === 0 ? ' top1' : '');
     rank.textContent = t.rank || (i + 1);
 
+    // Album art thumbnail — same structure as AMRAP entries
+    const thumb = document.createElement('div');
+    thumb.className = 'amrap-thumb';
+    const imgSrc = t.imgSrc || t.localImg || t.imgUrl || '';
+    if (imgSrc) {
+      const img = document.createElement('img');
+      img.src = imgSrc;
+      img.alt = t.album || t.artist || '';
+      img.loading = 'lazy';
+      img.onerror = function() {
+        this.parentElement.innerHTML = '<div class="amrap-thumb-placeholder">ART</div>';
+      };
+      thumb.appendChild(img);
+    } else {
+      thumb.innerHTML = '<div class="amrap-thumb-placeholder">ART</div>';
+    }
+
     const info = document.createElement('div');
     info.className = 'amrap-info';
     const scoreHtml = t.score ? ' <span class="editorial-score">▲' + t.score + '</span>' : '';
+    const labelHtml = t.label ? '<div class="amrap-artist" style="opacity:0.55;font-size:0.56rem;letter-spacing:0.04em">' + t.label + '</div>' : '';
     info.innerHTML = '<div class="amrap-track">' + (t.album || t.track || '') + scoreHtml + '</div>' +
-                     '<div class="amrap-artist">' + (t.artist || '') + '</div>';
-    if (t.blurb) {
-      const blurb = document.createElement('div');
-      blurb.className = 'editorial-blurb';
-      blurb.textContent = t.blurb;
-      info.appendChild(blurb);
-    }
+                     '<div class="amrap-artist">' + (t.artist || '') + '</div>' +
+                     labelHtml;
 
     el.appendChild(rank);
+    el.appendChild(thumb);
     el.appendChild(info);
     tracksEl.appendChild(el);
   });

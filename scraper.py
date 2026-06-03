@@ -475,52 +475,126 @@ def scrape_2xx():
 
 
 # ---------------------------------------------------------------------------
-# BANDCAMP DAILY - Notable Releases (staff picks)
-# Page: https://daily.bandcamp.com/
+# BANDCAMP DAILY
+# Sources:
+#   1. Album of the Day  — scraped from homepage (uses _2.jpg images)
+#   2. Essential Releases — latest article from /essential-releases index
 # ---------------------------------------------------------------------------
 
+def _parse_bc_aotd_title(raw):
+    """Split 'Artist, "Album"' title string into (artist, album)."""
+    # Replace Unicode replacement chars (encoding artefact) with plain quote
+    raw = raw.replace('�', '"').replace('“', '"').replace('”', '"') \
+             .replace('‘', "'").replace('’', "'") \
+             .replace('&amp;', '&').replace('&#39;', "'").replace('&quot;', '"')
+    # Pattern: Artist Name, "Album Title"
+    m = re.match(r'^(.+?),\s*["\'](.+)["\']$', raw.strip())
+    if m:
+        return m.group(1).strip(), m.group(2).strip()
+    # Fallback: split on first comma
+    parts = raw.split(',', 1)
+    if len(parts) == 2:
+        return parts[0].strip(), parts[1].strip().strip('"\'')
+    return raw.strip(), ''
+
+
 def scrape_bandcamp_daily():
-    print("  Bandcamp Daily: fetching...")
-    html = fetch("https://daily.bandcamp.com/")
-
     tracks = []
-    seen   = set()
 
-    # Page structure: each article has class="title-wrapper" (article title)
-    # and class="franchise" (genre category label above it).
-    # Extract paired franchise + title from article-info-text blocks.
-    blocks = re.findall(
-        r'<div[^>]*class="article-info-text"[^>]*>([\s\S]*?)</div>\s*</div>',
-        html)
+    # ── 1. Album of the Day (homepage) ───────────────────────────────────────
+    print("  Bandcamp Daily: fetching homepage for AOTD...")
+    homepage = fetch("https://daily.bandcamp.com/")
 
-    for block in blocks:
-        franchise_m = re.search(r'class="franchise"[^>]*>([^<]+)<', block)
-        title_m     = re.search(r'class="title(?:\s[^"]*)??"[^>]*>([^<]+)<', block)
-        if not title_m:
+    # AOTD images use _2.jpg suffix; other article thumbnails use _150.jpg.
+    # Find paired (image, title) where image precedes the title-wrapper.
+    aotd_pairs = re.findall(
+        r'<img src="(https://f4\.bcbits\.com/img/[^"]+_2\.jpg)"'
+        r'[\s\S]*?class="title-wrapper"><a[^>]*>([^<]+)</a>',
+        homepage)
+
+    for img, raw_title in aotd_pairs[:5]:
+        artist, album = _parse_bc_aotd_title(raw_title)
+        if not artist:
             continue
-        title     = title_m.group(1).strip()
-        franchise = franchise_m.group(1).strip() if franchise_m else "Feature"
-        # Skip generic "LISTS" category — too vague
-        if franchise.upper() in ('LISTS', 'FEATURES'):
-            continue
-        key = title.lower()
-        if key not in seen and title:
-            seen.add(key)
+        tracks.append({
+            "rank":   len(tracks) + 1,
+            "artist": artist,
+            "track":  "",
+            "album":  album,
+            "label":  "Album of the Day",
+            "imgSrc": img,
+            "type":   "editorial"
+        })
+
+    # ── 2. Essential Releases (latest article) ───────────────────────────────
+    print("  Bandcamp Daily: fetching Essential Releases index...")
+    index = fetch("https://daily.bandcamp.com/essential-releases")
+
+    links = re.findall(
+        r'href="(/essential-releases/essential-releases-[^"]+)"', index)
+    links = list(dict.fromkeys(links))  # deduplicate preserving order
+
+    if links:
+        er_url = "https://daily.bandcamp.com" + links[0]
+        print("  Bandcamp Daily: fetching " + er_url)
+        article = fetch(er_url)
+
+        # h3 tags contain artist+album concatenated: "Aho SsanThe Sun Turned Black"
+        h3_raw = re.findall(r'<h3[^>]*>([\s\S]*?)</h3>', article)
+        h3s = [re.sub(r'<[^>]+>', '', h).strip() for h in h3_raw]
+        h3s = [h for h in h3s if h and len(h) < 100]
+
+        # mplayer-artist blocks give artist name and image (each appears twice)
+        mblocks = re.findall(
+            r'<mplayer-artist[^>]*>([\s\S]*?)</mplayer-artist>', article)
+
+        seen_names = []
+        artist_imgs = {}
+        for block in mblocks:
+            am = re.search(r'class="artist-name"><a[^>]+>([^<]+)</a>', block)
+            im = re.search(
+                r'src="(https://f4\.bcbits\.com/img/[^"]+_2\.jpg)"', block)
+            if am:
+                raw_name = am.group(1).strip()
+                name = raw_name.replace('&amp;', '&').replace('&#39;', "'")
+                if name not in artist_imgs:
+                    seen_names.append(name)
+                    artist_imgs[name] = im.group(1) if im else ""
+
+        # Also scrape bandcamp.com/album/ links in the article to get album slugs
+        # These give a fallback album title when h3 split is ambiguous
+        album_links = re.findall(
+            r'href="https://[^"]+\.bandcamp\.com/album/([^"]+)"', article)
+        album_from_slug = [
+            s.replace('-', ' ').title() for s in album_links if s
+        ]
+
+        # Pair h3s with deduplicated artist list; strip artist from front → album
+        for idx_e, (h3, artist) in enumerate(zip(h3s, seen_names)):
+            h3_clean = h3.replace('&amp;', '&').replace('&#39;', "'")
+            if h3_clean.startswith(artist):
+                album = h3_clean[len(artist):].strip()
+            elif len(album_from_slug) > idx_e:
+                # Use slug-derived album name as fallback
+                album = album_from_slug[idx_e]
+            else:
+                album = h3_clean
             tracks.append({
                 "rank":   len(tracks) + 1,
-                "artist": franchise,   # genre/franchise as the "artist" field
+                "artist": artist,
                 "track":  "",
-                "album":  title,
-                "label":  "",
+                "album":  album,
+                "label":  "Essential Release",
+                "imgSrc": artist_imgs.get(artist, ""),
                 "type":   "editorial"
             })
-        if len(tracks) >= 15:
-            break
+            if len(tracks) >= 15:
+                break
 
     return {
         "station": "Bandcamp Daily",
         "chart_title": "Bandcamp Daily",
-        "chart_subtitle": "Staff picks & features",
+        "chart_subtitle": "AOTD & Essential Releases",
         "updated": datetime.now(timezone.utc).isoformat(),
         "source_url": "https://daily.bandcamp.com/",
         "type": "editorial",
