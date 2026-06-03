@@ -1051,11 +1051,15 @@
       border-left: none !important;
       border-top: 1px solid var(--border) !important;
       transform: translateY(110%);
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      /* PEEK-SWIPE: transition routed through a var so JS can disable it during
+         a live drag. Revert to: transition: transform 0.4s cubic-bezier(...) !important; */
+      transition: var(--sp-transition, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)) !important;
       z-index: 50; overflow-y: auto; padding-top: 0 !important;
     }
     .side-panel.open {
-      transform: translateY(0) !important; right: 0 !important;
+      /* PEEK-SWIPE: x/y offset routed through vars so finger-tracking can move
+         the panel despite the !important. Revert to: transform: translateY(0) !important; */
+      transform: translate(var(--sp-x, 0px), var(--sp-y, 0px)) !important; right: 0 !important;
     }
 
     /* ── TAB BAR: position:fixed + bottom:0 + height come from general CSS ─ */
@@ -1159,6 +1163,57 @@
     border-color: var(--green);
     background: var(--hover-bg, rgba(0,255,65,0.05));
   }
+
+  /* ===== PEEK SWIPE (Option B) — START =================================
+     Lightweight preview of the adjacent station that slides in under the
+     finger while swiping between stations. To REMOVE this feature delete
+     this CSS block, the JS block marked PEEK SWIPE, and revert the two
+     PEEK-SWIPE lines in the mobile .side-panel rules. */
+  .peek-panel {
+    position: fixed;
+    z-index: 49;            /* just under the real side panel (z 50) */
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px;
+    pointer-events: none;
+    overflow: hidden;
+    will-change: transform;
+  }
+  .peek-panel .peek-name {
+    font-family: var(--ui-font, 'Oswald', sans-serif);
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--accent, var(--green));
+    text-align: center;
+    line-height: 1.1;
+    text-shadow: 0 0 20px rgba(var(--glow-color, 0,255,65), 0.4);
+  }
+  .peek-panel .peek-meta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .peek-panel .peek-art {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.4rem;
+    line-height: 1.3;
+    color: var(--accent, var(--green));
+    opacity: 0.5;
+    white-space: pre;
+    text-align: center;
+    margin: 0;
+    text-shadow: 0 0 8px rgba(var(--glow-color, 0,255,65), 0.4);
+    max-width: 100%;
+    overflow: hidden;
+  }
+  /* ===== PEEK SWIPE (Option B) — END =================================== */
 
   .settings-panel {
     position: fixed;
@@ -1315,6 +1370,10 @@
     background: var(--bg);
   }
   .world-view.active { display: flex; }
+  /* When the world view is active, always hide the map — overrides any
+     display:flex !important from landscape media queries that inline styles
+     alone cannot beat. Keeps the two views from showing simultaneously. */
+  .app:has(.world-view.active) .map-container { display: none !important; }
   .world-view::-webkit-scrollbar { width: 4px; }
   .world-view::-webkit-scrollbar-track { background: var(--bg); }
   .world-view::-webkit-scrollbar-thumb { background: var(--border); }
@@ -1329,17 +1388,20 @@
 
   .world-grid {
     display: grid;
-    grid-template-columns: repeat(3, 220px);
-    gap: 18px;
-    align-content: center;
-    justify-content: center;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    gap: 16px;
     flex: 1;
+    min-height: 0;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
   }
 
   .world-card {
     background: var(--panel);
     border: 1px solid #0a2e0c;
-    padding: 28px 18px;
+    padding: 16px 12px;
     cursor: pointer;
     position: relative;
     transition: all 0.2s ease;
@@ -1348,9 +1410,11 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 8px;
+    gap: 6px;
     clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
-    min-height: 170px;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
   }
   .world-card:hover {
     border-color: var(--green);
@@ -1501,23 +1565,24 @@
   @media (max-width: 700px) {
     .act-mobile-hit { display: block !important; }
     .world-view {
-      padding: 12px;
-      padding-bottom: 20px;
+      padding: 10px 10px 4px;
     }
+    .world-title { margin-bottom: 10px; }
     .world-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      max-width: 100%;
     }
     .world-card {
-      padding: 18px 12px;
-      min-height: 120px;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+      padding: 8px 6px;
+      gap: 4px;
     }
-    .world-card-name { font-size: 1.05rem; }
-    .world-card-location { font-size: 0.58rem; letter-spacing: 1px; }
-    .world-card-flag { font-size: 0.65rem; }
+    .world-card-name { font-size: 0.85rem; line-height: 1.05; }
+    .world-card-location { font-size: 0.5rem; letter-spacing: 0.5px; }
+    .world-card-freq { font-size: 0.5rem; }
+    .world-card-flag { font-size: 0.55rem; padding: 1px 4px; }
+    .world-pagination { padding: 8px 0 2px; gap: 12px; }
   }
   .amrap-panel {
     position: fixed;
@@ -1716,18 +1781,54 @@
 
   /* ── Add-to-collection button on chart entries ── */
   .add-to-coll-btn {
-    flex-shrink: 0; width: 22px; height: 22px;
+    flex-shrink: 0; width: 30px; height: 30px;
     background: none; border: 1px solid var(--border);
-    color: var(--muted); font-size: 0.75rem; line-height: 1;
-    cursor: pointer; border-radius: 3px;
+    color: var(--muted); font-size: 0.95rem; line-height: 1;
+    cursor: pointer; border-radius: 4px;
     display: flex; align-items: center; justify-content: center;
-    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.12s;
     font-family: 'Share Tech Mono', monospace;
     margin-left: auto; flex-shrink: 0;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
   .add-to-coll-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .add-to-coll-btn:active { transform: scale(0.88); }
   .add-to-coll-btn.added { color: var(--accent); border-color: var(--accent);
+    background: rgba(var(--glow-color), 0.14); }
+
+  /* ── Add-to-collection toast ── */
+  .coll-toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    transform: translate(-50%, 16px);
+    background: var(--panel);
+    border: 1px solid var(--accent, var(--green));
+    color: var(--accent, var(--green));
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 1px;
+    padding: 9px 18px; border-radius: 4px;
+    box-shadow: 0 0 22px rgba(var(--glow-color, 0,255,65), 0.28);
+    z-index: 10000; opacity: 0; pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
+  }
+  .coll-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ── Notes sheet tabs (NOTES | COLLECTION) ── */
+  .notes-sheet-tabs { display: flex; gap: 6px; }
+  .notes-sheet-tab {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 2px; padding: 5px 12px;
+    cursor: pointer; border-radius: 2px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .notes-sheet-tab.active { color: var(--accent); border-color: var(--accent);
     background: rgba(var(--glow-color), 0.1); }
+  .notes-sheet-pane { display: none; flex: 1; min-height: 0; flex-direction: column; }
+  .notes-sheet-pane.active { display: flex; }
 
   /* ── Panel source navigator ── */
   .amrap-nav-row {
@@ -1926,8 +2027,8 @@
   .fs-ascii {
     font-family: 'Share Tech Mono', monospace;
     font-size: clamp(0.38rem, 1.1vw, 0.8rem);
-    color: var(--muted);
-    opacity: 0.35;
+    color: var(--accent, var(--green));
+    opacity: 0.5;
     line-height: 1.3;
     text-align: center;
     white-space: pre;
@@ -1936,6 +2037,7 @@
     pointer-events: none;
     max-width: 90vw;
     overflow: hidden;
+    text-shadow: 0 0 10px rgba(var(--glow-color, 0,255,65), 0.45);
   }
   .fs-station-name {
     font-family: var(--ui-font, 'Oswald', sans-serif);
@@ -2200,12 +2302,15 @@
     z-index: 180;
     flex-direction: column;
     align-items: center;
-    padding: 10px 0 14px;
-    gap: 2px;
+    padding: 8px 0 10px;
+    gap: 0;
     background: var(--bg);
     border-right: 1px solid var(--border);
     box-sizing: border-box;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
+  .landscape-nav::-webkit-scrollbar { display: none; }
   .ls-logo {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.5rem;
@@ -2213,45 +2318,50 @@
     color: var(--accent);
     text-align: center;
     line-height: 1.2;
-    margin-bottom: 6px;
-    padding: 4px 2px;
+    margin-bottom: 4px;
+    padding: 2px;
     white-space: nowrap;
+    flex-shrink: 0;
   }
   .ls-nav-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 46px;
-    min-height: 52px;
+    width: 100%;
+    min-height: 50px;
+    flex-shrink: 0;
     gap: 3px;
     background: none;
     border: none;
     color: var(--muted);
     cursor: pointer;
     border-radius: 6px;
-    padding: 6px 4px;
+    padding: 6px 2px;
     transition: color 0.15s, background 0.15s;
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
   .ls-nav-btn:active,
   .ls-nav-btn.active {
     color: var(--accent);
     background: rgba(var(--glow-color), 0.08);
   }
-  .ls-nav-btn svg { flex-shrink: 0; }
+  .ls-nav-btn svg { flex-shrink: 0; pointer-events: none; }
   .ls-nav-btn span {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.38rem;
     letter-spacing: 0.08em;
     line-height: 1;
+    pointer-events: none;
   }
-  .ls-nav-spacer { flex: 1; }
+  .ls-nav-spacer { flex: 1 0 8px; min-height: 8px; }
   .ls-nav-divider {
     width: 28px;
     height: 1px;
     background: var(--border);
-    margin: 4px 0;
+    margin: 3px 0;
+    flex-shrink: 0;
   }
   .ls-play-pill {
     display: flex;
@@ -2260,6 +2370,7 @@
     gap: 4px;
     padding: 6px 0;
     width: 100%;
+    flex-shrink: 0;
   }
   .ls-play-dot {
     width: 5px; height: 5px;
@@ -2361,6 +2472,20 @@
 
     /* ── Mobile tab bar stays hidden ── */
     .mobile-tabs { display: none !important; }
+
+    /* ── Mobile sheets (charts / notes / collection) become full-height
+          overlays to the RIGHT of the 54px left nav. The ≤700px rule that
+          normally shows them doesn't apply in landscape (width > 700), so
+          enable + reposition them here. ── */
+    .amrap-mobile-sheet {
+      display: flex !important;
+      left: 54px !important;
+      right: 0 !important;
+      top: 0 !important;
+      bottom: 0 !important;
+      transform: translateY(100%);
+    }
+    .amrap-mobile-sheet.open { transform: translateY(0) !important; }
 
     /* ── Fullscreen overlay: full screen ── */
     #fullscreenOverlay { left: 0 !important; }
@@ -2785,7 +2910,7 @@ html.theme-switching *::after {
   <div class="fs-corner tr"></div>
   <div class="fs-corner bl"></div>
   <div class="fs-corner br"></div>
-  <div class="fs-hint">TAP ANYWHERE TO DISMISS · SWIPE DOWN TO CLOSE</div>
+  <div class="fs-hint">TAP ANYWHERE TO DISMISS</div>
   <div class="fs-ascii" id="fsAscii"></div>
   <div class="fs-station-name" id="fsStationName"></div>
   <div class="fs-freq" id="fsFreq"></div>
@@ -2843,11 +2968,6 @@ html.theme-switching *::after {
     <span>NOTES</span>
   </button>
   <div class="ls-nav-spacer"></div>
-  <!-- Playing indicator — shown via JS when audio is active -->
-  <div class="ls-play-pill" id="ls-play-pill" style="display:none">
-    <div class="ls-play-dot"></div>
-    <span class="ls-play-label">ON AIR</span>
-  </div>
 </nav>
 
 <!-- AMRAP Metro Chart Panel -->
@@ -2971,7 +3091,6 @@ html.theme-switching *::after {
         <div class="player-label-row">
           <div class="player-label">// <span id="panelLocalTime" style="font-size:0.55rem; color:var(--muted); letter-spacing:4px;"></span></div>
           <div class="panel-action-btns">
-            <button class="share-station-btn" id="shareStationBtn" onclick="shareStation()" title="Share station">➦</button>
             <button class="log-now-btn" id="logNowBtn" onclick="logNow()" title="Log to Listening Diary">✎</button>
             <!-- shazam-btn slot -->
             <button class="sleep-clock-btn" id="sleepClockBtn" onclick="toggleSleepPicker()" title="Sleep timer">☾</button>
@@ -4146,11 +4265,35 @@ function _showArtInContainer(container, art) {
   tickZoom();
 }
 
+// ─── SONG LOOKUP (configurable provider) ──────────────────────────────────────
+const SEARCH_PROVIDERS = {
+  google:  { label: 'GOOGLE',        url: q => 'https://www.google.com/search?q=' + encodeURIComponent(q) },
+  ytmusic: { label: 'YOUTUBE MUSIC', url: q => 'https://music.youtube.com/search?q=' + encodeURIComponent(q) },
+  spotify: { label: 'SPOTIFY',       url: q => 'https://open.spotify.com/search/' + encodeURIComponent(q) },
+  bandcamp:{ label: 'BANDCAMP',      url: q => 'https://bandcamp.com/search?q=' + encodeURIComponent(q) }
+};
+const SEARCH_PROVIDER_ORDER = ['google', 'ytmusic', 'spotify', 'bandcamp'];
+
+function _lookupSong(artist, track) {
+  const q = ((artist || '') + ' ' + (track || '')).trim();
+  if (!q) return;
+  const prov = SEARCH_PROVIDERS[(typeof CFG !== 'undefined' && CFG.searchProvider)] || SEARCH_PROVIDERS.google;
+  window.open(prov.url(q), '_blank');
+}
+
 function loadCharts(station) {
   const container = document.getElementById('chartContainer');
   if (!container) return;
   if (window._worldAsciiTimer) clearInterval(window._worldAsciiTimer);
   if (window._worldZoomRaf)   cancelAnimationFrame(window._worldZoomRaf);
+
+  // Cancel any pending chart render + invalidate its token FIRST, before any
+  // early-return below. Otherwise a previously-scheduled renderCharts() for a
+  // charted station could fire ~1s later and paint over a no-chart station's
+  // art (the "chart bleeding into another station" bug). Bumping the token
+  // makes that stale render bail out of its own token check.
+  if (window._chartTimeout) { clearTimeout(window._chartTimeout); window._chartTimeout = null; }
+  window._chartRenderToken = (window._chartRenderToken || 0) + 1;
 
   const currentState = window._currentStateCode;
   const artBtn = document.getElementById('artToggleBtn');
@@ -4185,8 +4328,7 @@ function loadCharts(station) {
   const now = new Date();
   document.getElementById('chartRefresh').textContent =
     'UPDATED ' + now.toLocaleDateString('en-AU', { day: '2-digit', month: 'short' }).toUpperCase();
-  if (window._chartTimeout) clearTimeout(window._chartTimeout);
-  const token = (window._chartRenderToken = (window._chartRenderToken || 0) + 1);
+  const token = window._chartRenderToken; // already bumped at top of loadCharts
   window._chartTimeout = setTimeout(() => renderCharts(station, token), 800 + Math.random() * 400);
 }
 
@@ -4230,7 +4372,7 @@ function renderCharts(station, token) {
     el.style.animationDelay = (i * 0.04) + 's';
     el.style.cursor = 'pointer';
     el.title = 'Search ' + entry.artist + ' — ' + entry.track;
-    el.onclick = () => window.open('https://www.google.com/search?q=' + encodeURIComponent(entry.artist + ' ' + entry.track), '_blank');
+    el.onclick = () => _lookupSong(entry.artist, entry.track);
     el.innerHTML =
       '<div class="chart-num ' + (entry.pos <= 3 ? 'top3' : '') + '">' +
         String(entry.pos).padStart(2, '0') +
@@ -4243,28 +4385,15 @@ function renderCharts(station, token) {
 
     // + button to add to collection
     if (CFG.showCollection !== 'off') {
-      const addBtn = document.createElement('button');
-      addBtn.className = 'add-to-coll-btn';
-      addBtn.textContent = '+';
-      addBtn.title = 'Add to Collection';
-      addBtn.onclick = function(e) {
-        e.stopPropagation();
-        const added = addToCollection({
-          artist:    entry.artist,
-          track:     entry.track,
-          album:     '',
-          station:   station.name,
-          stationId: station.id,
-          imgSrc:    '',
-          source:    station.chartTitle || (station.name + ' Chart')
-        });
-        if (added !== false) {
-          this.textContent = '✓';
-          this.classList.add('added');
-          setTimeout(() => { this.textContent = '+'; this.classList.remove('added'); }, 1200);
-        }
-      };
-      el.appendChild(addBtn);
+      el.appendChild(_makeAddButton({
+        artist:    entry.artist,
+        track:     entry.track,
+        album:     '',
+        station:   station.name,
+        stationId: station.id,
+        imgSrc:    '',
+        source:    station.chartTitle || (station.name + ' Chart')
+      }));
     }
 
     // Swipe right on a chart entry → log it to diary
@@ -4814,7 +4943,7 @@ function renderAMRAP(data) {
     el.className = 'amrap-entry';
     el.style.cursor = 'pointer';
     el.title = 'Search ' + (t.artist || '') + ' — ' + (t.title || '');
-    el.onclick = () => window.open('https://www.google.com/search?q=' + encodeURIComponent((t.artist || '') + ' ' + (t.title || '')), '_blank');
+    el.onclick = () => _lookupSong(t.artist, t.title);
 
     const thumb = document.createElement('div');
     thumb.className = 'amrap-thumb';
@@ -4852,31 +4981,19 @@ function renderAMRAP(data) {
     el.appendChild(info);
     // + button
     if (CFG.showCollection !== 'off') {
-      const addBtn = document.createElement('button');
-      addBtn.className = 'add-to-coll-btn';
-      addBtn.textContent = '+';
-      addBtn.title = 'Add to Collection';
-      addBtn.onclick = function(e) {
-        e.stopPropagation();
-        const added = addToCollection({
-          artist:    t.artist || '',
-          track:     t.title  || '',
-          album:     t.title  || '',
-          station:   'AMRAP',
-          stationId: '',
-          imgSrc:    t.localImg || t.imgSrc || t.remoteImg || '',
-          source:    'AMRAP Metro Chart'
-        });
-        if (added !== false) {
-          this.textContent = '✓';
-          this.classList.add('added');
-          setTimeout(() => { this.textContent = '+'; this.classList.remove('added'); }, 1200);
-        }
-      };
-      el.appendChild(addBtn);
+      el.appendChild(_makeAddButton({
+        artist:    t.artist || '',
+        track:     t.title  || '',
+        album:     t.title  || '',
+        station:   'AMRAP',
+        stationId: '',
+        imgSrc:    t.localImg || t.imgSrc || t.remoteImg || '',
+        source:    'AMRAP Metro Chart'
+      }));
     }
     tracks.appendChild(el);
   });
+  _syncAmrapSheetIfOpen();
 }
 
 async function loadAsciiArt() {
@@ -4935,6 +5052,30 @@ async function loadChartsFromAPI() {
   } catch (e) {
     console.warn('Charts API not available, using placeholder data');
   }
+}
+
+// ─── MOBILE / LANDSCAPE CHARTS SHEET ──────────────────────────────────────────
+// Clone the live AMRAP panel into the mobile sheet, KEEPING the supplier
+// switcher (nav-row) so users can cycle chart sources. Re-run whenever the
+// panel source changes while the sheet is open so it stays in sync.
+function _populateAmrapSheet() {
+  const sheet = document.getElementById('amrapMobileSheet');
+  if (!sheet) return;
+  const amrapPanel = document.getElementById('amrapPanel');
+  if (!amrapPanel) return;
+  const clone = amrapPanel.cloneNode(true);
+  // Strip the panel-internal tab row + the diary/collection panes — keep the
+  // nav-row (◀ source ▶) and progress bar so suppliers can be switched.
+  ['amrap-tab-row', 'amrap-diary-pane', 'amrap-collection-pane'].forEach(cls => {
+    const el = clone.querySelector('.' + cls);
+    if (el) el.remove();
+  });
+  sheet.innerHTML = clone.innerHTML;
+}
+
+function _syncAmrapSheetIfOpen() {
+  const sheet = document.getElementById('amrapMobileSheet');
+  if (sheet && sheet.classList.contains('open')) _populateAmrapSheet();
 }
 
 // ─── MOBILE TAB SWITCHING ─────────────────────────────────────────────────────
@@ -5016,23 +5157,10 @@ function switchMobileTab(tab) {
   } else if (tab === 'charts') {
     worldView.classList.remove('active');
     mapContainer.style.display = '';
-    if (!amrapSheet.dataset.populated) {
-      const amrapPanel = document.getElementById('amrapPanel');
-      // Copy tracks + footer only — strip the tab-row to avoid nested/broken tabs
-      const clone = amrapPanel.cloneNode(true);
-      const tabRow = clone.querySelector('.amrap-tab-row');
-      if (tabRow) tabRow.remove();
-      const navRow = clone.querySelector('.amrap-nav-row');
-      if (navRow) navRow.remove();
-      const navProg = clone.querySelector('.amrap-nav-progress-wrap');
-      if (navProg) navProg.remove();
-      const diaryPane = clone.querySelector('.amrap-diary-pane');
-      if (diaryPane) diaryPane.remove();
-      const collPane = clone.querySelector('.amrap-collection-pane');
-      if (collPane) collPane.remove();
-      amrapSheet.innerHTML = clone.innerHTML;
-      amrapSheet.dataset.populated = '1';
-    }
+    // Force the live panel onto the charts tab, then render the current source
+    try { localStorage.setItem('rrAmrapTab', 'charts'); } catch(e) {}
+    if (_panelSources.length) renderPanelSource(_panelIdx);
+    _populateAmrapSheet();
     amrapSheet.classList.add('open');
     if (tabCharts) tabCharts.classList.add('active');
     sidePanel.classList.remove('open');
@@ -5047,11 +5175,7 @@ function switchMobileTab(tab) {
       mapContainer.style.display = '';
     }
     if (diarySheet) {
-      const ta = document.getElementById('diaryMobileTextarea');
-      if (ta) {
-        ta.value = _getDiaryContent(_diaryPage);
-        if (!ta.value) _diaryAutoFill(ta);
-      }
+      switchNotesSheet('diary');
       diarySheet.classList.add('open');
     }
     if (tabDiary) tabDiary.classList.add('active');
@@ -5059,18 +5183,42 @@ function switchMobileTab(tab) {
     currentView = 'australia';
     return;
   } else if (tab === 'collection') {
+    // Collection now lives inside the Notes sheet (collection sub-tab)
     _prevMobileTab = currentView === 'world' ? 'world' : 'map';
     if (currentView !== 'world') {
       worldView.classList.remove('active');
       mapContainer.style.display = '';
     }
-    if (collSheet) {
-      renderCollection();
-      collSheet.classList.add('open');
+    if (diarySheet) {
+      switchNotesSheet('collection');
+      diarySheet.classList.add('open');
     }
+    if (tabDiary) tabDiary.classList.add('active');
     sidePanel.classList.remove('open');
     currentView = 'australia';
     return;
+  }
+}
+
+// ─── NOTES SHEET (Diary | Collection sub-tabs) ────────────────────────────────
+function switchNotesSheet(which) {
+  const isColl    = which === 'collection' && CFG.showCollection !== 'off';
+  const diaryTab  = document.getElementById('notesSheetTabDiary');
+  const collTab   = document.getElementById('notesSheetTabColl');
+  const diaryPane = document.getElementById('notesDiaryPane');
+  const collPane  = document.getElementById('notesCollPane');
+  if (diaryTab)  diaryTab.classList.toggle('active', !isColl);
+  if (collTab)   collTab.classList.toggle('active', isColl);
+  if (diaryPane) diaryPane.classList.toggle('active', !isColl);
+  if (collPane)  collPane.classList.toggle('active', isColl);
+  if (isColl) {
+    renderCollection();
+  } else {
+    const ta = document.getElementById('diaryMobileTextarea');
+    if (ta) {
+      ta.value = _getDiaryContent(_diaryPage);
+      if (!ta.value) _diaryAutoFill(ta);
+    }
   }
 }
 
@@ -5311,6 +5459,50 @@ function _findStationById(id) {
   return null;
 }
 
+// ─── ADD-TO-COLLECTION FEEDBACK ───────────────────────────────────────────────
+let _collToastTimer = null;
+function _showCollToast(msg) {
+  const t = document.getElementById('collToast');
+  if (!t) return;
+  t.textContent = '✓ ' + msg;
+  t.classList.add('show');
+  clearTimeout(_collToastTimer);
+  _collToastTimer = setTimeout(() => t.classList.remove('show'), 1600);
+}
+
+// Is this artist/track already in the current collection page?
+function _isInCollection(artist, track) {
+  let items;
+  try { items = JSON.parse(localStorage.getItem(_getCollPageKey(_collPage)) || '[]'); } catch(e) { items = []; }
+  const key = (artist || '') + '||' + (track || '');
+  return items.some(i => (i.artist || '') + '||' + (i.track || '') === key);
+}
+
+// Build a consistent "+ / ✓" add button with clear feedback. Used by every
+// chart/editorial/AMRAP entry so behaviour is identical everywhere.
+function _makeAddButton(data) {
+  const btn = document.createElement('button');
+  btn.className = 'add-to-coll-btn';
+  const inColl = _isInCollection(data.artist, data.track);
+  btn.textContent = inColl ? '✓' : '+';
+  if (inColl) btn.classList.add('added');
+  btn.title = 'Add to Collection';
+  btn.setAttribute('aria-label', 'Add to Collection');
+  btn.onclick = function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    if (btn.classList.contains('added')) { _showCollToast('Already in Collection'); return; }
+    const added = addToCollection(data);
+    btn.textContent = '✓';
+    btn.classList.add('added');
+    _showCollToast(added === false ? 'Already in Collection' : 'Added to Collection');
+    if (typeof _haptic === 'function') _haptic(8);
+  };
+  // Stop the touch from falling through to the row's song-lookup handler.
+  btn.addEventListener('touchend', function(e) { e.stopPropagation(); }, { passive: true });
+  return btn;
+}
+
 // ─── MULTI-PAGE COLLECTION ────────────────────────────────────────────────────
 let _collPage = 0;
 
@@ -5396,12 +5588,13 @@ function exportCollection() {
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' });
   const lines = ['Radio Radar Hits - ' + dateStr, '='.repeat(50), ''];
+  const prov = SEARCH_PROVIDERS[CFG.searchProvider] || SEARCH_PROVIDERS.google;
   items.forEach((item, i) => {
     const q = ((item.artist || '') + ' ' + (item.track || '')).trim();
     lines.push((i + 1) + '. ' + (item.track || '(unknown track)'));
     if (item.artist) lines.push('   Artist: ' + item.artist);
     if (item.source) lines.push('   Source: ' + item.source);
-    lines.push('   Search: https://www.google.com/search?q=' + encodeURIComponent(q));
+    lines.push('   Search: ' + prov.url(q));
     lines.push('');
   });
   lines.push('Exported from Community Radio Radar · ' + dateStr);
@@ -5467,7 +5660,7 @@ function renderCollection() {
         const tile = document.createElement('div');
         tile.className = 'collection-tile';
         const q = ((item.artist || '') + ' ' + (item.track || '')).trim();
-        tile.onclick = () => window.open('https://www.google.com/search?q=' + encodeURIComponent(q), '_blank');
+        tile.onclick = () => _lookupSong(item.artist, item.track);
         tile.title = q;
 
         const art = document.createElement('div');
@@ -5506,19 +5699,128 @@ function renderCollection() {
 
     pane.appendChild(scroll);
 
-    // Footer with export button
+    // Footer with share + export buttons
     const footer = document.createElement('div');
     footer.className = 'collection-footer';
     const countEl = document.createElement('span');
     countEl.textContent = items.length ? (items.length + ' TRACK' + (items.length !== 1 ? 'S' : '')) : '';
+    const btnGroup = document.createElement('div');
+    btnGroup.style.cssText = 'display:flex;gap:6px;';
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'collection-export-btn';
+    shareBtn.textContent = 'SHARE ➦';
+    shareBtn.onclick = e => { e.stopPropagation(); shareCollection(); };
     const exportBtn = document.createElement('button');
     exportBtn.className = 'collection-export-btn';
     exportBtn.textContent = 'EXPORT ↓';
     exportBtn.onclick = e => { e.stopPropagation(); exportCollection(); };
+    btnGroup.appendChild(shareBtn);
+    btnGroup.appendChild(exportBtn);
     footer.appendChild(countEl);
-    footer.appendChild(exportBtn);
+    footer.appendChild(btnGroup);
     pane.appendChild(footer);
   });
+}
+
+// ─── COLLECTION SHARE CARD (v1 — refine after testing) ────────────────────────
+// Renders the current collection page to a branded PNG "card" and hands it to
+// the native share sheet (with a download fallback). This is a first pass —
+// layout/styling will be tuned after the mockup review.
+async function shareCollection() {
+  let items;
+  try { items = JSON.parse(localStorage.getItem(_getCollPageKey(_collPage)) || '[]'); } catch(e) { items = []; }
+  if (!items.length) { alert('No tracks to share on this collection page.'); return; }
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' });
+  const shown = items.slice(0, 8);
+
+  // Pull theme colours straight off the live CSS so the card matches the app.
+  const cs = getComputedStyle(document.documentElement);
+  const accent = (cs.getPropertyValue('--accent') || cs.getPropertyValue('--green') || '#00ff41').trim();
+  const bg     = (cs.getPropertyValue('--bg') || '#030a04').trim();
+  const panel  = (cs.getPropertyValue('--panel') || '#050f06').trim();
+  const muted  = (cs.getPropertyValue('--muted') || '#2a5c30').trim();
+  const text   = (cs.getPropertyValue('--text') || '#b8ffca').trim();
+
+  const W = 1080, H = 1080;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  // Subtle scanlines
+  ctx.fillStyle = 'rgba(0,0,0,0.18)';
+  for (let y = 0; y < H; y += 4) ctx.fillRect(0, y, W, 1);
+  // Border frame
+  ctx.strokeStyle = accent; ctx.lineWidth = 3;
+  ctx.strokeRect(40, 40, W - 80, H - 80);
+
+  // Header
+  ctx.fillStyle = accent;
+  ctx.font = '700 30px "Share Tech Mono", monospace';
+  ctx.fillText('// COMMUNITY RADIO RADAR', 80, 120);
+  ctx.fillStyle = text;
+  ctx.font = '800 76px "Inter Tight", "Oswald", sans-serif';
+  ctx.fillText('Radio Radar Hits', 80, 210);
+  ctx.fillStyle = muted;
+  ctx.font = '400 28px "Share Tech Mono", monospace';
+  ctx.fillText(_getCollPageName(_collPage).toUpperCase() + '  ·  ' + dateStr.toUpperCase(), 80, 256);
+
+  // Divider
+  ctx.strokeStyle = muted; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(80, 300); ctx.lineTo(W - 80, 300); ctx.stroke();
+
+  // Track list
+  let y = 360;
+  const rowH = 88;
+  shown.forEach((it, i) => {
+    ctx.fillStyle = panel; ctx.fillRect(80, y - 50, W - 160, rowH - 14);
+    ctx.fillStyle = accent;
+    ctx.font = '700 40px "Share Tech Mono", monospace';
+    ctx.fillText(String(i + 1).padStart(2, '0'), 104, y);
+    ctx.fillStyle = text;
+    ctx.font = '600 38px "Inter", sans-serif';
+    const track = (it.track || it.artist || '').slice(0, 34);
+    ctx.fillText(track, 180, y - 8);
+    ctx.fillStyle = muted;
+    ctx.font = '400 26px "Share Tech Mono", monospace';
+    const meta = [it.artist, it.source].filter(Boolean).join('  ·  ').slice(0, 52);
+    ctx.fillText(meta, 180, y + 26);
+    y += rowH;
+  });
+
+  if (items.length > shown.length) {
+    ctx.fillStyle = muted;
+    ctx.font = '400 28px "Share Tech Mono", monospace';
+    ctx.fillText('+ ' + (items.length - shown.length) + ' more…', 104, y + 10);
+  }
+
+  // Footer
+  ctx.fillStyle = accent;
+  ctx.font = '400 26px "Share Tech Mono", monospace';
+  ctx.fillText('communityradioradar.online', 80, H - 80);
+
+  const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+  if (!blob) { alert('Could not generate share image.'); return; }
+  const file = new File([blob], 'radio-radar-hits.png', { type: 'image/png' });
+  const shareText = 'My Radio Radar Hits — ' + dateStr + ' · found on Community Radio Radar';
+
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Radio Radar Hits', text: shareText });
+      return;
+    }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+
+  // Fallback: download the image
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Radio Radar Hits - ' + dateStr + '.png';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  _showCollToast('Card saved');
 }
 
 function _loadCollectionAscii(item, artEl) {
@@ -5840,63 +6142,204 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// ─── SWIPE BETWEEN STATES (mobile) ───────────────────────────────────────────
+// ===== PEEK SWIPE (Option B) — START ==========================================
+// Live finger-tracking swipe between stations with a "peek" preview of the
+// adjacent station (name + freq + ASCII art) sliding in under the finger.
+// Mobile portrait only (matches where swipe was previously active).
+//
+// TO REMOVE THIS FEATURE:
+//   1. Delete this whole block (down to PEEK SWIPE — END).
+//   2. Un-comment the ORIGINAL handler preserved at the bottom of this block.
+//   3. Revert the two PEEK-SWIPE lines in the mobile .side-panel / .side-panel.open
+//      CSS rules, and delete the ".peek-panel" CSS block (also marked PEEK SWIPE).
 (function() {
   const STATE_ORDER = ['WA', 'NT', 'SA', 'QLD', 'NSW', 'ACT', 'VIC', 'TAS'];
   const panel = document.getElementById('sidePanel');
   if (!panel) return;
 
-  let _tx = null, _ty = null, _swiping = false;
+  const COMMIT_FRACTION = 0.32;   // drag this fraction of width to switch
+  let _tx = null, _ty = null, _swiping = false, _decided = false;
+  let _peek = null, _dir = 0, _W = 1, _target = null;
+
+  function _stateList() {
+    return STATE_ORDER.filter(k => STATIONS[k] || UNDER_CONSTRUCTION[k]);
+  }
+  function _neighbour(dir) {
+    const keys = _stateList();
+    if (!keys.length) return null;
+    const base = Math.max(0, keys.indexOf(currentState));
+    const idx = dir < 0 ? (base + 1) % keys.length
+                        : (base - 1 + keys.length) % keys.length;
+    return keys[idx];
+  }
+  function _stationFor(code) {
+    const arr = STATIONS[code];
+    if (arr && arr.length) {
+      const i = (typeof getStateDefault === 'function') ? getStateDefault(code) : 0;
+      return arr[i] || arr[0];
+    }
+    return null;
+  }
+  function _artFor(station, code) {
+    const map = Object.assign({}, (typeof STATION_ASCII_ART !== 'undefined' ? STATION_ASCII_ART : {}), window._asciiOverrides || {});
+    const a = (station && map[station.id]) || map[code] || [];
+    return Array.isArray(a) ? a.join('\n') : (a || '');
+  }
+  function _ensurePeek() {
+    if (_peek) return _peek;
+    _peek = document.createElement('div');
+    _peek.className = 'peek-panel';
+    _peek.innerHTML = '<div class="peek-name"></div><div class="peek-meta"></div><pre class="peek-art"></pre>';
+    document.body.appendChild(_peek);
+    return _peek;
+  }
+  function _buildPeek(code) {
+    const st = _stationFor(code);
+    const rect = panel.getBoundingClientRect();
+    const p = _ensurePeek();
+    p.style.left   = rect.left + 'px';
+    p.style.top    = rect.top + 'px';
+    p.style.width  = rect.width + 'px';
+    p.style.height = rect.height + 'px';
+    p.querySelector('.peek-name').textContent = st ? st.name : code;
+    p.querySelector('.peek-meta').textContent = st
+      ? [st.freq, st.city].filter(Boolean).join(' · ')
+      : 'COMING SOON';
+    p.querySelector('.peek-art').textContent = _artFor(st, code);
+    _W = rect.width || window.innerWidth;
+    _target = code;
+  }
+  function _restingPeekX() { return (-_dir) * _W; }
+  function _apply(dx, transition) {
+    panel.style.setProperty('--sp-transition', transition);
+    panel.style.setProperty('--sp-x', dx + 'px');
+    if (_peek) {
+      _peek.style.transition = transition === 'none' ? 'none' : 'transform 0.22s ease';
+      _peek.style.transform  = 'translateX(' + (_restingPeekX() + dx) + 'px)';
+    }
+  }
+  function _cleanup() {
+    panel.style.removeProperty('--sp-transition');
+    panel.style.removeProperty('--sp-x');
+    if (_peek) { _peek.remove(); _peek = null; }
+    _dir = 0; _target = null;
+  }
 
   panel.addEventListener('touchstart', function(e) {
+    if (window.innerWidth > 700 || currentView === 'world') { _tx = null; return; }
     _tx = e.touches[0].clientX;
     _ty = e.touches[0].clientY;
-    _swiping = false;
+    _swiping = false; _decided = false; _dir = 0; _target = null;
   }, { passive: true });
 
   panel.addEventListener('touchmove', function(e) {
     if (_tx === null) return;
     const dx = e.touches[0].clientX - _tx;
     const dy = e.touches[0].clientY - _ty;
+
+    if (!_decided) {
+      if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        _swiping = true; _decided = true;
+      } else if (Math.abs(dy) > 10) {
+        _decided = true; _swiping = false;   // vertical scroll / close — leave it alone
+        return;
+      } else {
+        return;
+      }
+    }
+    if (!_swiping) return;
+
+    e.preventDefault();                       // block native vertical scroll during drag
+    const dir = dx < 0 ? -1 : 1;
+    const target = _neighbour(dir);
+    if (!target || target === currentState) {  // no neighbour — rubber-band only
+      _apply(Math.sign(dx) * Math.min(Math.abs(dx) * 0.35, 60), 'none');
+      return;
+    }
+    if (target !== _target || dir !== _dir || !_peek) {
+      _dir = dir;
+      _buildPeek(target);
+    }
+    const clamped = Math.max(-_W, Math.min(_W, dx));
+    _apply(clamped, 'none');
+  }, { passive: false });
+
+  function _end() {
+    if (_tx === null) return;
+    const startedSwiping = _swiping;
+    const finishX = parseFloat(getComputedStyle(panel).getPropertyValue('--sp-x')) || 0;
+    _tx = null; _ty = null; _swiping = false; _decided = false;
+
+    if (!startedSwiping || !_peek || !_target) { if (_peek) _cleanup(); return; }
+
+    const past = Math.abs(finishX) >= _W * COMMIT_FRACTION;
+    if (past) {
+      const target = _target;
+      // Slide current panel fully out in the drag direction; peek slides to centre.
+      _apply(_dir * _W, 'transform 0.22s ease');
+      setTimeout(() => {
+        if (typeof selectState === 'function') selectState(target);
+        // Snap the (now re-populated) real panel back to centre with no transition,
+        // then drop the peek — the real panel (z 50) covers the peek (z 49) instantly.
+        panel.style.setProperty('--sp-transition', 'none');
+        panel.style.setProperty('--sp-x', '0px');
+        void panel.offsetWidth;               // force reflow so the snap is instant
+        _cleanup();
+      }, 230);
+    } else {
+      // Not far enough — ease everything back to rest.
+      _apply(0, 'transform 0.22s ease');
+      setTimeout(_cleanup, 240);
+    }
+  }
+  panel.addEventListener('touchend', _end, { passive: true });
+  panel.addEventListener('touchcancel', _end, { passive: true });
+})();
+
+/* ── ORIGINAL handler (pre-peek) — restore this if you remove the peek block ──
+(function() {
+  const STATE_ORDER = ['WA', 'NT', 'SA', 'QLD', 'NSW', 'ACT', 'VIC', 'TAS'];
+  const panel = document.getElementById('sidePanel');
+  if (!panel) return;
+  let _tx = null, _ty = null, _swiping = false;
+  panel.addEventListener('touchstart', function(e) {
+    _tx = e.touches[0].clientX; _ty = e.touches[0].clientY; _swiping = false;
+  }, { passive: true });
+  panel.addEventListener('touchmove', function(e) {
+    if (_tx === null) return;
+    const dx = e.touches[0].clientX - _tx, dy = e.touches[0].clientY - _ty;
     if (!_swiping && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.5) _swiping = true;
   }, { passive: true });
-
   panel.addEventListener('touchend', function(e) {
     if (_tx === null) return;
-    const dx = e.changedTouches[0].clientX - _tx;
-    const dy = e.changedTouches[0].clientY - _ty;
+    const dx = e.changedTouches[0].clientX - _tx, dy = e.changedTouches[0].clientY - _ty;
     _tx = null; _ty = null;
-
     if (!_swiping || window.innerWidth > 700) return;
     if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
     if (currentView === 'world') return;
-
     const stateKeys = STATE_ORDER.filter(k => STATIONS[k] || UNDER_CONSTRUCTION[k]);
     if (!stateKeys.length) return;
-
-    const curPos  = stateKeys.indexOf(currentState);
-    const base    = curPos >= 0 ? curPos : 0;
-    const nextPos = dx < 0
-      ? (base + 1) % stateKeys.length
-      : (base - 1 + stateKeys.length) % stateKeys.length;
+    const curPos = stateKeys.indexOf(currentState), base = curPos >= 0 ? curPos : 0;
+    const nextPos = dx < 0 ? (base + 1) % stateKeys.length : (base - 1 + stateKeys.length) % stateKeys.length;
     const nextState = stateKeys[nextPos];
-
     if (nextState && nextState !== currentState) {
       panel.style.transition = 'transform 0.18s ease';
-      panel.style.transform  = dx < 0 ? 'translateX(-30px)' : 'translateX(30px)';
+      panel.style.transform = dx < 0 ? 'translateX(-30px)' : 'translateX(30px)';
       setTimeout(() => {
         panel.style.transition = 'none';
-        panel.style.transform  = dx < 0 ? 'translateX(30px)' : 'translateX(-30px)';
+        panel.style.transform = dx < 0 ? 'translateX(30px)' : 'translateX(-30px)';
         selectState(nextState);
         requestAnimationFrame(() => requestAnimationFrame(() => {
           panel.style.transition = 'transform 0.18s ease';
-          panel.style.transform  = '';
+          panel.style.transform = '';
           setTimeout(() => { panel.style.transition = ''; }, 200);
         }));
       }, 160);
     }
   }, { passive: true });
 })();
+*/
+// ===== PEEK SWIPE (Option B) — END ============================================
 
 
 // ─── LANDSCAPE LEFT NAV ───────────────────────────────────────────────────────
@@ -5942,14 +6385,9 @@ function lsNav(view) {
     if (diarySheet)  diarySheet.classList.remove('open');
     if (collSheet)   collSheet.classList.remove('open');
     if (amrapSheet) {
-      if (!amrapSheet.dataset.populated) {
-        const amrapPanel = document.getElementById('amrapPanel');
-        const clone = amrapPanel.cloneNode(true);
-        ['amrap-tab-row','amrap-nav-row','amrap-nav-progress-wrap','amrap-diary-pane','amrap-collection-pane']
-          .forEach(cls => { const el = clone.querySelector('.' + cls); if (el) el.remove(); });
-        amrapSheet.innerHTML = clone.innerHTML;
-        amrapSheet.dataset.populated = '1';
-      }
+      try { localStorage.setItem('rrAmrapTab', 'charts'); } catch(e) {}
+      if (_panelSources.length) renderPanelSource(_panelIdx);
+      _populateAmrapSheet();
       amrapSheet.classList.add('open');
     }
     if (btn) btn.classList.add('active');
@@ -5958,15 +6396,9 @@ function lsNav(view) {
     if (currentView === 'world') toggleWorldView();
     const amrapSheet = document.getElementById('amrapMobileSheet');
     const diarySheet  = document.getElementById('diaryMobileSheet');
-    const collSheet   = document.getElementById('collectionMobileSheet');
     if (amrapSheet) amrapSheet.classList.remove('open');
-    if (collSheet)  collSheet.classList.remove('open');
     if (diarySheet) {
-      const ta = document.getElementById('diaryMobileTextarea');
-      if (ta) {
-        ta.value = _getDiaryContent(_diaryPage);
-        if (!ta.value) _diaryAutoFill(ta);
-      }
+      switchNotesSheet('diary');
       diarySheet.classList.add('open');
     }
     if (btn) btn.classList.add('active');
@@ -6063,6 +6495,7 @@ function renderPanelSource(idx) {
       _renderEditorial(s);
     }
   }
+  _syncAmrapSheetIfOpen();
 }
 
 function _renderEditorial(source) {
@@ -6097,7 +6530,7 @@ function _renderEditorial(source) {
     el.className = 'amrap-entry editorial-entry';
     el.style.cursor = 'pointer';
     const q = ((t.artist || '') + ' ' + (t.album || t.track || '')).trim();
-    el.onclick = () => window.open('https://www.google.com/search?q=' + encodeURIComponent(q), '_blank');
+    el.onclick = () => _lookupSong(t.artist, t.album || t.track);
     el.title = 'Search ' + q;
 
     const rank = document.createElement('div');
@@ -6134,28 +6567,15 @@ function _renderEditorial(source) {
     el.appendChild(info);
     // + button
     if (CFG.showCollection !== 'off') {
-      const addBtn = document.createElement('button');
-      addBtn.className = 'add-to-coll-btn';
-      addBtn.textContent = '+';
-      addBtn.title = 'Add to Collection';
-      addBtn.onclick = function(e) {
-        e.stopPropagation();
-        const added = addToCollection({
-          artist:    t.artist  || '',
-          track:     t.album   || t.track || '',
-          album:     t.album   || '',
-          station:   source.station || '',
-          stationId: '',
-          imgSrc:    t.imgSrc  || '',
-          source:    source.chart_title || source.station || ''
-        });
-        if (added !== false) {
-          this.textContent = '✓';
-          this.classList.add('added');
-          setTimeout(() => { this.textContent = '+'; this.classList.remove('added'); }, 1200);
-        }
-      };
-      el.appendChild(addBtn);
+      el.appendChild(_makeAddButton({
+        artist:    t.artist  || '',
+        track:     t.album   || t.track || '',
+        album:     t.album   || '',
+        station:   source.station || '',
+        stationId: '',
+        imgSrc:    t.imgSrc  || '',
+        source:    source.chart_title || source.station || ''
+      }));
     }
     tracksEl.appendChild(el);
   });
@@ -6539,6 +6959,10 @@ function _refreshWeatherDisplay() {
       <button class="setting-pill" onclick="cycleSetting('weatherDetail',['default','full','off'])" id="pill-weatherDetail">DEFAULT</button>
     </div>
     <div class="setting-row">
+      <span class="setting-label">SONG SEARCH</span>
+      <button class="setting-pill" onclick="cycleSetting('searchProvider',['google','ytmusic','spotify','bandcamp'])" id="pill-searchProvider">GOOGLE</button>
+    </div>
+    <div class="setting-row">
       <span class="setting-label">NOTES</span>
       <button class="setting-pill" onclick="cycleSetting('showNotes',['on','off'])" id="pill-showNotes">ON</button>
     </div>
@@ -6546,12 +6970,6 @@ function _refreshWeatherDisplay() {
       <span class="setting-label">COLLECTION</span>
       <button class="setting-pill" onclick="cycleSetting('showCollection',['on','off'])" id="pill-showCollection">ON</button>
     </div>
-  </div>
-  <div class="settings-footer">
-    <span class="settings-saved">
-      <span class="settings-saved-dot"></span>
-      ALL CHANGES SAVED
-    </span>
   </div>
   <div class="settings-about">
     <div class="settings-about-title">◎ ABOUT</div>
@@ -6570,23 +6988,28 @@ function _refreshWeatherDisplay() {
 <div class="amrap-mobile-sheet" id="amrapMobileSheet"></div>
 <div class="amrap-mobile-sheet diary-mobile-sheet" id="diaryMobileSheet">
   <div class="amrap-mobile-sheet-header">
-    <div class="amrap-label">// LISTENING DIARY</div>
+    <div class="notes-sheet-tabs">
+      <button class="notes-sheet-tab active" id="notesSheetTabDiary" onclick="switchNotesSheet('diary')">NOTES</button>
+      <button class="notes-sheet-tab" id="notesSheetTabColl" onclick="switchNotesSheet('collection')">COLLECTION</button>
+    </div>
     <button class="amrap-mobile-sheet-close" onclick="switchMobileTab(_prevMobileTab)">✕</button>
   </div>
-  <textarea class="amrap-diary-textarea diary-mobile-textarea" id="diaryMobileTextarea" placeholder="your listening diary..." oninput="saveDiaryFromMobile()"></textarea>
-  <div class="amrap-diary-footer" style="padding:8px 14px;">
-    <span class="amrap-diary-saved" id="diaryMobileSaved">SAVED ✓</span>
-    <button class="amrap-diary-clear" onclick="clearDiary()">CLEAR ✕</button>
+  <!-- NOTES pane -->
+  <div class="notes-sheet-pane active" id="notesDiaryPane">
+    <textarea class="amrap-diary-textarea diary-mobile-textarea" id="diaryMobileTextarea" placeholder="your listening diary..." oninput="saveDiaryFromMobile()"></textarea>
+    <div class="amrap-diary-footer" style="padding:8px 14px;">
+      <span class="amrap-diary-saved" id="diaryMobileSaved">SAVED ✓</span>
+      <button class="amrap-diary-clear" onclick="clearDiary()">CLEAR ✕</button>
+    </div>
+  </div>
+  <!-- COLLECTION pane -->
+  <div class="notes-sheet-pane" id="notesCollPane">
+    <div class="amrap-collection-pane active" id="collectionMobilePaneInner" style="flex:1;overflow-y:hidden;"></div>
   </div>
 </div>
 
-<div class="amrap-mobile-sheet diary-mobile-sheet" id="collectionMobileSheet">
-  <div class="amrap-mobile-sheet-header">
-    <div class="amrap-label">// COLLECTION</div>
-    <button class="amrap-mobile-sheet-close" onclick="switchMobileTab(_prevMobileTab)">✕</button>
-  </div>
-  <div class="amrap-collection-pane active" id="collectionMobilePaneInner" style="flex:1;overflow-y:hidden;"></div>
-</div>
+<!-- Toast for add-to-collection feedback -->
+<div class="coll-toast" id="collToast" role="status" aria-live="polite"></div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 if ('serviceWorker' in navigator) {
@@ -7184,7 +7607,7 @@ const FONT_SIZES = { small: '14px', medium: '17px', large: '20px', xlarge: '24px
 const FONT_SIZE_LABELS = { small: 'SMALL', medium: 'MEDIUM', large: 'LARGE', xlarge: 'X LARGE' };
 const HEADER_H   = { small: '60px', medium: '66px', large: '73px', xlarge: '80px' };
 
-const CFG_DEFAULTS = { theme: 'green', fontSize: 'medium', clockFormat: '12hr', contrast: 'normal', widgetSize: 'medium', showBio: 'show', defaultPanel: 'chart', weatherDetail: 'default', extraTabs: [], showNotes: 'on', showCollection: 'on' };
+const CFG_DEFAULTS = { theme: 'green', fontSize: 'medium', clockFormat: '12hr', contrast: 'normal', widgetSize: 'medium', showBio: 'show', defaultPanel: 'chart', weatherDetail: 'default', extraTabs: [], showNotes: 'on', showCollection: 'on', searchProvider: 'google' };
 let CFG = Object.assign({}, CFG_DEFAULTS, JSON.parse(localStorage.getItem('rrCfg') || '{}'));
 
 function saveConfig() { localStorage.setItem('rrCfg', JSON.stringify(CFG)); }
@@ -7291,6 +7714,10 @@ const widgetSizePill = document.getElementById('pill-widgetSize');
   // Weather detail setting
   const wxPill = document.getElementById('pill-weatherDetail');
   if (wxPill) wxPill.textContent = (CFG.weatherDetail || 'default').toUpperCase();
+
+  // Song-search provider setting
+  const searchPill = document.getElementById('pill-searchProvider');
+  if (searchPill) searchPill.textContent = (SEARCH_PROVIDERS[CFG.searchProvider] || SEARCH_PROVIDERS.google).label;
   // Refresh weather display with new setting if panel is open and we have cached data
   _refreshWeatherDisplay();
 
@@ -7319,11 +7746,16 @@ const widgetSizePill = document.getElementById('pill-widgetSize');
   const collOn = CFG.showCollection !== 'off';
   const _collEls = [
     document.getElementById('amrapTabCollection'),
+    document.getElementById('notesSheetTabColl'),
   ];
   _collEls.forEach(el => { if (el) el.style.display = collOn ? '' : 'none'; });
   document.querySelectorAll('.add-to-coll-btn').forEach(b => b.style.display = collOn ? '' : 'none');
   const pillColl = document.getElementById('pill-showCollection');
   if (pillColl) pillColl.textContent = collOn ? 'ON' : 'OFF';
+  // If collection is off but the notes sheet is showing its collection pane, flip to diary
+  if (!collOn && document.getElementById('notesCollPane')?.classList.contains('active')) {
+    if (typeof switchNotesSheet === 'function') switchNotesSheet('diary');
+  }
   if (!collOn && localStorage.getItem('rrAmrapTab') === 'collection') {
     if (typeof switchAmrapTab === 'function') switchAmrapTab('charts');
   }
