@@ -10,6 +10,7 @@ Outputs: charts.json in the same folder as this script
 
 import json
 import re
+import ssl
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -18,10 +19,26 @@ from urllib.request import urlopen, Request
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; CommunityRadioRadar/1.0)"}
 OUTPUT_FILE = Path(__file__).parent / "charts.json"
 
+# SSL context — verified by default (safe for server use).
+# Pass --insecure flag when running locally on a dev machine whose system
+# cert store doesn't carry all intermediate CAs (e.g. Windows + Python).
+_INSECURE = "--insecure" in sys.argv
+if _INSECURE:
+    _SSL_CTX = ssl.create_default_context()
+    _SSL_CTX.check_hostname = False
+    _SSL_CTX.verify_mode = ssl.CERT_NONE
+    print("WARNING: SSL verification disabled (--insecure flag)")
+else:
+    try:
+        import certifi
+        _SSL_CTX = ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        _SSL_CTX = ssl.create_default_context()
+
 
 def fetch(url):
     req = Request(url, headers=HEADERS)
-    with urlopen(req, timeout=20) as r:
+    with urlopen(req, timeout=20, context=_SSL_CTX) as r:
         return r.read().decode("utf-8", errors="replace")
 
 
@@ -46,14 +63,25 @@ def scrape_triple_r():
     m = re.search(r"Triple R Soundscape:\s*([\w\s]+\d{4})", html)
     chart_date = m.group(1).strip() if m else "This week"
 
-    headings = re.findall(r'<h1[^>]*>([^<]+)</h1>', html)
+    # Entries live in <h1><strong>Artist - Album (Label) ***note</strong></h1>
+    # Use strong tag content to get the full entry text
+    headings = re.findall(r'<strong[^>]*class="inline--bold"[^>]*>([^<]+)</strong>', html)
+    if not headings:
+        # Fallback: any strong inside h1
+        headings = re.findall(r'<h1[^>]*>[\s\S]*?<strong[^>]*>([^<]+)</strong>', html)
+    if not headings:
+        # Last resort: bare h1 content
+        headings = re.findall(r'<h1[^>]*>([^<]+)</h1>', html)
 
     skip_words = ["triple r", "soundscape", "melbourne", "explore",
-                  "subscribe", "102.7", "sign in", "shop", "on demand"]
+                  "subscribe", "102.7", "sign in", "shop", "on demand",
+                  "donation", "double your"]
 
     tracks = []
     for h in headings:
         h = h.strip()
+        # Strip trailing notes like ***AOTW
+        h = re.sub(r'\s*\*+\w*\s*$', '', h).strip()
         if any(s in h.lower() for s in skip_words):
             continue
         if " - " not in h:
@@ -62,6 +90,8 @@ def scrape_triple_r():
         label_m = re.search(r'\(([^)]+)\)\s*$', rest)
         album = rest[:label_m.start()].strip() if label_m else rest.strip()
         label = label_m.group(1).strip() if label_m else ""
+        if not artist.strip() or not album.strip():
+            continue
         tracks.append({
             "rank": len(tracks) + 1,
             "artist": artist.strip(),
@@ -233,7 +263,7 @@ def scrape_4zzz():
         "https://4zzz.org.au/program/the-chart-show",
         headers=HEADERS
     )
-    with urllib.request.urlopen(req, timeout=20) as r:
+    with urllib.request.urlopen(req, timeout=20, context=_SSL_CTX) as r:
         url = r.url  # final URL after redirect
         html = r.read().decode("utf-8", errors="replace")
     print("  4ZZZ: landed on " + url)
@@ -444,14 +474,370 @@ def scrape_2xx():
     }
 
 
+# ---------------------------------------------------------------------------
+# BANDCAMP DAILY - Notable Releases (staff picks)
+# Page: https://daily.bandcamp.com/
+# ---------------------------------------------------------------------------
+
+def scrape_bandcamp_daily():
+    print("  Bandcamp Daily: fetching...")
+    html = fetch("https://daily.bandcamp.com/")
+
+    tracks = []
+    seen   = set()
+
+    # Page structure: each article has class="title-wrapper" (article title)
+    # and class="franchise" (genre category label above it).
+    # Extract paired franchise + title from article-info-text blocks.
+    blocks = re.findall(
+        r'<div[^>]*class="article-info-text"[^>]*>([\s\S]*?)</div>\s*</div>',
+        html)
+
+    for block in blocks:
+        franchise_m = re.search(r'class="franchise"[^>]*>([^<]+)<', block)
+        title_m     = re.search(r'class="title(?:\s[^"]*)??"[^>]*>([^<]+)<', block)
+        if not title_m:
+            continue
+        title     = title_m.group(1).strip()
+        franchise = franchise_m.group(1).strip() if franchise_m else "Feature"
+        # Skip generic "LISTS" category — too vague
+        if franchise.upper() in ('LISTS', 'FEATURES'):
+            continue
+        key = title.lower()
+        if key not in seen and title:
+            seen.add(key)
+            tracks.append({
+                "rank":   len(tracks) + 1,
+                "artist": franchise,   # genre/franchise as the "artist" field
+                "track":  "",
+                "album":  title,
+                "label":  "",
+                "type":   "editorial"
+            })
+        if len(tracks) >= 15:
+            break
+
+    return {
+        "station": "Bandcamp Daily",
+        "chart_title": "Bandcamp Daily",
+        "chart_subtitle": "Staff picks & features",
+        "updated": datetime.now(timezone.utc).isoformat(),
+        "source_url": "https://daily.bandcamp.com/",
+        "type": "editorial",
+        "tracks": tracks
+    }
+
+
+# ---------------------------------------------------------------------------
+# PITCHFORK - Best New Music (BNM)
+# API: https://pitchfork.com/api/v2/reviews/albums/?types=bnm&limit=10
+# ---------------------------------------------------------------------------
+
+def scrape_pitchfork_bnm():
+    print("  Pitchfork BNM: fetching page...")
+    url  = "https://pitchfork.com/reviews/best/albums/"
+    html = fetch(url)
+
+    # Strip scripts/styles then extract text lines.
+    # Pattern after stripping: Genre → Album Title → Artist → Reviewer → Date (repeating)
+    raw = re.sub(r'<style[\s\S]*?</style>', '', html)
+    raw = re.sub(r'<script[\s\S]*?</script>', '', raw)
+    raw = re.sub(r'<[^>]+>', '\n', raw)
+    lines = [l.strip() for l in raw.split('\n') if l.strip() and len(l.strip()) > 1]
+
+    GENRES = {
+        'Electronic', 'Folk/Country', 'Experimental', 'Rap', 'Rock', 'Pop/R&B',
+        'Jazz', 'Metal', 'Classical', 'Global', 'Reissue', 'Alternative/Indie',
+        'Country', 'R&B/Soul', 'Latin', 'Dance', 'Ambient'
+    }
+    SKIP = {
+        'Best New Albums', 'Best New Reissues', '8.0+ reviews', 'Sunday Reviews',
+        'Tracks', 'Albums', 'Skip to main content', 'Open Navigation Menu',
+        'Menu', 'Newsletter', 'Search', 'News', 'Reviews', 'Best New Music',
+        'Features', 'Lists', 'Columns', 'Video', 'All rights reserved',
+    }
+
+    tracks = []
+    i = 0
+    while i < len(lines) and len(tracks) < 12:
+        line = lines[i]
+        if line in GENRES:
+            # Next line = album, line after = artist
+            if i + 2 < len(lines):
+                album  = lines[i + 1]
+                artist = lines[i + 2]
+                # Sanity: skip if either looks like nav/boilerplate
+                if album not in SKIP and artist not in SKIP and len(album) > 1:
+                    tracks.append({
+                        "rank":   len(tracks) + 1,
+                        "artist": artist,
+                        "track":  "",
+                        "album":  album,
+                        "label":  line,   # genre as label
+                        "type":   "editorial"
+                    })
+                i += 3
+                continue
+        i += 1
+
+    return {
+        "station": "Pitchfork",
+        "chart_title": "Best New Music",
+        "chart_subtitle": "BNM-rated albums",
+        "updated": datetime.now(timezone.utc).isoformat(),
+        "source_url": url,
+        "type": "editorial",
+        "tracks": tracks
+    }
+
+
+# ---------------------------------------------------------------------------
+# NPR MUSIC - New Music Friday
+# Page: https://www.npr.org/sections/allsongs/606254804/new-music-friday
+# ---------------------------------------------------------------------------
+
+def scrape_line_of_best_fit():
+    print("  Line of Best Fit: fetching new tracks...")
+    url  = "https://www.thelineofbestfit.com/new-music"
+    html = fetch(url)
+
+    raw   = re.sub(r'<style[\s\S]*?</style>', '', html)
+    raw   = re.sub(r'<script[\s\S]*?</script>', '', raw)
+    raw   = re.sub(r'<[^>]+>', '\n', raw)
+    lines = [l.strip() for l in raw.split('\n') if l.strip() and len(l.strip()) > 1]
+
+    SKIP = {'Tracks', 'Albums', 'Features', 'News', 'About', 'Contact',
+            'Advertise', 'Newsletter', 'Instagram', 'Search', 'Loading...',
+            'The Line', 'Best Fit', 'Close', 'The Line of Best Fit'}
+    DATE_RE = re.compile(r'^\d{2}\.\d{2}\.\d{4}')
+
+    tracks = []
+    seen   = set()
+    i = 0
+    while i < len(lines) and len(tracks) < 15:
+        line = lines[i]
+        if line in SKIP or DATE_RE.match(line):
+            i += 1
+            continue
+        # Check if next line looks like a track description (contains apostrophe, quote, or music words)
+        if i + 1 < len(lines):
+            nxt = lines[i + 1]
+            if (len(line) <= 50 and len(nxt) > 20 and
+                    (nxt.startswith('‘') or nxt.startswith('"') or nxt.startswith("'") or
+                     "'" in nxt or '’' in nxt) and
+                    line not in seen):
+                # Extract track name from description (usually in quotes)
+                track_m = re.search(r'[‘“’”\'"]([\w][^\'\"]{3,60})[‘“’”\']', nxt)
+                track = track_m.group(1).strip() if track_m else ""
+                seen.add(line)
+                tracks.append({
+                    "rank":   len(tracks) + 1,
+                    "artist": line,
+                    "track":  track,
+                    "album":  track,
+                    "label":  "",
+                    "type":   "editorial"
+                })
+                i += 2
+                continue
+        i += 1
+
+    return {
+        "station": "Best Fit",
+        "chart_title": "New Tracks",
+        "chart_subtitle": "The Line of Best Fit",
+        "updated": datetime.now(timezone.utc).isoformat(),
+        "source_url": url,
+        "type": "editorial",
+        "tracks": tracks
+    }
+
+
+def scrape_npr_new_music():
+    print("  NPR New Music Friday: fetching index...")
+    index_url = "https://www.npr.org/sections/allsongs/606254804/new-music-friday"
+    index     = fetch(index_url)
+
+    # Find the most recent article link
+    links = re.findall(
+        r'href="(https://www\.npr\.org/\d{4}/\d{2}/\d{2}/\d+/[^"]+)"',
+        index)
+    url  = index_url
+    html = index
+    for link in links[:5]:
+        if 'new-music-friday' in link.lower() or 'all-songs' in link.lower():
+            try:
+                print("  NPR: fetching " + link)
+                html = fetch(link)
+                url  = link
+                break
+            except Exception:
+                pass
+
+    # NPR articles list picks as "Artist — Album" or bold artist names + album in text
+    raw   = re.sub(r'<style[\s\S]*?</style>', '', html)
+    raw   = re.sub(r'<script[\s\S]*?</script>', '', raw)
+    raw   = re.sub(r'<[^>]+>', '\n', raw)
+    lines = [l.strip() for l in raw.split('\n') if l.strip() and len(l.strip()) > 2]
+
+    tracks = []
+    seen   = set()
+    SKIP   = {'NPR', 'Music', 'Subscribe', 'Newsletter', 'Listen', 'Follow',
+              'Skip', 'Navigation', 'Search', 'Home', 'News', 'More'}
+
+    for line in lines:
+        # Pattern: "Artist, Album Title" or "Artist — Album"
+        m = re.match(r'^([^,\-—]{3,45})[,\-—]\s*[“‘"]?(.{3,70})[”’"]?\s*$', line)
+        if m:
+            artist = m.group(1).strip()
+            album  = m.group(2).strip().strip('"\'')
+            # Skip nav boilerplate
+            if any(s.lower() in artist.lower() for s in SKIP):
+                continue
+            if any(s.lower() in album.lower() for s in SKIP):
+                continue
+            # Skip lines that are clearly dates or metadata
+            if re.search(r'\b(20\d\d|January|February|March|April|May|June|July|August|'
+                         r'September|October|November|December|Monday|Tuesday|Wednesday|'
+                         r'Thursday|Friday|Saturday|Sunday)\b', artist):
+                continue
+            key = artist.lower()
+            if key not in seen and len(artist) > 2:
+                seen.add(key)
+                tracks.append({
+                    "rank":   len(tracks) + 1,
+                    "artist": artist,
+                    "track":  "",
+                    "album":  album,
+                    "label":  "",
+                    "type":   "editorial"
+                })
+        if len(tracks) >= 12:
+            break
+
+    return {
+        "station": "NPR Music",
+        "chart_title": "New Music Friday",
+        "chart_subtitle": "NPR's weekly picks",
+        "updated": datetime.now(timezone.utc).isoformat(),
+        "source_url": url,
+        "type": "editorial",
+        "tracks": tracks
+    }
+
+
+# ---------------------------------------------------------------------------
+# NACC - North American College & Community Radio Chart
+# Page: https://nacc.usc.edu/
+# ---------------------------------------------------------------------------
+
+def scrape_nacc():
+    import time
+    print("  NACC: fetching chart...")
+
+    html = None
+    for attempt in range(3):
+        try:
+            html = fetch("https://nacc.usc.edu/")
+            break
+        except Exception as e:
+            if attempt == 2:
+                raise
+            print("  NACC: connection failed, retry " + str(attempt + 2))
+            time.sleep(4)
+
+    rows   = re.findall(r'<tr[^>]*>([\s\S]*?)</tr>', html)
+    tracks = []
+
+    for row in rows:
+        cells = re.findall(r'<td[^>]*>([\s\S]*?)</td>', row)
+        cells = [re.sub(r'<[^>]+>', '', c).strip() for c in cells]
+        cells = [c for c in cells if c]
+        if len(cells) >= 2 and re.match(r'^\d+$', cells[0]):
+            tracks.append({
+                "rank":   int(cells[0]),
+                "artist": cells[1] if len(cells) > 1 else "",
+                "track":  "",
+                "album":  cells[2] if len(cells) > 2 else "",
+                "label":  cells[3] if len(cells) > 3 else "",
+                "type":   "chart"
+            })
+        if len(tracks) >= 30:
+            break
+
+    return {
+        "station": "NACC",
+        "chart_title": "College Radio Chart",
+        "chart_subtitle": "North American College & Community",
+        "updated": datetime.now(timezone.utc).isoformat(),
+        "source_url": "https://nacc.usc.edu/",
+        "type": "editorial",
+        "tracks": tracks
+    }
+
+
+# ---------------------------------------------------------------------------
+# UK OFFICIAL INDEPENDENT ALBUMS CHART
+# Page: https://www.officialcharts.com/charts/independent-albums-chart/
+# ---------------------------------------------------------------------------
+
+def scrape_uk_indie():
+    print("  UK Indie Albums: fetching...")
+    html = fetch("https://www.officialcharts.com/charts/independent-albums-chart/")
+
+    # Page strips to: ... 'Number' → 'N' → movement → 'ALBUM' → 'ARTIST' → metadata ...
+    raw   = re.sub(r'<style[\s\S]*?</style>', '', html)
+    raw   = re.sub(r'<script[\s\S]*?</script>', '', raw)
+    raw   = re.sub(r'<[^>]+>', '\n', raw)
+    lines = [l.strip() for l in raw.split('\n') if l.strip()]
+
+    MOVEMENT = re.compile(r'^(New|Re-Entry|Non-Mover|LW:|Peak:|=)$', re.IGNORECASE)
+
+    tracks = []
+    i = 0
+    while i < len(lines) and len(tracks) < 20:
+        # Look for the "Number" sentinel followed by a digit
+        if lines[i] == 'Number' and i + 1 < len(lines) and re.match(r'^\d{1,2}$', lines[i + 1]):
+            rank = int(lines[i + 1])
+            # Skip past rank digit and any movement words
+            j = i + 2
+            while j < len(lines) and MOVEMENT.match(lines[j]):
+                j += 1
+            album  = lines[j]     if j < len(lines) else ""
+            artist = lines[j + 1] if j + 1 < len(lines) else ""
+            if album and artist and re.search(r'[A-Za-z]{2,}', album):
+                tracks.append({
+                    "rank":   rank,
+                    "artist": artist,
+                    "track":  "",
+                    "album":  album,
+                    "label":  "",
+                    "type":   "chart"
+                })
+            i = j + 2
+            continue
+        i += 1
+
+    return {
+        "station": "UK Indie Albums",
+        "chart_title": "Independent Albums",
+        "chart_subtitle": "UK Official Independent Albums Chart",
+        "updated": datetime.now(timezone.utc).isoformat(),
+        "source_url": "https://www.officialcharts.com/charts/independent-albums-chart/",
+        "type": "editorial",
+        "tracks": tracks
+    }
+
+
 def main():
     print("Community Radio Radar - Chart Scraper")
     print("=" * 40)
 
-    results = {}
-    errors = {}
+    results   = {}
+    editorial = []
+    errors    = {}
 
-    scrapers = {
+    station_scrapers = {
         "triple_r": scrape_triple_r,
         "rtrfm":    scrape_rtrfm,
         "three_d":  scrape_three_d,
@@ -460,7 +846,15 @@ def main():
         "twoxx":    scrape_2xx,
     }
 
-    for key, fn in scrapers.items():
+    editorial_scrapers = [
+        ("bandcamp",   scrape_bandcamp_daily),
+        ("pitchfork",  scrape_pitchfork_bnm),
+        ("best_fit",   scrape_line_of_best_fit),
+        ("uk_indie",   scrape_uk_indie),
+    ]
+
+    print("\n-- Station Charts --")
+    for key, fn in station_scrapers.items():
         try:
             data = fn()
             results[key] = data
@@ -469,10 +863,21 @@ def main():
             print("    FAILED: " + str(e))
             errors[key] = str(e)
 
+    print("\n-- Editorial Sources --")
+    for key, fn in editorial_scrapers:
+        try:
+            data = fn()
+            editorial.append(data)
+            print("    OK (" + key + "): " + str(len(data['tracks'])) + " entries")
+        except Exception as e:
+            print("    FAILED (" + key + "): " + str(e))
+            errors["editorial_" + key] = str(e)
+
     output = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "charts": results,
-        "errors": errors
+        "charts":       results,
+        "editorial":    editorial,
+        "errors":       errors
     }
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
@@ -481,7 +886,7 @@ def main():
     print("")
     print("Done! charts.json written to: " + str(OUTPUT_FILE))
     if errors:
-        print("Stations with errors: " + ", ".join(errors.keys()))
+        print("Sources with errors: " + ", ".join(errors.keys()))
     return 0
 
 
