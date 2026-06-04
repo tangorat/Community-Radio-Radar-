@@ -1697,11 +1697,24 @@
     background: rgba(var(--glow-color), 0.06);
   }
   .amrap-tab-btn:hover:not(.active) { color: var(--text); border-color: var(--text); }
+  /* Tracks area is a VIEWPORT: each chart source renders into its own
+     .amrap-slide (cached + re-attached so revisited charts never reload their
+     images), and slides swap horizontally inside this clipped box. */
   .amrap-tracks {
     flex: 1;
-    overflow-y: auto;
-    padding: 8px 0;
+    position: relative;
+    overflow: hidden;
     touch-action: pan-y;   /* allow vertical scroll; hand horizontal swipes to JS */
+  }
+  .amrap-slide {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px 0;
+    -webkit-overflow-scrolling: touch;
+    will-change: transform;
+    backface-visibility: hidden;
   }
   .amrap-diary-pane {
     flex: 1;
@@ -1965,7 +1978,12 @@
     filter: contrast(var(--img-contrast, 100%));
     object-fit: cover;
     display: block;
+    /* Fade album art in as it loads (set to 1 on load / when re-attached
+       from cache it already carries opacity:1, so cached art shows instantly). */
+    opacity: 0;
+    transition: opacity 0.35s ease;
   }
+  .amrap-thumb img.loaded { opacity: 1; }
   .amrap-thumb-placeholder {
     width: 100%;
     height: 100%;
@@ -2324,6 +2342,11 @@
   .amrap-mobile-sheet.open {
     transform: translateY(0);
   }
+  /* Charts sheet is rendered natively: header host (cloned, image-free) on top,
+     the slide viewport fills the rest and scrolls internally. */
+  #amrapMobileSheet { overflow: hidden; }
+  #amrapMobileSheet .sheet-header { flex-shrink: 0; }
+  #amrapMobileSheet .amrap-tracks { flex: 1; min-height: 0; }
   .amrap-mobile-sheet-header {
     display: flex;
     justify-content: space-between;
@@ -5104,7 +5127,7 @@ async function loadAMRAP() {
     });
     _panelSources[0] = amrapSource;
     if (_panelIdx === 0) {
-      renderAMRAP(data);
+      renderAMRAP(amrapSource);   // use the SAME object the swipe path uses (consistent slide cache key)
       _updateNavLabel();
       _resetNavBar();
     }
@@ -5115,6 +5138,100 @@ async function loadAMRAP() {
     _startPong(document.getElementById('amrapPongEl'));
     document.getElementById('amrapWeek').textContent = '';
   }
+}
+
+// ─── CHART SLIDES (cache + carousel) ──────────────────────────────────────────
+// Each source's track rows are rendered ONCE into a cached .amrap-slide. On
+// revisit the same element is re-attached, so its already-loaded album art does
+// NOT reload. There is ONE shared cache — the slide element simply moves to
+// whichever viewport is currently visible (the bottom sheet on phone /
+// tablet-landscape, otherwise the left panel), so the sheet is rendered
+// NATIVELY (no clone) and gets the same no-reload + slide + fade behaviour.
+const _slideCache = new WeakMap();   // source object -> .amrap-slide (shared)
+let _slideDir = 0;
+
+// The visible charts viewport: the open bottom sheet, else the left panel.
+function _chartViewport() {
+  const sheet = document.getElementById('amrapMobileSheet');
+  if (sheet && sheet.classList.contains('open')) {
+    return sheet.querySelector('.amrap-tracks');
+  }
+  return document.getElementById('amrapTracks');
+}
+
+// Fade album art in on load; if it's a re-attached cached image (already
+// complete) mark it loaded immediately so it shows without re-fading.
+function _fadeImg(img) {
+  if (img.complete && img.naturalWidth) { img.classList.add('loaded'); return; }
+  img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
+}
+
+function _getPanelSlide(source, builder) {
+  let slide = _slideCache.get(source);
+  if (slide) return slide;
+  slide = document.createElement('div');
+  slide.className = 'amrap-slide';
+  builder(slide);
+  _slideCache.set(source, slide);
+  return slide;
+}
+
+// Build the bottom sheet's static skeleton once: a header host (cloned, image-
+// free) + the native tracks viewport that slides mount into.
+function _ensureSheetSkeleton() {
+  const sheet = document.getElementById('amrapMobileSheet');
+  if (!sheet || sheet.querySelector('.amrap-tracks')) return;
+  sheet.innerHTML = '<div class="sheet-header"></div><div class="amrap-tracks"></div>';
+}
+
+// Mirror the (image-free) panel header into the sheet so its title / source /
+// ◀ ▶ nav buttons stay current. Cheap — no album art is involved.
+function _syncSheetHeader() {
+  const sheet = document.getElementById('amrapMobileSheet');
+  if (!sheet || !sheet.classList.contains('open')) return;
+  const host = sheet.querySelector('.sheet-header');
+  const panelHeader = document.querySelector('#amrapPanel .amrap-header');
+  if (!host || !panelHeader) return;
+  const clone = panelHeader.cloneNode(true);
+  const tabRow = clone.querySelector('.amrap-tab-row');  // sheet has no panel tabs
+  if (tabRow) tabRow.remove();
+  host.innerHTML = clone.innerHTML;
+}
+
+// Called at the end of each chart render — keeps the sheet header in sync when
+// the sheet is the active viewport (the slide itself already mounted there).
+function _afterChartRender() { _syncSheetHeader(); }
+
+// Mount a slide into a viewport. dir 0 = instant swap; dir<0/+ = slide in from
+// the right/left while the current slide leaves the opposite way.
+function _mountSlide(viewport, slide, dir) {
+  if (!viewport) return;
+  // Clear any non-slide leftovers (e.g. the pong placeholder).
+  [...viewport.children].forEach(c => {
+    if (c !== slide && !(c.classList && c.classList.contains('amrap-slide'))) c.remove();
+  });
+  const cur = [...viewport.children].find(c => c.classList && c.classList.contains('amrap-slide') && c !== slide);
+
+  if (!cur || !dir) {
+    if (cur) cur.remove();
+    slide.style.transition = 'none';
+    slide.style.transform = '';
+    if (slide.parentElement !== viewport) viewport.appendChild(slide);
+    return;
+  }
+  // Animate: incoming starts off the next-in-line edge, slides to centre.
+  slide.style.transition = 'none';
+  slide.style.transform = 'translateX(' + (dir < 0 ? 100 : -100) + '%)';
+  viewport.appendChild(slide);
+  void viewport.offsetWidth;                       // reflow before animating
+  const ease = 'transform 0.26s cubic-bezier(0.4,0,0.2,1)';
+  cur.style.transition = ease; slide.style.transition = ease;
+  cur.style.transform = 'translateX(' + (dir < 0 ? -100 : 100) + '%)';
+  slide.style.transform = 'translateX(0)';
+  setTimeout(() => {
+    if (cur.parentElement === viewport && cur !== slide) cur.remove();  // back to cache only
+    slide.style.transition = '';
+  }, 300);
 }
 
 function renderAMRAP(data) {
@@ -5141,68 +5258,71 @@ function renderAMRAP(data) {
   const _pongEl = document.getElementById('amrapPongEl');
   if (_pongEl && _pongEl._pongTimer) clearInterval(_pongEl._pongTimer);
 
-  tracks.innerHTML = '';
-  (data.tracks || []).forEach((t, i) => {
-    const el = document.createElement('div');
-    el.className = 'amrap-entry';
-    el.style.cursor = 'pointer';
-    el.title = 'Search ' + (t.artist || '') + ' — ' + (t.title || '');
-    el.onclick = () => _lookupSong(t.artist, t.title);
-    _entryData(el, {
-      artist: t.artist || '', track: t.title || '', album: t.title || '',
-      station: 'AMRAP', stationId: '',
-      imgSrc: t.localImg || t.imgSrc || t.remoteImg || '', source: 'AMRAP Metro Chart'
+  const slide = _getPanelSlide(data, (c) => {
+    (data.tracks || []).forEach((t, i) => {
+      const el = document.createElement('div');
+      el.className = 'amrap-entry';
+      el.style.cursor = 'pointer';
+      el.title = 'Search ' + (t.artist || '') + ' — ' + (t.title || '');
+      el.onclick = () => _lookupSong(t.artist, t.title);
+      _entryData(el, {
+        artist: t.artist || '', track: t.title || '', album: t.title || '',
+        station: 'AMRAP', stationId: '',
+        imgSrc: t.localImg || t.imgSrc || t.remoteImg || '', source: 'AMRAP Metro Chart'
+      });
+
+      const thumb = document.createElement('div');
+      thumb.className = 'amrap-thumb';
+      const src = t.localImg || t.imgSrc || '';
+      const fallback = t.remoteImg || '';
+      if (src || fallback) {
+        const img = document.createElement('img');
+        img.src = src || fallback;
+        img.alt = t.title || '';
+        img.loading = 'lazy';
+        img.onerror = function() {
+          if (!this._tried && fallback && this.src !== fallback) {
+            this._tried = true;
+            this.src = fallback;
+          } else {
+            this.parentElement.innerHTML = '<div class="amrap-thumb-placeholder">ART</div>';
+          }
+        };
+        _fadeImg(img);
+        thumb.appendChild(img);
+      } else {
+        thumb.innerHTML = '<div class="amrap-thumb-placeholder">ART</div>';
+      }
+
+      const rank = document.createElement('div');
+      rank.className = 'amrap-rank' + (i === 0 ? ' top1' : '');
+      rank.textContent = i + 1;
+
+      const info = document.createElement('div');
+      info.className = 'amrap-info';
+      info.innerHTML = '<div class="amrap-track">' + (t.title || '') + '</div>' +
+                       '<div class="amrap-artist">' + (t.artist || '') + '</div>';
+
+      el.appendChild(rank);
+      el.appendChild(thumb);
+      el.appendChild(info);
+      if (CFG.showCollection !== 'off') {
+        el.appendChild(_makeAddButton({
+          artist:    t.artist || '',
+          track:     t.title  || '',
+          album:     t.title  || '',
+          station:   'AMRAP',
+          stationId: '',
+          imgSrc:    t.localImg || t.imgSrc || t.remoteImg || '',
+          source:    'AMRAP Metro Chart'
+        }));
+      }
+      c.appendChild(el);
     });
-
-    const thumb = document.createElement('div');
-    thumb.className = 'amrap-thumb';
-    const src = t.localImg || t.imgSrc || '';
-    const fallback = t.remoteImg || '';
-    if (src || fallback) {
-      const img = document.createElement('img');
-      img.src = src || fallback;
-      img.alt = t.title || '';
-      img.loading = 'lazy';
-      img.onerror = function() {
-        if (!this._tried && fallback && this.src !== fallback) {
-          this._tried = true;
-          this.src = fallback;
-        } else {
-          this.parentElement.innerHTML = '<div class="amrap-thumb-placeholder">ART</div>';
-        }
-      };
-      thumb.appendChild(img);
-    } else {
-      thumb.innerHTML = '<div class="amrap-thumb-placeholder">ART</div>';
-    }
-
-    const rank = document.createElement('div');
-    rank.className = 'amrap-rank' + (i === 0 ? ' top1' : '');
-    rank.textContent = i + 1;
-
-    const info = document.createElement('div');
-    info.className = 'amrap-info';
-    info.innerHTML = '<div class="amrap-track">' + (t.title || '') + '</div>' +
-                     '<div class="amrap-artist">' + (t.artist || '') + '</div>';
-
-    el.appendChild(rank);
-    el.appendChild(thumb);
-    el.appendChild(info);
-    // + button
-    if (CFG.showCollection !== 'off') {
-      el.appendChild(_makeAddButton({
-        artist:    t.artist || '',
-        track:     t.title  || '',
-        album:     t.title  || '',
-        station:   'AMRAP',
-        stationId: '',
-        imgSrc:    t.localImg || t.imgSrc || t.remoteImg || '',
-        source:    'AMRAP Metro Chart'
-      }));
-    }
-    tracks.appendChild(el);
   });
-  _syncAmrapSheetIfOpen();
+  _mountSlide(_chartViewport(), slide, _slideDir);
+  _slideDir = 0;
+  _afterChartRender();
 }
 
 async function loadAsciiArt() {
@@ -5267,46 +5387,18 @@ async function loadChartsFromAPI() {
 // Clone the live AMRAP panel into the mobile sheet, KEEPING the supplier
 // switcher (nav-row) so users can cycle chart sources. Re-run whenever the
 // panel source changes while the sheet is open so it stays in sync.
-function _populateAmrapSheet() {
+// Open the charts bottom sheet and render the current source NATIVELY into it
+// (no clone). The slide moves into the sheet viewport, so it keeps its loaded
+// album art (no reload) and animates between sources just like the panel.
+function _openChartsSheet() {
   const sheet = document.getElementById('amrapMobileSheet');
   if (!sheet) return;
-  const amrapPanel = document.getElementById('amrapPanel');
-  if (!amrapPanel) return;
-  const clone = amrapPanel.cloneNode(true);
-  // Strip the panel-internal tab row + the diary/collection panes — keep the
-  // nav-row (◀ source ▶) and progress bar so suppliers can be switched.
-  ['amrap-tab-row', 'amrap-diary-pane', 'amrap-collection-pane'].forEach(cls => {
-    const el = clone.querySelector('.' + cls);
-    if (el) el.remove();
-  });
-  sheet.innerHTML = clone.innerHTML;
-
-  // cloneNode/innerHTML does NOT copy the .onclick handlers, so wire the sheet
-  // up ONCE with a delegated listener that reads the data-* attributes on each
-  // entry. This makes both song lookup (tap row) and add-to-collection (tap +)
-  // work inside the cloned sheet. (#3)
-  if (!sheet.dataset.delegated) {
-    sheet.dataset.delegated = '1';
-    sheet.addEventListener('click', function(e) {
-      const addBtn = e.target.closest('.add-to-coll-btn');
-      const entry  = e.target.closest('.amrap-entry, .chart-entry');
-      if (addBtn && entry) {
-        e.stopPropagation();
-        const d = entry.dataset;
-        _toggleCollect(addBtn, {
-          artist: d.artist, track: d.track, album: d.album,
-          station: d.station, stationId: d.stationid, imgSrc: d.img, source: d.source
-        });
-        return;
-      }
-      if (entry) _lookupSong(entry.dataset.artist, entry.dataset.track);
-    });
-  }
-}
-
-function _syncAmrapSheetIfOpen() {
-  const sheet = document.getElementById('amrapMobileSheet');
-  if (sheet && sheet.classList.contains('open')) _populateAmrapSheet();
+  _ensureSheetSkeleton();
+  try { localStorage.setItem('rrAmrapTab', 'charts'); } catch(e) {}
+  sheet.classList.add('open');          // open BEFORE render so _chartViewport() targets the sheet
+  _slideDir = 0;
+  if (_panelSources.length) renderPanelSource(_panelIdx);
+  else _syncSheetHeader();
 }
 
 // ─── MOBILE TAB SWITCHING ─────────────────────────────────────────────────────
@@ -5388,11 +5480,7 @@ function switchMobileTab(tab) {
   } else if (tab === 'charts') {
     worldView.classList.remove('active');
     mapContainer.style.display = '';
-    // Force the live panel onto the charts tab, then render the current source
-    try { localStorage.setItem('rrAmrapTab', 'charts'); } catch(e) {}
-    if (_panelSources.length) renderPanelSource(_panelIdx);
-    _populateAmrapSheet();
-    amrapSheet.classList.add('open');
+    _openChartsSheet();                 // builds skeleton, opens, renders natively
     if (tabCharts) tabCharts.classList.add('active');
     sidePanel.classList.remove('open');
     mapContainer.classList.remove('panel-open');
@@ -6808,8 +6896,11 @@ document.addEventListener('keydown', function(e) {
       const tab = localStorage.getItem('rrAmrapTab');
       return tab !== 'diary' && tab !== 'collection' && _panelSources.length >= 2;
     };
-    const setX = (x, trans) => { if (tracks) { tracks.style.transition = trans; tracks.style.transform = 'translateX(' + x + 'px)'; } };
-    const reset = () => { if (tracks) { tracks.style.transition = ''; tracks.style.transform = ''; } };
+    // Finger-track the CURRENT slide (the cached source panel), not the viewport,
+    // so the commit can hand straight off to the carousel _mountSlide animation.
+    const curSlide = () => tracks ? tracks.querySelector('.amrap-slide') : null;
+    const setX = (x, trans) => { const s = curSlide(); if (s) { s.style.transition = trans; s.style.transform = 'translateX(' + x + 'px)'; } };
+    const reset = () => { const s = curSlide(); if (s) { s.style.transition = ''; s.style.transform = ''; } };
 
     panelEl.addEventListener('touchstart', e => {
       if (!chartsActive()) { sx = null; return; }
@@ -6838,14 +6929,13 @@ document.addEventListener('keydown', function(e) {
       if (!sw) { reset(); return; }
       if (Math.abs(dx) >= 45 && Math.abs(dx) > Math.abs(dy)) {
         const dir = dx < 0 ? -1 : 1;
-        setX(dir * W * 0.5, 'transform 0.13s ease');
-        setTimeout(() => {
-          if (dir < 0) { if (typeof nextPanelSource === 'function') nextPanelSource(); }
-          else        { if (typeof prevPanelSource === 'function') prevPanelSource(); }
-          reset();                                     // re-render replaces content
-        }, 120);
+        // Hand off to the carousel: the current slide continues out from its
+        // dragged position while the cached next slide slides in.
+        _slideDir = dir;
+        if (dir < 0) { if (typeof nextPanelSource === 'function') nextPanelSource(); }
+        else        { if (typeof prevPanelSource === 'function') prevPanelSource(); }
       } else {
-        setX(0, 'transform 0.18s ease');
+        setX(0, 'transform 0.18s ease');             // not far enough — spring back
         setTimeout(reset, 200);
       }
     }
@@ -7015,10 +7105,7 @@ function lsNav(view) {
     if (diarySheet)  diarySheet.classList.remove('open');
     if (collSheet)   collSheet.classList.remove('open');
     if (amrapSheet) {
-      try { localStorage.setItem('rrAmrapTab', 'charts'); } catch(e) {}
-      if (_panelSources.length) renderPanelSource(_panelIdx);
-      _populateAmrapSheet();
-      amrapSheet.classList.add('open');
+      _openChartsSheet();               // native render (no clone)
     }
     if (btn) btn.classList.add('active');
   } else if (view === 'notes') {
@@ -7085,19 +7172,19 @@ let _panelIdx     = 0;
 let _panelTimer   = null;
 
 function _resetNavBar() {
-  const bar = document.getElementById('amrapNavProgressBar');
-  if (!bar) return;
-  bar.classList.remove('running');
-  void bar.offsetWidth; // force reflow
-  bar.classList.add('running');
+  // Class-based so BOTH the panel and the (cloned) sheet progress bars animate.
+  document.querySelectorAll('.amrap-nav-progress-bar').forEach(bar => {
+    bar.classList.remove('running');
+    void bar.offsetWidth; // force reflow
+    bar.classList.add('running');
+  });
 }
 
 function _updateNavLabel() {
-  const label = document.getElementById('amrapNavLabel');
-  if (!label) return;
   const s = _panelSources[_panelIdx];
   if (!s) return;
-  label.textContent = (s.chart_title || s.station || '').toUpperCase();
+  const text = (s.chart_title || s.station || '').toUpperCase();
+  document.querySelectorAll('.amrap-nav-label').forEach(el => el.textContent = text);
 }
 
 function renderPanelSource(idx) {
@@ -7108,7 +7195,7 @@ function renderPanelSource(idx) {
 
   // Don't touch the tracks area or labels if diary or collection tab is active
   const currentTab = localStorage.getItem('rrAmrapTab');
-  if (currentTab === 'diary' || currentTab === 'collection') return;
+  if (currentTab === 'diary' || currentTab === 'collection') { _slideDir = 0; return; }
 
   _updateNavLabel();
   _resetNavBar();
@@ -7125,7 +7212,7 @@ function renderPanelSource(idx) {
       _renderEditorial(s);
     }
   }
-  _syncAmrapSheetIfOpen();
+  // (renderers already mount into the active viewport + sync the sheet header)
 }
 
 function _renderEditorial(source) {
@@ -7154,66 +7241,69 @@ function _renderEditorial(source) {
   }
   if (credits) credits.style.display = 'none';
 
-  tracksEl.innerHTML = '';
-  (source.tracks || []).forEach((t, i) => {
-    const el = document.createElement('div');
-    el.className = 'amrap-entry editorial-entry';
-    el.style.cursor = 'pointer';
-    const q = ((t.artist || '') + ' ' + (t.album || t.track || '')).trim();
-    el.onclick = () => _lookupSong(t.artist, t.album || t.track);
-    el.title = 'Search ' + q;
-    _entryData(el, {
-      artist: t.artist || '', track: t.album || t.track || '', album: t.album || '',
-      station: source.station || '', stationId: '',
-      imgSrc: t.imgSrc || '', source: source.chart_title || source.station || ''
+  const slide = _getPanelSlide(source, (c) => {
+    (source.tracks || []).forEach((t, i) => {
+      const el = document.createElement('div');
+      el.className = 'amrap-entry editorial-entry';
+      el.style.cursor = 'pointer';
+      const q = ((t.artist || '') + ' ' + (t.album || t.track || '')).trim();
+      el.onclick = () => _lookupSong(t.artist, t.album || t.track);
+      el.title = 'Search ' + q;
+      _entryData(el, {
+        artist: t.artist || '', track: t.album || t.track || '', album: t.album || '',
+        station: source.station || '', stationId: '',
+        imgSrc: t.imgSrc || '', source: source.chart_title || source.station || ''
+      });
+
+      const rank = document.createElement('div');
+      rank.className = 'amrap-rank' + (i === 0 ? ' top1' : '');
+      rank.textContent = t.rank || (i + 1);
+
+      const thumb = document.createElement('div');
+      thumb.className = 'amrap-thumb';
+      const imgSrc = t.imgSrc || t.localImg || t.imgUrl || '';
+      if (imgSrc) {
+        const img = document.createElement('img');
+        img.src = imgSrc;
+        img.alt = t.album || t.artist || '';
+        img.loading = 'lazy';
+        img.onerror = function() {
+          this.parentElement.innerHTML = '<div class="amrap-thumb-placeholder">ART</div>';
+        };
+        _fadeImg(img);
+        thumb.appendChild(img);
+      } else {
+        thumb.innerHTML = '<div class="amrap-thumb-placeholder">ART</div>';
+      }
+
+      const info = document.createElement('div');
+      info.className = 'amrap-info';
+      const scoreHtml = t.score ? ' <span class="editorial-score">▲' + t.score + '</span>' : '';
+      const labelHtml = t.label ? '<div class="amrap-artist" style="opacity:0.55;font-size:0.56rem;letter-spacing:0.04em">' + t.label + '</div>' : '';
+      info.innerHTML = '<div class="amrap-track">' + (t.album || t.track || '') + scoreHtml + '</div>' +
+                       '<div class="amrap-artist">' + (t.artist || '') + '</div>' +
+                       labelHtml;
+
+      el.appendChild(rank);
+      el.appendChild(thumb);
+      el.appendChild(info);
+      if (CFG.showCollection !== 'off') {
+        el.appendChild(_makeAddButton({
+          artist:    t.artist  || '',
+          track:     t.album   || t.track || '',
+          album:     t.album   || '',
+          station:   source.station || '',
+          stationId: '',
+          imgSrc:    t.imgSrc  || '',
+          source:    source.chart_title || source.station || ''
+        }));
+      }
+      c.appendChild(el);
     });
-
-    const rank = document.createElement('div');
-    rank.className = 'amrap-rank' + (i === 0 ? ' top1' : '');
-    rank.textContent = t.rank || (i + 1);
-
-    // Album art thumbnail — same structure as AMRAP entries
-    const thumb = document.createElement('div');
-    thumb.className = 'amrap-thumb';
-    const imgSrc = t.imgSrc || t.localImg || t.imgUrl || '';
-    if (imgSrc) {
-      const img = document.createElement('img');
-      img.src = imgSrc;
-      img.alt = t.album || t.artist || '';
-      img.loading = 'lazy';
-      img.onerror = function() {
-        this.parentElement.innerHTML = '<div class="amrap-thumb-placeholder">ART</div>';
-      };
-      thumb.appendChild(img);
-    } else {
-      thumb.innerHTML = '<div class="amrap-thumb-placeholder">ART</div>';
-    }
-
-    const info = document.createElement('div');
-    info.className = 'amrap-info';
-    const scoreHtml = t.score ? ' <span class="editorial-score">▲' + t.score + '</span>' : '';
-    const labelHtml = t.label ? '<div class="amrap-artist" style="opacity:0.55;font-size:0.56rem;letter-spacing:0.04em">' + t.label + '</div>' : '';
-    info.innerHTML = '<div class="amrap-track">' + (t.album || t.track || '') + scoreHtml + '</div>' +
-                     '<div class="amrap-artist">' + (t.artist || '') + '</div>' +
-                     labelHtml;
-
-    el.appendChild(rank);
-    el.appendChild(thumb);
-    el.appendChild(info);
-    // + button
-    if (CFG.showCollection !== 'off') {
-      el.appendChild(_makeAddButton({
-        artist:    t.artist  || '',
-        track:     t.album   || t.track || '',
-        album:     t.album   || '',
-        station:   source.station || '',
-        stationId: '',
-        imgSrc:    t.imgSrc  || '',
-        source:    source.chart_title || source.station || ''
-      }));
-    }
-    tracksEl.appendChild(el);
   });
+  _mountSlide(_chartViewport(), slide, _slideDir);
+  _slideDir = 0;
+  _afterChartRender();
 }
 
 function _renderDualStack(sourceA, sourceB) {
@@ -7230,49 +7320,53 @@ function _renderDualStack(sourceA, sourceB) {
   if (footer)  { footer.style.display = 'none'; }
   if (credits) { credits.style.display = 'none'; }
 
-  tracksEl.innerHTML = '';
+  // Cache keyed by sourceA (the pairing is stable for a given data load).
+  const slide = _getPanelSlide(sourceA, (root) => {
+    [sourceA, sourceB].forEach((src, stackIdx) => {
+      const section = document.createElement('div');
+      section.className = 'editorial-stack-section';
 
-  [sourceA, sourceB].forEach((src, stackIdx) => {
-    const section = document.createElement('div');
-    section.className = 'editorial-stack-section';
+      const hdr = document.createElement('div');
+      hdr.className = 'editorial-stack-header';
+      hdr.textContent = (src.chart_title || src.station || '').toUpperCase();
+      section.appendChild(hdr);
 
-    const hdr = document.createElement('div');
-    hdr.className = 'editorial-stack-header';
-    hdr.textContent = (src.chart_title || src.station || '').toUpperCase();
-    section.appendChild(hdr);
+      (src.tracks || []).forEach((t, i) => {
+        const el = document.createElement('div');
+        el.className = 'amrap-entry editorial-entry editorial-stack-entry';
+        el.style.cursor = 'pointer';
+        el.onclick = () => _lookupSong(t.artist, t.album || t.track);
+        _entryData(el, {
+          artist: t.artist || '', track: t.album || t.track || '', album: t.album || '',
+          station: src.station || '', stationId: '',
+          imgSrc: t.imgSrc || '', source: src.chart_title || src.station || ''
+        });
 
-    (src.tracks || []).forEach((t, i) => {
-      const el = document.createElement('div');
-      el.className = 'amrap-entry editorial-entry editorial-stack-entry';
-      el.style.cursor = 'pointer';
-      el.onclick = () => _lookupSong(t.artist, t.album || t.track);
-      _entryData(el, {
-        artist: t.artist || '', track: t.album || t.track || '', album: t.album || '',
-        station: src.station || '', stationId: '',
-        imgSrc: t.imgSrc || '', source: src.chart_title || src.station || ''
+        const rank = document.createElement('div');
+        rank.className = 'amrap-rank';
+        rank.textContent = t.rank || (i + 1);
+
+        const info = document.createElement('div');
+        info.className = 'amrap-info';
+        info.innerHTML = '<div class="amrap-track" style="font-size:0.57rem">' + (t.album || t.track || '') + '</div>' +
+                         '<div class="amrap-artist" style="font-size:0.5rem">' + (t.artist || '') + '</div>';
+
+        el.appendChild(rank);
+        el.appendChild(info);
+        section.appendChild(el);
       });
 
-      const rank = document.createElement('div');
-      rank.className = 'amrap-rank';
-      rank.textContent = t.rank || (i + 1);
-
-      const info = document.createElement('div');
-      info.className = 'amrap-info';
-      info.innerHTML = '<div class="amrap-track" style="font-size:0.57rem">' + (t.album || t.track || '') + '</div>' +
-                       '<div class="amrap-artist" style="font-size:0.5rem">' + (t.artist || '') + '</div>';
-
-      el.appendChild(rank);
-      el.appendChild(info);
-      section.appendChild(el);
+      root.appendChild(section);
+      if (stackIdx === 0) {
+        const div = document.createElement('div');
+        div.className = 'editorial-stack-divider';
+        root.appendChild(div);
+      }
     });
-
-    tracksEl.appendChild(section);
-    if (stackIdx === 0) {
-      const div = document.createElement('div');
-      div.className = 'editorial-stack-divider';
-      tracksEl.appendChild(div);
-    }
   });
+  _mountSlide(_chartViewport(), slide, _slideDir);
+  _slideDir = 0;
+  _afterChartRender();
 }
 
 let _lastManualNavTime = 0;
