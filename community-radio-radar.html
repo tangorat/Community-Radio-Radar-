@@ -1655,13 +1655,13 @@
     flex-shrink: 0;
   }
   .amrap-label {
-    font-size: 0.6rem;
+    font-size: 0.75rem;
     letter-spacing: 0.12em;
     color: var(--accent);
-    margin-bottom: 2px;
+    margin-bottom: 3px;
   }
   .amrap-title {
-    font-size: 0.65rem;
+    font-size: 0.8rem;
     letter-spacing: 0.08em;
     color: var(--fg);
     line-height: 1.3;
@@ -1891,7 +1891,7 @@
   .amrap-nav-btn:hover { color: var(--accent); border-color: var(--accent); }
   .amrap-nav-label {
     flex: 1; text-align: center; font-family: 'Share Tech Mono', monospace;
-    font-size: 0.48rem; letter-spacing: 0.07em; color: var(--muted);
+    font-size: 0.62rem; letter-spacing: 0.07em; color: var(--muted);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .amrap-nav-progress-wrap {
@@ -5155,16 +5155,11 @@ function _populateAmrapSheet() {
       const entry  = e.target.closest('.amrap-entry, .chart-entry');
       if (addBtn && entry) {
         e.stopPropagation();
-        if (addBtn.classList.contains('added')) { _showCollToast('Already in Collection'); return; }
         const d = entry.dataset;
-        const added = addToCollection({
+        _toggleCollect(addBtn, {
           artist: d.artist, track: d.track, album: d.album,
           station: d.station, stationId: d.stationid, imgSrc: d.img, source: d.source
         });
-        addBtn.textContent = '✓';
-        addBtn.classList.add('added');
-        _showCollToast(added === false ? 'Already in Collection' : 'Added to Collection');
-        if (typeof _haptic === 'function') _haptic(8);
         return;
       }
       if (entry) _lookupSong(entry.dataset.artist, entry.dataset.track);
@@ -5577,6 +5572,33 @@ function _isInCollection(artist, track) {
   return items.some(i => (i.artist || '') + '||' + (i.track || '') === key);
 }
 
+// Remove an entry from the current collection page by artist+track.
+function _removeFromCollectionByKey(artist, track) {
+  let items;
+  try { items = JSON.parse(localStorage.getItem(_getCollPageKey(_collPage)) || '[]'); } catch(e) { items = []; }
+  const key = (artist || '') + '||' + (track || '');
+  items = items.filter(i => (i.artist || '') + '||' + (i.track || '') !== key);
+  try { localStorage.setItem(_getCollPageKey(_collPage), JSON.stringify(items)); } catch(e) {}
+  renderCollection();
+}
+
+// Toggle a song in/out of the collection from a + / ✓ button. Used by both the
+// live panel buttons and the delegated mobile-sheet handler.
+function _toggleCollect(btn, data) {
+  if (btn.classList.contains('added')) {
+    _removeFromCollectionByKey(data.artist, data.track);
+    btn.textContent = '+';
+    btn.classList.remove('added');
+    _showCollToast('Removed from Collection');
+  } else {
+    addToCollection(data);
+    btn.textContent = '✓';
+    btn.classList.add('added');
+    _showCollToast('Added to Collection');
+  }
+  if (typeof _haptic === 'function') _haptic(8);
+}
+
 // Tag an entry element with the data needed to (a) look the song up and
 // (b) add it to the collection — via data-* attributes. These survive an
 // innerHTML clone (unlike .onclick handlers), so the cloned mobile charts
@@ -5599,17 +5621,12 @@ function _makeAddButton(data) {
   const inColl = _isInCollection(data.artist, data.track);
   btn.textContent = inColl ? '✓' : '+';
   if (inColl) btn.classList.add('added');
-  btn.title = 'Add to Collection';
-  btn.setAttribute('aria-label', 'Add to Collection');
+  btn.title = 'Add / remove from Collection';
+  btn.setAttribute('aria-label', 'Add or remove from Collection');
   btn.onclick = function(e) {
     e.stopPropagation();
     e.preventDefault();
-    if (btn.classList.contains('added')) { _showCollToast('Already in Collection'); return; }
-    const added = addToCollection(data);
-    btn.textContent = '✓';
-    btn.classList.add('added');
-    _showCollToast(added === false ? 'Already in Collection' : 'Added to Collection');
-    if (typeof _haptic === 'function') _haptic(8);
+    _toggleCollect(btn, data);
   };
   // Stop the touch from falling through to the row's song-lookup handler.
   btn.addEventListener('touchend', function(e) { e.stopPropagation(); }, { passive: true });
@@ -5694,29 +5711,68 @@ function _promptRenamePage(type, idx) {
 }
 
 // ─── COLLECTION EXPORT ────────────────────────────────────────────────────────
-function exportCollection() {
+// Builds a clean "Artist - Track" list (one per line — ideal for pasting into a
+// Spotify / YouTube Music playlist search). Works on iPhone where file
+// downloads fail: shares via the native sheet, else copies to the clipboard,
+// else downloads on desktop.
+function _collectionTrackList() {
   let items;
   try { items = JSON.parse(localStorage.getItem(_getCollPageKey(_collPage)) || '[]'); } catch(e) { items = []; }
+  return items;
+}
+
+async function exportCollection() {
+  const items = _collectionTrackList();
   if (!items.length) { alert('No tracks in this collection page.'); return; }
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' });
-  const lines = ['Radio Radar Hits - ' + dateStr, '='.repeat(50), ''];
-  const prov = SEARCH_PROVIDERS[CFG.searchProvider] || SEARCH_PROVIDERS.google;
-  items.forEach((item, i) => {
-    const q = ((item.artist || '') + ' ' + (item.track || '')).trim();
-    lines.push((i + 1) + '. ' + (item.track || '(unknown track)'));
-    if (item.artist) lines.push('   Artist: ' + item.artist);
-    if (item.source) lines.push('   Source: ' + item.source);
-    lines.push('   Search: ' + prov.url(q));
-    lines.push('');
-  });
-  lines.push('Exported from Community Radio Radar · ' + dateStr);
-  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  const dateStr = new Date().toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' });
+  // Clean, paste-ready list (no URLs) for adding to a playlist search.
+  const list = items.map(it => ((it.artist || '') + ' - ' + (it.track || '')).replace(/^ - | - $/,'')).join('\n');
+  const text = 'Radio Radar Hits (' + dateStr + ')\n\n' + list + '\n\nvia communityradioradar.online';
+
+  // 1) Native share sheet (best on iPhone)
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: 'Radio Radar Hits', text });
+      return;
+    }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+
+  // 2) Clipboard (works on iOS Safari + everywhere)
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      _showCollToast('Songs copied — paste into a playlist');
+      return;
+    }
+  } catch (e) {}
+
+  // 3) Desktop download fallback
+  const blob = new Blob([text], { type: 'text/plain' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'Radio Radar Hits - ' + dateStr + '.txt';
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+// Copy the list and open Spotify / YouTube Music so the user can paste it into
+// a new playlist. (True one-click playlist creation needs account login / API.)
+async function openCollectionInService(service) {
+  const items = _collectionTrackList();
+  if (!items.length) { alert('No tracks in this collection page.'); return; }
+  const list = items.map(it => ((it.artist || '') + ' - ' + (it.track || '')).replace(/^ - | - $/,'')).join('\n');
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(list);
+      _showCollToast('Songs copied — paste & search to add');
+    }
+  } catch (e) {}
+  const first = items[0];
+  const q = ((first.artist || '') + ' ' + (first.track || '')).trim();
+  const url = service === 'spotify'
+    ? 'https://open.spotify.com/search/' + encodeURIComponent(q)
+    : 'https://music.youtube.com/search?q=' + encodeURIComponent(q);
+  window.open(url, '_blank');
 }
 
 function addToCollection(data) {
@@ -5812,23 +5868,24 @@ function renderCollection() {
 
     pane.appendChild(scroll);
 
-    // Footer with share + export buttons
+    // Footer with playlist / share / export buttons
     const footer = document.createElement('div');
     footer.className = 'collection-footer';
     const countEl = document.createElement('span');
     countEl.textContent = items.length ? (items.length + ' TRACK' + (items.length !== 1 ? 'S' : '')) : '';
     const btnGroup = document.createElement('div');
-    btnGroup.style.cssText = 'display:flex;gap:6px;';
-    const shareBtn = document.createElement('button');
-    shareBtn.className = 'collection-export-btn';
-    shareBtn.textContent = 'SHARE ➦';
-    shareBtn.onclick = e => { e.stopPropagation(); shareCollection(); };
-    const exportBtn = document.createElement('button');
-    exportBtn.className = 'collection-export-btn';
-    exportBtn.textContent = 'EXPORT ↓';
-    exportBtn.onclick = e => { e.stopPropagation(); exportCollection(); };
-    btnGroup.appendChild(shareBtn);
-    btnGroup.appendChild(exportBtn);
+    btnGroup.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;';
+    const mkBtn = (label, fn) => {
+      const b = document.createElement('button');
+      b.className = 'collection-export-btn';
+      b.textContent = label;
+      b.onclick = e => { e.stopPropagation(); fn(); };
+      return b;
+    };
+    btnGroup.appendChild(mkBtn('SPOTIFY', () => openCollectionInService('spotify')));
+    btnGroup.appendChild(mkBtn('YT MUSIC', () => openCollectionInService('ytmusic')));
+    btnGroup.appendChild(mkBtn('SHARE ➦', () => shareCollection()));
+    btnGroup.appendChild(mkBtn('COPY ⧉', () => exportCollection()));
     footer.appendChild(countEl);
     footer.appendChild(btnGroup);
     pane.appendChild(footer);
@@ -6411,17 +6468,14 @@ document.addEventListener('keydown', function(e) {
     const past = Math.abs(finishX) >= _W * COMMIT_FRACTION && target && !_isSame(target);
 
     if (past) {
-      // 1) slide the CURRENT panel out in the drag direction
-      _setX(_dir * _W, 'transform 0.2s ease');
-      setTimeout(() => {
-        // 2) render the REAL next station into the panel (no intermediate preview)
-        _applyTarget(target);
-        // 3) place it just off the OPPOSITE edge, then slide it into centre
-        _setX(-_dir * _W, 'none');
-        void panel.offsetWidth;               // force reflow before animating in
-        requestAnimationFrame(() => _setX(0, 'transform 0.24s cubic-bezier(0.4,0,0.2,1)'));
-        setTimeout(_reset, 300);
-      }, 190);
+      // Render the REAL next station immediately, position it just off the
+      // next-in-line edge, then slide it straight in. No slide-OUT first, so
+      // there's no blank gap — it reads as a direct swap to the next station.
+      _applyTarget(target);
+      _setX(-_dir * _W, 'none');             // start off the opposite edge
+      void panel.offsetWidth;                // reflow before animating
+      requestAnimationFrame(() => _setX(0, 'transform 0.22s cubic-bezier(0.4,0,0.2,1)'));
+      setTimeout(_reset, 260);
     } else {
       // not far enough — spring back to centre
       _setX(0, 'transform 0.2s ease');
@@ -6474,11 +6528,63 @@ function _attachHSwipe(el, onLeft, onRight, guard) {
     () => { if (typeof prevPanelSource === 'function') prevPanelSource(); },
     chartsActive);
 
-  // World grid: swipe between page 1 / 2 of the station tiles.
-  _attachHSwipe(document.getElementById('worldView'),
-    () => { if (typeof changeWorldPage === 'function') changeWorldPage(1); },
-    () => { if (typeof changeWorldPage === 'function') changeWorldPage(-1); },
-    () => currentView === 'world' && !document.getElementById('sidePanel').classList.contains('open'));
+})();
+
+// World grid: finger-tracking page swipe — the tile grid physically follows
+// your finger and the next page slides in.
+(function() {
+  const wv = document.getElementById('worldView');
+  const grid = document.getElementById('worldGrid');
+  if (!wv || !grid) return;
+  let sx = null, sy = null, sw = false, dec = false, W = 1, hasNext = false, hasPrev = false;
+  const active = () => currentView === 'world' && !document.getElementById('sidePanel').classList.contains('open');
+  const total = () => (typeof WORLD_STATIONS_PAGES !== 'undefined') ? WORLD_STATIONS_PAGES.length : 1;
+  function setX(x, trans) { grid.style.transition = trans; grid.style.transform = 'translateX(' + x + 'px)'; }
+  function reset() { grid.style.transition = ''; grid.style.transform = ''; }
+
+  wv.addEventListener('touchstart', e => {
+    if (!active()) { sx = null; return; }
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; sw = false; dec = false;
+    W = wv.getBoundingClientRect().width || window.innerWidth;
+    hasNext = currentWorldPage < total() - 1;
+    hasPrev = currentWorldPage > 0;
+  }, { passive: true });
+
+  wv.addEventListener('touchmove', e => {
+    if (sx === null) return;
+    const dx = e.touches[0].clientX - sx, dy = e.touches[0].clientY - sy;
+    if (!dec) {
+      if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.4) { sw = true; dec = true; }
+      else if (Math.abs(dy) > 10) { dec = true; sw = false; return; }
+      else return;
+    }
+    if (!sw) return;
+    e.preventDefault();
+    let x = dx;
+    if ((dx < 0 && !hasNext) || (dx > 0 && !hasPrev)) x = dx * 0.3; // resist at edges
+    setX(Math.max(-W, Math.min(W, x)), 'none');
+  }, { passive: false });
+
+  function end(e) {
+    if (sx === null) return;
+    const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    sx = null; sy = null;
+    if (!sw) { reset(); return; }
+    const dir = dx < 0 ? 1 : -1;                 // swipe left → next page
+    const canGo = (dir > 0 && hasNext) || (dir < 0 && hasPrev);
+    if (Math.abs(dx) >= W * 0.25 && Math.abs(dx) > Math.abs(dy) && canGo) {
+      changeWorldPage(dir);                       // render new page
+      setX(dir > 0 ? W : -W, 'none');             // start it off the opposite edge
+      void grid.offsetWidth;
+      requestAnimationFrame(() => setX(0, 'transform 0.22s cubic-bezier(0.4,0,0.2,1)'));
+      setTimeout(reset, 260);
+    } else {
+      setX(0, 'transform 0.2s ease');             // spring back
+      setTimeout(reset, 220);
+    }
+  }
+  wv.addEventListener('touchend', end, { passive: true });
+  wv.addEventListener('touchcancel', end, { passive: true });
 })();
 // ===== EXTRA SWIPES — END =====================================================
 
