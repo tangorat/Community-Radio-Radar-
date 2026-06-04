@@ -450,7 +450,9 @@
     background: var(--panel);
     border-left: 1px solid var(--border);
     z-index: 50;
-    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    /* SWIPE: transition routed through a var so the swipe handler can drive a
+       fast transform animation; defaults to the normal right-slide. */
+    transition: var(--sp-transition, right 0.4s cubic-bezier(0.4, 0, 0.2, 1));
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -459,6 +461,9 @@
 
   .side-panel.open {
     right: 0;
+    /* SWIPE: x/y offset routed through vars so finger-tracking can slide the
+       panel horizontally during a station swipe (works on tablet too). */
+    transform: translate(var(--sp-x, 0px), var(--sp-y, 0px));
   }
 
   .panel-drag-handle { display: none; }
@@ -2330,6 +2335,14 @@
     #volControl    { display: none !important; }
     #miniPipBtn    { display: none !important; }
     #widgetSizeRow { display: none !important; }
+
+    /* Bigger chart-source headers on tablet so where the chart comes from
+       (e.g. PITCHFORK · BEST NEW MUSIC) reads clearly. */
+    .amrap-label     { font-size: 0.82rem !important; margin-bottom: 4px !important; }
+    .amrap-title     { font-size: 0.9rem !important; }
+    .amrap-week      { font-size: 0.66rem !important; }
+    .amrap-nav-label { font-size: 0.72rem !important; }
+    .editorial-stack-header { font-size: 0.72rem !important; }
 
     /* panel-open: push only by the side-panel width, not AMRAP offset too */
     .map-container.panel-open { margin-right: 400px !important; }
@@ -6289,29 +6302,35 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// ===== PEEK SWIPE (Option B) — START ==========================================
-// Live finger-tracking swipe between stations with a "peek" preview of the
-// adjacent station (name + freq + ASCII art) sliding in under the finger.
-// Mobile portrait only (matches where swipe was previously active).
-//
-// TO REMOVE THIS FEATURE:
-//   1. Delete this whole block (down to PEEK SWIPE — END).
-//   2. Un-comment the ORIGINAL handler preserved at the bottom of this block.
-//   3. Revert the two PEEK-SWIPE lines in the mobile .side-panel / .side-panel.open
-//      CSS rules, and delete the ".peek-panel" CSS block (also marked PEEK SWIPE).
+// ===== STATION SWIPE — START ==================================================
+// Finger-tracking swipe between stations on phones AND tablets. On commit the
+// current panel slides out and the REAL next station is rendered and slides in
+// from the opposite edge — no intermediate preview / "peek" layer.
 (function() {
   const STATE_ORDER = ['WA', 'NT', 'SA', 'QLD', 'NSW', 'ACT', 'VIC', 'TAS'];
   const panel = document.getElementById('sidePanel');
   if (!panel) return;
 
-  const COMMIT_FRACTION = 0.32;   // drag this fraction of width to switch
+  const COMMIT_FRACTION = 0.3;    // drag this fraction of width to switch
   let _tx = null, _ty = null, _swiping = false, _decided = false;
-  let _peek = null, _dir = 0, _W = 1, _target = null;
+  let _dir = 0, _W = 1;
 
   function _stateList() {
     return STATE_ORDER.filter(k => STATIONS[k] || UNDER_CONSTRUCTION[k]);
   }
+  function _worldList() {
+    return (typeof WORLD_STATIONS_PAGES !== 'undefined') ? WORLD_STATIONS_PAGES.flat() : [];
+  }
+  // In the world view neighbours are STATION objects; on the map they're STATE codes.
   function _neighbour(dir) {
+    if (currentView === 'world') {
+      const list = _worldList();
+      if (!list.length) return null;
+      const cur = window._currentWorldStation;
+      const base = Math.max(0, list.findIndex(s => cur && s && s.id === cur.id));
+      const idx = dir < 0 ? (base + 1) % list.length : (base - 1 + list.length) % list.length;
+      return list[idx];
+    }
     const keys = _stateList();
     if (!keys.length) return null;
     const base = Math.max(0, keys.indexOf(currentState));
@@ -6319,64 +6338,37 @@ document.addEventListener('keydown', function(e) {
                         : (base - 1 + keys.length) % keys.length;
     return keys[idx];
   }
-  function _stationFor(code) {
-    const arr = STATIONS[code];
-    if (arr && arr.length) {
-      const i = (typeof getStateDefault === 'function') ? getStateDefault(code) : 0;
-      return arr[i] || arr[0];
+  function _isSame(target) {
+    if (currentView === 'world') {
+      return !!(window._currentWorldStation && target && window._currentWorldStation.id === target.id);
     }
-    return null;
+    return target === currentState;
   }
-  function _artFor(station, code) {
-    const map = Object.assign({}, (typeof STATION_ASCII_ART !== 'undefined' ? STATION_ASCII_ART : {}), window._asciiOverrides || {});
-    const a = (station && map[station.id]) || map[code] || [];
-    return Array.isArray(a) ? a.join('\n') : (a || '');
+  function _applyTarget(target) {
+    if (currentView === 'world') {
+      if (typeof _doSelectWorldStation === 'function') _doSelectWorldStation(target);
+    } else {
+      if (typeof selectState === 'function') selectState(target);
+    }
   }
-  function _ensurePeek() {
-    if (_peek) return _peek;
-    _peek = document.createElement('div');
-    _peek.className = 'peek-panel';
-    _peek.innerHTML = '<div class="peek-name"></div><div class="peek-meta"></div><pre class="peek-art"></pre>';
-    document.body.appendChild(_peek);
-    return _peek;
-  }
-  function _buildPeek(code) {
-    const st = _stationFor(code);
-    const rect = panel.getBoundingClientRect();
-    const p = _ensurePeek();
-    p.style.left   = rect.left + 'px';
-    p.style.top    = rect.top + 'px';
-    p.style.width  = rect.width + 'px';
-    p.style.height = rect.height + 'px';
-    p.querySelector('.peek-name').textContent = st ? st.name : code;
-    p.querySelector('.peek-meta').textContent = st
-      ? [st.freq, st.city].filter(Boolean).join(' · ')
-      : 'COMING SOON';
-    p.querySelector('.peek-art').textContent = _artFor(st, code);
-    _W = rect.width || window.innerWidth;
-    _target = code;
-  }
-  function _restingPeekX() { return (-_dir) * _W; }
-  function _apply(dx, transition) {
+  function _setX(x, transition) {
     panel.style.setProperty('--sp-transition', transition);
-    panel.style.setProperty('--sp-x', dx + 'px');
-    if (_peek) {
-      _peek.style.transition = transition === 'none' ? 'none' : 'transform 0.22s ease';
-      _peek.style.transform  = 'translateX(' + (_restingPeekX() + dx) + 'px)';
-    }
+    panel.style.setProperty('--sp-x', x + 'px');
   }
-  function _cleanup() {
+  function _reset() {
     panel.style.removeProperty('--sp-transition');
     panel.style.removeProperty('--sp-x');
-    if (_peek) { _peek.remove(); _peek = null; }
-    _dir = 0; _target = null;
+    _dir = 0;
   }
 
   panel.addEventListener('touchstart', function(e) {
-    if (window.innerWidth > 700 || currentView === 'world') { _tx = null; return; }
+    // Enabled on phones AND tablets (≤1024). Works for map states AND world
+    // stations — only swipe when a station panel is actually open.
+    if (window.innerWidth > 1024 || !panel.classList.contains('open')) { _tx = null; return; }
     _tx = e.touches[0].clientX;
     _ty = e.touches[0].clientY;
-    _swiping = false; _decided = false; _dir = 0; _target = null;
+    _swiping = false; _decided = false; _dir = 0;
+    _W = panel.getBoundingClientRect().width || window.innerWidth;
   }, { passive: true });
 
   panel.addEventListener('touchmove', function(e) {
@@ -6399,16 +6391,13 @@ document.addEventListener('keydown', function(e) {
     e.preventDefault();                       // block native vertical scroll during drag
     const dir = dx < 0 ? -1 : 1;
     const target = _neighbour(dir);
-    if (!target || target === currentState) {  // no neighbour — rubber-band only
-      _apply(Math.sign(dx) * Math.min(Math.abs(dx) * 0.35, 60), 'none');
+    if (!target || _isSame(target)) {          // no neighbour — rubber-band only
+      _setX(Math.sign(dx) * Math.min(Math.abs(dx) * 0.35, 60), 'none');
       return;
     }
-    if (target !== _target || dir !== _dir || !_peek) {
-      _dir = dir;
-      _buildPeek(target);
-    }
-    const clamped = Math.max(-_W, Math.min(_W, dx));
-    _apply(clamped, 'none');
+    _dir = dir;
+    // Finger-track the current panel directly (no peek layer).
+    _setX(Math.max(-_W, Math.min(_W, dx)), 'none');
   }, { passive: false });
 
   function _end() {
@@ -6416,32 +6405,82 @@ document.addEventListener('keydown', function(e) {
     const startedSwiping = _swiping;
     const finishX = parseFloat(getComputedStyle(panel).getPropertyValue('--sp-x')) || 0;
     _tx = null; _ty = null; _swiping = false; _decided = false;
+    if (!startedSwiping) { _reset(); return; }
 
-    if (!startedSwiping || !_peek || !_target) { if (_peek) _cleanup(); return; }
+    const target = _neighbour(_dir);
+    const past = Math.abs(finishX) >= _W * COMMIT_FRACTION && target && !_isSame(target);
 
-    const past = Math.abs(finishX) >= _W * COMMIT_FRACTION;
     if (past) {
-      const target = _target;
-      // Slide current panel fully out in the drag direction; peek slides to centre.
-      _apply(_dir * _W, 'transform 0.22s ease');
+      // 1) slide the CURRENT panel out in the drag direction
+      _setX(_dir * _W, 'transform 0.2s ease');
       setTimeout(() => {
-        if (typeof selectState === 'function') selectState(target);
-        // Snap the (now re-populated) real panel back to centre with no transition,
-        // then drop the peek — the real panel (z 50) covers the peek (z 49) instantly.
-        panel.style.setProperty('--sp-transition', 'none');
-        panel.style.setProperty('--sp-x', '0px');
-        void panel.offsetWidth;               // force reflow so the snap is instant
-        _cleanup();
-      }, 230);
+        // 2) render the REAL next station into the panel (no intermediate preview)
+        _applyTarget(target);
+        // 3) place it just off the OPPOSITE edge, then slide it into centre
+        _setX(-_dir * _W, 'none');
+        void panel.offsetWidth;               // force reflow before animating in
+        requestAnimationFrame(() => _setX(0, 'transform 0.24s cubic-bezier(0.4,0,0.2,1)'));
+        setTimeout(_reset, 300);
+      }, 190);
     } else {
-      // Not far enough — ease everything back to rest.
-      _apply(0, 'transform 0.22s ease');
-      setTimeout(_cleanup, 240);
+      // not far enough — spring back to centre
+      _setX(0, 'transform 0.2s ease');
+      setTimeout(_reset, 220);
     }
   }
   panel.addEventListener('touchend', _end, { passive: true });
   panel.addEventListener('touchcancel', _end, { passive: true });
 })();
+
+// ===== EXTRA SWIPES (charts source + world pages) — START =====================
+// Lightweight horizontal-swipe binder: swipe left → onLeft, right → onRight.
+// Vertical gestures are ignored so normal scrolling still works.
+function _attachHSwipe(el, onLeft, onRight, guard) {
+  if (!el) return;
+  let sx = null, sy = null, sw = false, dec = false;
+  el.addEventListener('touchstart', e => {
+    if (guard && !guard()) { sx = null; return; }
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; sw = false; dec = false;
+  }, { passive: true });
+  el.addEventListener('touchmove', e => {
+    if (sx === null) return;
+    const dx = e.touches[0].clientX - sx, dy = e.touches[0].clientY - sy;
+    if (!dec) {
+      if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.5) { sw = true; dec = true; }
+      else if (Math.abs(dy) > 12) { dec = true; sw = false; }
+    }
+  }, { passive: true });
+  el.addEventListener('touchend', e => {
+    if (sx === null) return;
+    const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    sx = null; sy = null;
+    if (!sw || Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx)) return;
+    if (dx < 0) { if (onLeft) onLeft(); } else { if (onRight) onRight(); }
+  }, { passive: true });
+}
+
+(function() {
+  const chartsActive = () => {
+    const tab = localStorage.getItem('rrAmrapTab');
+    return tab !== 'diary' && tab !== 'collection';
+  };
+  // Charts: swipe sideways to change chart source (instead of the ◀ ▶ arrows).
+  _attachHSwipe(document.getElementById('amrapPanel'),
+    () => { if (typeof nextPanelSource === 'function') nextPanelSource(); },
+    () => { if (typeof prevPanelSource === 'function') prevPanelSource(); },
+    chartsActive);
+  _attachHSwipe(document.getElementById('amrapMobileSheet'),
+    () => { if (typeof nextPanelSource === 'function') nextPanelSource(); },
+    () => { if (typeof prevPanelSource === 'function') prevPanelSource(); },
+    chartsActive);
+
+  // World grid: swipe between page 1 / 2 of the station tiles.
+  _attachHSwipe(document.getElementById('worldView'),
+    () => { if (typeof changeWorldPage === 'function') changeWorldPage(1); },
+    () => { if (typeof changeWorldPage === 'function') changeWorldPage(-1); },
+    () => currentView === 'world' && !document.getElementById('sidePanel').classList.contains('open'));
+})();
+// ===== EXTRA SWIPES — END =====================================================
 
 /* ── ORIGINAL handler (pre-peek) — restore this if you remove the peek block ──
 (function() {
@@ -6486,7 +6525,7 @@ document.addEventListener('keydown', function(e) {
   }, { passive: true });
 })();
 */
-// ===== PEEK SWIPE (Option B) — END ============================================
+// ===== STATION SWIPE — END ====================================================
 
 
 // ─── LANDSCAPE LEFT NAV ───────────────────────────────────────────────────────
