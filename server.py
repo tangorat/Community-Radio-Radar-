@@ -145,7 +145,9 @@ def get_amrap():
     with _amrap_lock:
         with open(AMRAP_FILE) as f:
             data = json.load(f)
-    return jsonify(data)
+    resp = jsonify(data)
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    return resp
 
 
 @app.route("/amrap_art/<filename>")
@@ -186,7 +188,9 @@ def get_charts():
         return jsonify({"error": "Charts not yet generated. Try again shortly."}), 503
     with open(CHARTS_FILE) as f:
         data = json.load(f)
-    return jsonify(data)
+    resp = jsonify(data)
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    return resp
 
 
 @app.route("/scrape", methods=["POST"])
