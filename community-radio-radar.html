@@ -2155,79 +2155,9 @@
     animation: wave-dance 0.8s ease-in-out infinite alternate;
   }
 
-  /* ===== FULLSCREEN WAVEFORM VISUALIZERS (10 options) ====================== */
-  .fs-wave-style-btn {
-    position: absolute; top: 16px; right: 16px;
-    font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; letter-spacing: 2px;
-    color: var(--muted); background: none; border: 1px solid var(--border);
-    border-radius: 3px; padding: 5px 10px; cursor: pointer; z-index: 3;
-    -webkit-tap-highlight-color: transparent; min-width: 120px; text-align: center;
-  }
-  .fs-wave-style-btn:active { color: var(--accent); border-color: var(--accent); }
-
-  .fs-waveform { position: relative; overflow: visible; }
-  .fs-waveform .fsv-bar { background: var(--accent, var(--green)); border-radius: 2px; }
-
-  /* 1 · RADIAL — bars radiating from a centre, pulsing */
-  .fs-waveform[data-style="1"] { width: 150px; height: 150px; display: block; }
-  .fs-waveform[data-style="1"] .fsv-bar {
-    position: absolute; left: 50%; bottom: 50%; width: 3px; height: 18px;
-    transform-origin: bottom center;
-  }
-  .fs-waveform[data-style="1"].playing .fsv-bar { animation: fsv-radial 1s ease-in-out infinite alternate; }
-  @keyframes fsv-radial { from { height: 10px; opacity: 0.45; } to { height: 34px; opacity: 1; } }
-
-  /* 2 · CASSETTE — two spinning tape reels */
-  .fs-waveform[data-style="2"] { width: 190px; height: 92px; }
-  .fs-reel {
-    position: absolute; top: 50%; width: 56px; height: 56px; margin-top: -28px;
-    border: 2px solid var(--accent, var(--green)); border-radius: 50%;
-    box-shadow: inset 0 0 0 14px rgba(var(--glow-color,0,255,65),0.06);
-  }
-  .fs-reel::before, .fs-reel::after {
-    content: ''; position: absolute; left: 50%; top: 50%; width: 2px; height: 24px;
-    background: var(--accent, var(--green)); margin: -12px 0 0 -1px;
-  }
-  .fs-reel::after { transform: rotate(90deg); }
-  .fs-reel.left { left: 8px; } .fs-reel.right { right: 8px; }
-  .fs-waveform[data-style="2"].playing .fs-reel { animation: fsv-spin 1.6s linear infinite; }
-  .fs-cass-tape { position: absolute; top: 50%; left: 30px; right: 30px; height: 2px;
-    background: var(--accent, var(--green)); opacity: 0.5; margin-top: 18px; }
-  @keyframes fsv-spin { to { transform: rotate(360deg); } }
-
-  /* 3 · VINYL — spinning record with tonearm */
-  .fs-waveform[data-style="3"] { width: 150px; height: 150px; }
-  .fs-vinyl {
-    position: absolute; inset: 0; border-radius: 50%;
-    background: radial-gradient(circle, var(--accent) 0 13%, transparent 14% 16%, var(--bg) 16%);
-    border: 2px solid var(--accent, var(--green));
-    box-shadow: inset 0 0 0 2px rgba(var(--glow-color,0,255,65),0.18),
-                inset 0 0 0 14px rgba(var(--glow-color,0,255,65),0.06),
-                inset 0 0 0 26px rgba(var(--glow-color,0,255,65),0.10),
-                inset 0 0 0 38px rgba(var(--glow-color,0,255,65),0.04);
-  }
-  .fs-vinyl::after { content:''; position:absolute; left:50%; top:50%; width:6px; height:6px;
-    background: var(--bg); border-radius:50%; margin:-3px 0 0 -3px; }
-  .fs-waveform[data-style="3"].playing .fs-vinyl { animation: fsv-spin 3s linear infinite; }
-  .fs-tonearm { position:absolute; top:-6px; right:-2px; width:2px; height:62px;
-    background: var(--accent, var(--green)); transform-origin: top center; transform: rotate(28deg); }
-
-  /* 4 · VU METER — analog needle on an arc */
-  .fs-waveform[data-style="4"] { width: 190px; height: 100px; }
-  .fs-vu-arc { position:absolute; left:0; right:0; bottom:8px; height:84px;
-    border: 2px solid rgba(var(--glow-color,0,255,65),0.3); border-bottom:none;
-    border-radius: 95px 95px 0 0; }
-  .fs-vu-needle { position:absolute; left:50%; bottom:10px; width:2px; height:74px;
-    background: var(--accent, var(--green)); transform-origin: bottom center; transform: rotate(-45deg); }
-  .fs-waveform[data-style="4"].playing .fs-vu-needle { animation: fsv-vu 0.9s ease-in-out infinite alternate; }
-  @keyframes fsv-vu { 0%{transform:rotate(-46deg);} 35%{transform:rotate(10deg);} 60%{transform:rotate(-20deg);} 100%{transform:rotate(40deg);} }
-
-  /* 5 · SCOPE — canvas oscilloscope sine (drawn via rAF) */
-  .fs-waveform[data-style="5"] { width: min(280px, 72vw); height: 90px; }
-  .fs-waveform[data-style="5"] canvas { width: 100%; height: 100%; display:block; }
-
-  /* 6 · ASCII — block-character waveform (rAF) */
-  .fs-waveform[data-style="6"] {
+  /* ===== FULLSCREEN WAVEFORM (ASCII block-character visualizer) =========== */
+  .fs-waveform {
+    position: relative;
     width: min(340px, 84vw); height: 54px;
     align-items: center; justify-content: center; overflow: hidden;
   }
@@ -2239,42 +2169,7 @@
     white-space: pre; text-align: center; width: 100%;
     text-shadow: 0 0 10px rgba(var(--glow-color,0,255,65),0.5);
   }
-
-  /* 7 · MATRIX — falling characters (rAF) */
-  .fs-waveform[data-style="7"] { width: min(220px, 60vw); height: 96px; overflow: hidden; }
-  .fs-matrix { font-family:'Share Tech Mono',monospace; font-size:0.7rem; line-height:1.05;
-    color: var(--accent, var(--green)); white-space: pre; text-align:center; opacity:0.85; }
-
-  /* 8 · ORB — morphing pulsing blob */
-  .fs-waveform[data-style="8"] { width: 120px; height: 120px; }
-  .fs-orb { position:absolute; inset:18px; border-radius:42% 58% 53% 47%;
-    background: radial-gradient(circle at 40% 35%, rgba(var(--glow-color,0,255,65),0.9), rgba(var(--glow-color,0,255,65),0.15));
-    box-shadow: 0 0 30px rgba(var(--glow-color,0,255,65),0.4); }
-  .fs-waveform[data-style="8"].playing .fs-orb { animation: fsv-orb 3s ease-in-out infinite; }
-  @keyframes fsv-orb {
-    0%,100% { border-radius:42% 58% 53% 47%; transform: scale(0.92) rotate(0deg); }
-    50%     { border-radius:58% 42% 40% 60%; transform: scale(1.06) rotate(180deg); }
-  }
-
-  /* 9 · PEAK EQ — spectrum bars with falling peak caps */
-  .fs-waveform[data-style="9"] { align-items: flex-end; gap: 4px; height: 60px; }
-  .fs-waveform[data-style="9"] .fsv-col { position: relative; flex: 1; height: 100%; display:flex; align-items:flex-end; }
-  .fs-waveform[data-style="9"] .fsv-fill { width: 100%; height: 20%; background: var(--accent, var(--green)); }
-  .fs-waveform[data-style="9"] .fsv-cap { position:absolute; left:0; right:0; height:2px; background: var(--accent, var(--green)); bottom: 30%; }
-  .fs-waveform[data-style="9"].playing .fsv-fill { animation: fsv-eqf 0.7s ease-in-out infinite alternate; }
-  .fs-waveform[data-style="9"].playing .fsv-cap  { animation: fsv-cap 1.4s ease-in-out infinite alternate; }
-  @keyframes fsv-eqf { from { height: 12%; } to { height: 95%; } }
-  @keyframes fsv-cap { from { bottom: 22%; } to { bottom: 92%; } }
-
-  /* 10 · STARBURST — rays pulsing outward from centre */
-  .fs-waveform[data-style="10"] { width: 150px; height: 150px; display:block; }
-  .fs-waveform[data-style="10"] .fsv-ray {
-    position:absolute; left:50%; top:50%; width:2px; height:50px; background: var(--accent, var(--green));
-    transform-origin: top center; border-radius: 2px;
-  }
-  .fs-waveform[data-style="10"].playing .fsv-ray { animation: fsv-star 1.4s ease-in-out infinite alternate; }
-  @keyframes fsv-star { from { opacity:0.25; } to { opacity:1; } }
-  /* ===== END FULLSCREEN WAVEFORM VISUALIZERS =============================== */
+  /* ===== END FULLSCREEN WAVEFORM ========================================== */
   .fs-play-btn {
     width: 64px; height: 64px;
     border: 1.5px solid var(--accent, var(--green));
@@ -3062,17 +2957,55 @@ html.theme-switching *::after {
 }
 </style>
 <script>
+// ── PRE-PAINT BOOTSTRAP ──────────────────────────────────────────────────────
+// Apply the saved (or default) THEME and font size BEFORE the first paint, so
+// the app never flashes the CSS default theme and then snaps to the chosen one.
+// The theme maps live here (exposed on window) and are reused by the main
+// script, so there's a single source of truth.
+window.__rrThemes = {
+  green:    { '--green': '#00ff41', '--green-dim': '#00c032', '--bg': '#030a04', '--panel': '#050f06', '--border': '#0a2e0c', '--text': '#00c032', '--muted': '#2a5c30', '--inactive': '#050f06', '--fg': '#4a8c52', '--accent': '#00ff41', '--hover-bg': 'rgba(0,255,65,0.08)', '--hover-border': '#00ff41', '--bio-text': '#4a8c52', '--glow-color': '0,255,65', '--green-dark': '#003810', '--active-fill': '#051a08' },
+  amber:    { '--green': '#ffb347', '--green-dim': '#cc8a00', '--bg': '#0a0800', '--panel': '#100e00', '--border': '#2e2000', '--text': '#cc8a00', '--muted': '#5c4a00', '--inactive': '#0a0800', '--fg': '#8c7000', '--accent': '#ffb347', '--hover-bg': 'rgba(255,179,71,0.08)', '--hover-border': '#ffb347', '--bio-text': '#8c7000', '--glow-color': '255,179,71', '--green-dark': '#1a0e00', '--active-fill': '#120a00' },
+  blue:     { '--green': '#44aaff', '--green-dim': '#2288dd', '--bg': '#00050f', '--panel': '#000a1a', '--border': '#002a5a', '--text': '#44aaff', '--muted': '#1a5a9e', '--inactive': '#00050f', '--fg': '#2277cc', '--accent': '#44aaff', '--hover-bg': 'rgba(68,170,255,0.1)', '--hover-border': '#44aaff', '--bio-text': '#2277cc', '--glow-color': '68,170,255', '--green-dark': '#000d1f', '--active-fill': '#000814' },
+  white:    { '--green': '#cccccc', '--green-dim': '#999', '--bg': '#111', '--panel': '#1c1c1c', '--border': '#333', '--text': '#bbb', '--muted': '#666', '--inactive': '#111', '--fg': '#999', '--accent': '#ddd', '--hover-bg': 'rgba(200,200,200,0.1)', '--hover-border': '#ccc', '--bio-text': '#888', '--glow-color': '200,200,200', '--green-dark': '#1a1a1a', '--active-fill': '#222' },
+  whiteplus:{ '--green': '#2a2a2a', '--green-dim': '#444', '--bg': '#f0ede8', '--panel': '#e8e5e0', '--border': '#ccc', '--text': '#333', '--muted': '#888', '--inactive': '#ddd', '--fg': '#555', '--accent': '#111', '--hover-bg': 'rgba(0,0,0,0.06)', '--hover-border': '#555', '--bio-text': '#555', '--glow-color': '42,42,42', '--green-dark': '#ddd8d0', '--active-fill': '#e8e4de' },
+  'mono-cyan':   { '--green': '#00e5ff', '--green-dim': '#00c5dd', '--bg': '#000000', '--panel': '#0a0a0a', '--border': '#262626', '--text': '#f4f4f4', '--muted': '#8e8e8e', '--inactive': '#181818', '--fg': '#f4f4f4', '--accent': '#00e5ff', '--hover-bg': 'rgba(0,229,255,0.10)',  '--hover-border': '#00e5ff', '--bio-text': '#c8c8c8', '--glow-color': '0,229,255',   '--green-dark': '#003a44', '--active-fill': '#001a20' },
+  'mono-yellow': { '--green': '#ffd400', '--green-dim': '#ffbf00', '--bg': '#000000', '--panel': '#0a0a0a', '--border': '#262626', '--text': '#f4f4f4', '--muted': '#8e8e8e', '--inactive': '#181818', '--fg': '#f4f4f4', '--accent': '#ffd400', '--hover-bg': 'rgba(255,212,0,0.10)',  '--hover-border': '#ffd400', '--bio-text': '#c8c8c8', '--glow-color': '255,212,0',   '--green-dark': '#332a00', '--active-fill': '#1a1500' },
+  'mono-red':    { '--green': '#ff2f3a', '--green-dim': '#dd2230', '--bg': '#000000', '--panel': '#0a0a0a', '--border': '#262626', '--text': '#f4f4f4', '--muted': '#8e8e8e', '--inactive': '#181818', '--fg': '#f4f4f4', '--accent': '#ff2f3a', '--hover-bg': 'rgba(255,47,58,0.10)',  '--hover-border': '#ff2f3a', '--bio-text': '#c8c8c8', '--glow-color': '255,47,58',   '--green-dark': '#3a0a0d', '--active-fill': '#1a0a0c' },
+  'news-classic':    { '--green': '#c8331f', '--green-dim': '#a8231a', '--bg': '#f1ece2', '--panel': '#e8e1d2', '--border': '#1a1a1a', '--text': '#0e0e0e', '--muted': '#5a544a', '--inactive': '#d6cfbb', '--fg': '#0e0e0e', '--accent': '#c8331f', '--hover-bg': 'rgba(200,51,31,0.10)', '--hover-border': '#c8331f', '--bio-text': '#2a251f', '--glow-color': '200,51,31',  '--green-dark': '#dccfb0', '--active-fill': '#e3dcc7' },
+  'news-broadsheet': { '--green': '#a8231a', '--green-dim': '#8a1a14', '--bg': '#faf6ee', '--panel': '#f2ede1', '--border': '#0a0a0a', '--text': '#000000', '--muted': '#4a443a', '--inactive': '#e0d8c4', '--fg': '#000000', '--accent': '#a8231a', '--hover-bg': 'rgba(168,35,26,0.10)', '--hover-border': '#a8231a', '--bio-text': '#1a1814', '--glow-color': '168,35,26',  '--green-dark': '#e0d8c4', '--active-fill': '#ebe4cf' },
+  'news-inkblue':    { '--green': '#1f3a72', '--green-dim': '#152a58', '--bg': '#f1ece2', '--panel': '#e8e1d2', '--border': '#1a1a1a', '--text': '#0e0e0e', '--muted': '#5a544a', '--inactive': '#d6cfbb', '--fg': '#0e0e0e', '--accent': '#1f3a72', '--hover-bg': 'rgba(31,58,114,0.10)', '--hover-border': '#1f3a72', '--bio-text': '#2a251f', '--glow-color': '31,58,114',  '--green-dark': '#d6cfbb', '--active-fill': '#e3dcc7' },
+  'news-dark':       { '--green': '#e8533d', '--green-dim': '#cf3d27', '--bg': '#1a1612', '--panel': '#221d18', '--border': '#3a3128', '--text': '#f0e8d5', '--muted': '#8a7e6e', '--inactive': '#221d18', '--fg': '#f0e8d5', '--accent': '#e8533d', '--hover-bg': 'rgba(232,83,61,0.10)', '--hover-border': '#e8533d', '--bio-text': '#d6cdb8', '--glow-color': '232,83,61',  '--green-dark': '#3a2820', '--active-fill': '#2a221c' },
+};
+window.__rrThemeFamily = {
+  green: 'original', amber: 'original', blue: 'original', white: 'original', whiteplus: 'original',
+  'mono-cyan': 'mono', 'mono-yellow': 'mono', 'mono-red': 'mono',
+  'news-classic': 'newsprint', 'news-broadsheet': 'newsprint', 'news-inkblue': 'newsprint', 'news-dark': 'newsprint',
+};
+window.__rrFamilyDefault = { original: 'green', mono: 'mono-cyan', newsprint: 'news-classic' };
+window.__rrDefaultTheme = 'news-inkblue';   // app default when nothing is saved
+
 (function(){
   const HEADER_H = { small:'56px', medium:'60px', large:'66px', xlarge:'73px' };
+  const root = document.documentElement;
   try {
     const cfg = JSON.parse(localStorage.getItem('rrCfg') || '{}');
-    const hh = HEADER_H[cfg.fontSize] || '57px';
-    document.documentElement.style.setProperty('--header-h', hh);
-    if (cfg.fontSize) document.documentElement.style.fontSize =
+    // Theme — apply before paint to avoid the green flash.
+    let key = cfg.theme || window.__rrDefaultTheme;
+    if (!window.__rrThemes[key]) key = window.__rrDefaultTheme;
+    const t = window.__rrThemes[key];
+    for (const k in t) root.style.setProperty(k, t[k]);
+    root.setAttribute('data-theme', key);
+    root.setAttribute('data-family', window.__rrThemeFamily[key] || 'original');
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = t['--bg'] || '#030a04';
+    // Header height + font size.
+    root.style.setProperty('--header-h', HEADER_H[cfg.fontSize] || '57px');
+    if (cfg.fontSize) root.style.fontSize =
       { small:'12px', medium:'14px', large:'17px', xlarge:'20px' }[cfg.fontSize] || '14px';
   } catch(e) {}
 })();
 </script>
+<script defer src="https://umami-production-bab2.up.railway.app/script.js" data-website-id="01a276dc-6a69-4759-8ba8-d361c4ccd1b3"></script>
 </head>
 <body>
 
@@ -3126,7 +3059,6 @@ html.theme-switching *::after {
   <div class="fs-corner bl"></div>
   <div class="fs-corner br"></div>
   <div class="fs-hint">TAP ANYWHERE TO DISMISS</div>
-  <button class="fs-wave-style-btn" id="fsWaveStyleBtn" onclick="event.stopPropagation(); cycleFsWaveStyle()" title="Change waveform style">WAVE 1/5 ▸</button>
   <div class="fs-ascii" id="fsAscii"></div>
   <div class="fs-station-name" id="fsStationName"></div>
   <div class="fs-freq" id="fsFreq"></div>
@@ -4783,6 +4715,7 @@ function _onPlaySuccess(station, statusLabel) {
   const playBtn = document.getElementById('playBtn');
   isPlaying = true;
   window._lastPlayedStation = station;
+  window.umami?.track('play_station', { name: station.title || station.name || '' });
   _syncLsPlayPill(true);
   playBtn.classList.remove('buffering', 'signal-lost');
   playBtn.textContent = '▌▌';
@@ -5206,17 +5139,27 @@ function _afterChartRender() { _syncSheetHeader(); }
 // the right/left while the current slide leaves the opposite way.
 function _mountSlide(viewport, slide, dir) {
   if (!viewport) return;
-  // Clear any non-slide leftovers (e.g. the pong placeholder).
+  // Cancel any pending cleanup from a previous (possibly unfinished) transition
+  // so a fast second swipe can't leave a stale "ghost" slide behind.
+  if (viewport._slideCleanup) { clearTimeout(viewport._slideCleanup); viewport._slideCleanup = null; }
+
+  // Remove EVERY child that isn't the incoming slide or the tracked current
+  // slide — this clears the pong placeholder AND any leftover ghost slides from
+  // rapid swipes. (querySelectorAll over children, not live recursion.)
+  const tracked = viewport._curSlide;
   [...viewport.children].forEach(c => {
-    if (c !== slide && !(c.classList && c.classList.contains('amrap-slide'))) c.remove();
+    if (c === slide) return;
+    if (c.classList && c.classList.contains('amrap-slide') && c === tracked) return;
+    c.remove();
   });
-  const cur = [...viewport.children].find(c => c.classList && c.classList.contains('amrap-slide') && c !== slide);
+  const cur = (tracked && tracked !== slide && tracked.parentElement === viewport) ? tracked : null;
 
   if (!cur || !dir) {
     if (cur) cur.remove();
     slide.style.transition = 'none';
     slide.style.transform = '';
     if (slide.parentElement !== viewport) viewport.appendChild(slide);
+    viewport._curSlide = slide;
     return;
   }
   // Animate: incoming starts off the next-in-line edge, slides to centre.
@@ -5228,9 +5171,11 @@ function _mountSlide(viewport, slide, dir) {
   cur.style.transition = ease; slide.style.transition = ease;
   cur.style.transform = 'translateX(' + (dir < 0 ? -100 : 100) + '%)';
   slide.style.transform = 'translateX(0)';
-  setTimeout(() => {
-    if (cur.parentElement === viewport && cur !== slide) cur.remove();  // back to cache only
+  viewport._curSlide = slide;
+  viewport._slideCleanup = setTimeout(() => {
+    if (cur.parentElement === viewport && cur !== viewport._curSlide) cur.remove();  // back to cache only
     slide.style.transition = '';
+    viewport._slideCleanup = null;
   }, 300);
 }
 
@@ -5815,11 +5760,13 @@ function _toggleCollect(btn, data) {
     btn.textContent = '+';
     btn.classList.remove('added');
     _showCollToast('Removed from Collection');
+    window.umami?.track('collection_remove', { track: data.track || '', artist: data.artist || '' });
   } else {
     addToCollection(data);
     btn.textContent = '✓';
     btn.classList.add('added');
     _showCollToast('Added to Collection');
+    window.umami?.track('collection_add', { track: data.track || '', artist: data.artist || '' });
   }
   if (typeof _haptic === 'function') _haptic(8);
 }
@@ -6573,91 +6520,21 @@ function _updateFullscreenPlay() {
   if (wf) wf.classList.toggle('playing', isPlaying);   // for the sonar style
 }
 
-// ─── FULLSCREEN WAVEFORM VISUALIZERS (10) ─────────────────────────────────────
-const FS_WAVE_COUNT = 10;
-const FS_WAVE_NAMES = {
-  1:'RADIAL', 2:'CASSETTE', 3:'VINYL', 4:'VU METER', 5:'SCOPE',
-  6:'ASCII', 7:'MATRIX', 8:'ORB', 9:'PEAK EQ', 10:'STARBURST'
-};
-let _fsRaf = null, _fsRafT = 0;
-
-function _fsWaveStyle() {
-  let s = parseInt(localStorage.getItem('rrFsWave') || '6', 10) || 6;  // ASCII is the default
-  if (s < 1 || s > FS_WAVE_COUNT) s = 6;
-  return s;
-}
-
+// ─── FULLSCREEN WAVEFORM (ASCII block-character visualizer) ───────────────────
+let _fsRaf = null;
 function _stopFsRaf() { if (_fsRaf) { cancelAnimationFrame(_fsRaf); _fsRaf = null; } }
 
 function _buildFsWave() {
   const wf = document.getElementById('fsWaveform');
   if (!wf) return;
   _stopFsRaf();
-  const style = _fsWaveStyle();
-  wf.setAttribute('data-style', style);
+  wf.setAttribute('data-style', '6');
   wf.classList.toggle('playing', isPlaying);
   wf.innerHTML = '';
-
-  if (style === 1 || style === 10) {                 // RADIAL / STARBURST — rays around a circle
-    const n = 24, cls = style === 1 ? 'fsv-bar' : 'fsv-ray';
-    for (let i = 0; i < n; i++) {
-      const b = document.createElement('div'); b.className = cls;
-      b.style.transform = 'translateX(-50%) rotate(' + (i * (360 / n)) + 'deg)';
-      b.style.animationDelay = (i % 6) * 0.12 + 's';
-      wf.appendChild(b);
-    }
-  } else if (style === 2) {                           // CASSETTE
-    wf.innerHTML = '<div class="fs-reel left"></div><div class="fs-cass-tape"></div><div class="fs-reel right"></div>';
-  } else if (style === 3) {                           // VINYL
-    wf.innerHTML = '<div class="fs-vinyl"></div><div class="fs-tonearm"></div>';
-  } else if (style === 4) {                           // VU METER
-    wf.innerHTML = '<div class="fs-vu-arc"></div><div class="fs-vu-needle"></div>';
-  } else if (style === 5) {                           // SCOPE (canvas)
-    const c = document.createElement('canvas'); c.width = 280; c.height = 90; wf.appendChild(c);
-    _fsScope(c);
-  } else if (style === 6) {                           // ASCII block wave
-    const pre = document.createElement('div'); pre.className = 'fs-ascii-wave'; wf.appendChild(pre);
-    _fsAscii(pre);
-  } else if (style === 7) {                           // MATRIX rain
-    const pre = document.createElement('div'); pre.className = 'fs-matrix'; wf.appendChild(pre);
-    _fsMatrix(pre);
-  } else if (style === 8) {                           // ORB
-    wf.innerHTML = '<div class="fs-orb"></div>';
-  } else if (style === 9) {                           // PEAK EQ
-    for (let i = 0; i < 14; i++) {
-      const col = document.createElement('div'); col.className = 'fsv-col';
-      const fill = document.createElement('div'); fill.className = 'fsv-fill';
-      const cap = document.createElement('div'); cap.className = 'fsv-cap';
-      const d = (Math.abs(i - 7) * 0.06) + 's';
-      fill.style.animationDelay = d; cap.style.animationDelay = d;
-      fill.style.animationDuration = (0.5 + (i % 4) * 0.12) + 's';
-      col.appendChild(fill); col.appendChild(cap); wf.appendChild(col);
-    }
-  }
-  const btn = document.getElementById('fsWaveStyleBtn');
-  if (btn) btn.textContent = style + '/' + FS_WAVE_COUNT + ' ' + FS_WAVE_NAMES[style] + ' ▸';
-}
-
-// SCOPE — animated oscilloscope sine on canvas
-function _fsScope(canvas) {
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  const accent = (getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#00ff41').trim();
-  let phase = 0;
-  function frame() {
-    ctx.clearRect(0, 0, W, H);
-    ctx.strokeStyle = accent; ctx.lineWidth = 2; ctx.shadowColor = accent; ctx.shadowBlur = 8;
-    ctx.beginPath();
-    const amp = isPlaying ? H * 0.34 : H * 0.05;
-    for (let x = 0; x <= W; x += 3) {
-      const y = H / 2 + Math.sin(x * 0.045 + phase) * amp * Math.sin(x * 0.012 + phase * 0.5);
-      x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-    if (isPlaying) phase += 0.18;
-    _fsRaf = requestAnimationFrame(frame);
-  }
-  frame();
+  const pre = document.createElement('div');
+  pre.className = 'fs-ascii-wave';
+  wf.appendChild(pre);
+  _fsAscii(pre);
 }
 
 // ASCII — block-character waveform
@@ -6682,36 +6559,6 @@ function _fsAscii(el) {
     _fsRaf = requestAnimationFrame(frame);
   }
   frame();
-}
-
-// MATRIX — falling characters
-function _fsMatrix(el) {
-  const CH = 'アイウ01ABCﾊﾐﾋ#@%░▒'.split('');
-  const COLS = 18, ROWS = 9;
-  const drops = Array.from({ length: COLS }, () => Math.floor(Math.random() * ROWS));
-  let tick = 0;
-  function frame() {
-    tick++;
-    if (isPlaying && tick % 4 === 0) {
-      const grid = Array.from({ length: ROWS }, () => Array(COLS).fill(' '));
-      for (let c = 0; c < COLS; c++) {
-        drops[c] = (drops[c] + 1) % (ROWS + 4);
-        for (let t = 0; t < 4; t++) {
-          const r = drops[c] - t;
-          if (r >= 0 && r < ROWS) grid[r][c] = CH[Math.floor(Math.random() * CH.length)];
-        }
-      }
-      el.textContent = grid.map(row => row.join(' ')).join('\n');
-    }
-    _fsRaf = requestAnimationFrame(frame);
-  }
-  frame();
-}
-
-function cycleFsWaveStyle() {
-  const next = (_fsWaveStyle() % FS_WAVE_COUNT) + 1;
-  localStorage.setItem('rrFsWave', String(next));
-  _buildFsWave();
 }
 
 // Double-tap to open fullscreen (touch + mouse)
@@ -7064,6 +6911,7 @@ document.addEventListener('keydown', function(e) {
 
 // ─── LANDSCAPE LEFT NAV ───────────────────────────────────────────────────────
 function lsNav(view) {
+  window.umami?.track('nav', { view });
   // Update active state on nav buttons
   document.querySelectorAll('.ls-nav-btn').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('ls-btn-' + view);
@@ -7982,9 +7830,13 @@ if (FLAIR_WAVE_CHARTS) {
   document.head.appendChild(style);
 
   const _origRenderCharts = window.renderCharts;
-  window.renderCharts = function(station) {
-    _origRenderCharts(station);
+  window.renderCharts = function() {
+    // Forward ALL arguments (station, token) so the original's stale-render
+    // token guard still works — otherwise an out-of-order render bleeds another
+    // station's chart into the current one.
+    _origRenderCharts.apply(this, arguments);
     document.querySelectorAll('.chart-entry').forEach(entry => {
+      if (entry.querySelector('.chart-wave')) return;   // already decorated — don't duplicate
       const wave = document.createElement('div');
       wave.className = 'chart-wave';
       const bars = 5;
@@ -8303,38 +8155,11 @@ if (FLAIR_WAVE_CHARTS) {
 })();
 
 // ── SETTINGS ──────────────────────────────────────────────────────────────
-const THEMES = {
-  green:    { '--green': '#00ff41', '--green-dim': '#00c032', '--bg': '#030a04', '--panel': '#050f06', '--border': '#0a2e0c', '--text': '#00c032', '--muted': '#2a5c30', '--inactive': '#050f06', '--fg': '#4a8c52', '--accent': '#00ff41', '--hover-bg': 'rgba(0,255,65,0.08)', '--hover-border': '#00ff41', '--bio-text': '#4a8c52', '--glow-color': '0,255,65', '--green-dark': '#003810', '--active-fill': '#051a08' },
-  amber:    { '--green': '#ffb347', '--green-dim': '#cc8a00', '--bg': '#0a0800', '--panel': '#100e00', '--border': '#2e2000', '--text': '#cc8a00', '--muted': '#5c4a00', '--inactive': '#0a0800', '--fg': '#8c7000', '--accent': '#ffb347', '--hover-bg': 'rgba(255,179,71,0.08)', '--hover-border': '#ffb347', '--bio-text': '#8c7000', '--glow-color': '255,179,71', '--green-dark': '#1a0e00', '--active-fill': '#120a00' },
-  blue:     { '--green': '#44aaff', '--green-dim': '#2288dd', '--bg': '#00050f', '--panel': '#000a1a', '--border': '#002a5a', '--text': '#44aaff', '--muted': '#1a5a9e', '--inactive': '#00050f', '--fg': '#2277cc', '--accent': '#44aaff', '--hover-bg': 'rgba(68,170,255,0.1)', '--hover-border': '#44aaff', '--bio-text': '#2277cc', '--glow-color': '68,170,255', '--green-dark': '#000d1f', '--active-fill': '#000814' },
-  white:    { '--green': '#cccccc', '--green-dim': '#999', '--bg': '#111', '--panel': '#1c1c1c', '--border': '#333', '--text': '#bbb', '--muted': '#666', '--inactive': '#111', '--fg': '#999', '--accent': '#ddd', '--hover-bg': 'rgba(200,200,200,0.1)', '--hover-border': '#ccc', '--bio-text': '#888', '--glow-color': '200,200,200', '--green-dark': '#1a1a1a', '--active-fill': '#222' },
-  whiteplus:{ '--green': '#2a2a2a', '--green-dim': '#444', '--bg': '#f0ede8', '--panel': '#e8e5e0', '--border': '#ccc', '--text': '#333', '--muted': '#888', '--inactive': '#ddd', '--fg': '#555', '--accent': '#111', '--hover-bg': 'rgba(0,0,0,0.06)', '--hover-border': '#555', '--bio-text': '#555', '--glow-color': '42,42,42', '--green-dark': '#ddd8d0', '--active-fill': '#e8e4de' },
-
-  // ── MONO FAMILY ── dark, high-contrast, single accent
-  'mono-cyan':   { '--green': '#00e5ff', '--green-dim': '#00c5dd', '--bg': '#000000', '--panel': '#0a0a0a', '--border': '#262626', '--text': '#f4f4f4', '--muted': '#8e8e8e', '--inactive': '#181818', '--fg': '#f4f4f4', '--accent': '#00e5ff', '--hover-bg': 'rgba(0,229,255,0.10)',  '--hover-border': '#00e5ff', '--bio-text': '#c8c8c8', '--glow-color': '0,229,255',   '--green-dark': '#003a44', '--active-fill': '#001a20' },
-  'mono-yellow': { '--green': '#ffd400', '--green-dim': '#ffbf00', '--bg': '#000000', '--panel': '#0a0a0a', '--border': '#262626', '--text': '#f4f4f4', '--muted': '#8e8e8e', '--inactive': '#181818', '--fg': '#f4f4f4', '--accent': '#ffd400', '--hover-bg': 'rgba(255,212,0,0.10)',  '--hover-border': '#ffd400', '--bio-text': '#c8c8c8', '--glow-color': '255,212,0',   '--green-dark': '#332a00', '--active-fill': '#1a1500' },
-  'mono-red':    { '--green': '#ff2f3a', '--green-dim': '#dd2230', '--bg': '#000000', '--panel': '#0a0a0a', '--border': '#262626', '--text': '#f4f4f4', '--muted': '#8e8e8e', '--inactive': '#181818', '--fg': '#f4f4f4', '--accent': '#ff2f3a', '--hover-bg': 'rgba(255,47,58,0.10)',  '--hover-border': '#ff2f3a', '--bio-text': '#c8c8c8', '--glow-color': '255,47,58',   '--green-dark': '#3a0a0d', '--active-fill': '#1a0a0c' },
-
-  // ── NEWSPRINT FAMILY ── editorial paper stock, serif headlines
-  'news-classic':    { '--green': '#c8331f', '--green-dim': '#a8231a', '--bg': '#f1ece2', '--panel': '#e8e1d2', '--border': '#1a1a1a', '--text': '#0e0e0e', '--muted': '#5a544a', '--inactive': '#d6cfbb', '--fg': '#0e0e0e', '--accent': '#c8331f', '--hover-bg': 'rgba(200,51,31,0.10)', '--hover-border': '#c8331f', '--bio-text': '#2a251f', '--glow-color': '200,51,31',  '--green-dark': '#dccfb0', '--active-fill': '#e3dcc7' },
-  'news-broadsheet': { '--green': '#a8231a', '--green-dim': '#8a1a14', '--bg': '#faf6ee', '--panel': '#f2ede1', '--border': '#0a0a0a', '--text': '#000000', '--muted': '#4a443a', '--inactive': '#e0d8c4', '--fg': '#000000', '--accent': '#a8231a', '--hover-bg': 'rgba(168,35,26,0.10)', '--hover-border': '#a8231a', '--bio-text': '#1a1814', '--glow-color': '168,35,26',  '--green-dark': '#e0d8c4', '--active-fill': '#ebe4cf' },
-  'news-inkblue':    { '--green': '#1f3a72', '--green-dim': '#152a58', '--bg': '#f1ece2', '--panel': '#e8e1d2', '--border': '#1a1a1a', '--text': '#0e0e0e', '--muted': '#5a544a', '--inactive': '#d6cfbb', '--fg': '#0e0e0e', '--accent': '#1f3a72', '--hover-bg': 'rgba(31,58,114,0.10)', '--hover-border': '#1f3a72', '--bio-text': '#2a251f', '--glow-color': '31,58,114',  '--green-dark': '#d6cfbb', '--active-fill': '#e3dcc7' },
-  'news-dark':       { '--green': '#e8533d', '--green-dim': '#cf3d27', '--bg': '#1a1612', '--panel': '#221d18', '--border': '#3a3128', '--text': '#f0e8d5', '--muted': '#8a7e6e', '--inactive': '#221d18', '--fg': '#f0e8d5', '--accent': '#e8533d', '--hover-bg': 'rgba(232,83,61,0.10)', '--hover-border': '#e8533d', '--bio-text': '#d6cdb8', '--glow-color': '232,83,61',  '--green-dark': '#3a2820', '--active-fill': '#2a221c' },
-};
-
-// Maps each theme to its display family.
-const THEME_FAMILY = {
-  green: 'original', amber: 'original', blue: 'original', white: 'original', whiteplus: 'original',
-  'mono-cyan': 'mono', 'mono-yellow': 'mono', 'mono-red': 'mono',
-  'news-classic': 'newsprint', 'news-broadsheet': 'newsprint', 'news-inkblue': 'newsprint', 'news-dark': 'newsprint',
-};
-
-// First variant to show when a family is selected via the FAMILY pill.
-const FAMILY_DEFAULT_THEME = {
-  original: 'green',
-  mono: 'mono-cyan',
-  newsprint: 'news-classic',
-};
+// Theme maps are defined once in the pre-paint bootstrap (head) and shared here
+// so the flash-free early apply and the runtime use a single source of truth.
+const THEMES = window.__rrThemes;
+const THEME_FAMILY = window.__rrThemeFamily;
+const FAMILY_DEFAULT_THEME = window.__rrFamilyDefault;
 
 function cycleFamily() {
   const order = ['original', 'mono', 'newsprint'];
@@ -8351,7 +8176,7 @@ const FONT_SIZES = { small: '14px', medium: '17px', large: '20px', xlarge: '24px
 const FONT_SIZE_LABELS = { small: 'SMALL', medium: 'MEDIUM', large: 'LARGE', xlarge: 'X LARGE' };
 const HEADER_H   = { small: '60px', medium: '66px', large: '73px', xlarge: '80px' };
 
-const CFG_DEFAULTS = { theme: 'green', fontSize: 'medium', clockFormat: '12hr', contrast: 'normal', widgetSize: 'medium', showBio: 'show', defaultPanel: 'chart', weatherDetail: 'default', extraTabs: [], showNotes: 'on', showCollection: 'on', searchProvider: 'google' };
+const CFG_DEFAULTS = { theme: 'news-inkblue', fontSize: 'medium', clockFormat: '12hr', contrast: 'normal', widgetSize: 'medium', showBio: 'show', defaultPanel: 'chart', weatherDetail: 'default', extraTabs: [], showNotes: 'on', showCollection: 'on', searchProvider: 'google' };
 let CFG = Object.assign({}, CFG_DEFAULTS, JSON.parse(localStorage.getItem('rrCfg') || '{}'));
 
 function saveConfig() { localStorage.setItem('rrCfg', JSON.stringify(CFG)); }
